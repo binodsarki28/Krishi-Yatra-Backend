@@ -1,0 +1,34 @@
+package com.krishiYatra.krishiYatra.delivery;
+
+import com.krishiYatra.krishiYatra.db.Auditable;
+import com.krishiYatra.krishiYatra.user.UserEntity;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+@Entity
+@Table(name = "DELIVERY_PARTNERS")
+@Getter
+@Setter
+@EntityListeners(AuditingEntityListener.class)
+public class DeliveryEntity extends Auditable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "DELIVERY_GUID")
+    private String deliveryId;
+
+    @Column(name = "VEHICLE_TYPE")
+    private String vehicleType;
+
+    @Column(name = "LICENSE_NUMBER")
+    private String licenseNumber;
+
+    @Column(name = "IS_VERIFIED")
+    private boolean isVerified;
+
+    @OneToOne
+    @JoinColumn(name = "USER_GUID", nullable = false, unique = true)
+    private UserEntity user;
+}
