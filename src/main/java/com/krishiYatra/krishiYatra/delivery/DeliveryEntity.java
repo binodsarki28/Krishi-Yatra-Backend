@@ -1,5 +1,6 @@
 package com.krishiYatra.krishiYatra.delivery;
 
+import com.krishiYatra.krishiYatra.common.enums.VehicleType;
 import com.krishiYatra.krishiYatra.db.Auditable;
 import com.krishiYatra.krishiYatra.user.UserEntity;
 import jakarta.persistence.*;
@@ -8,7 +9,7 @@ import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "DELIVERY_PARTNERS")
+@Table(name = "DELIVERY")
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
@@ -19,11 +20,24 @@ public class DeliveryEntity extends Auditable {
     @Column(name = "DELIVERY_GUID")
     private String deliveryId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "VEHICLE_TYPE")
-    private String vehicleType;
+    private VehicleType vehicleType;
+
+    @Column(name = "VEHILCLE_BRAND")
+    private String vehicleBrand;
+
+    @Column(name = "NUMBER_PLATE")
+    private String numberPlate;
 
     @Column(name = "LICENSE_NUMBER")
     private String licenseNumber;
+
+    @Column(name = "VEHICLE_PHOTO")
+    private String VehiclePhoto;
+
+    @Column(name = "LICENSE_PHOTO")
+    private String licensePhoto;
 
     @Column(name = "IS_VERIFIED")
     private boolean isVerified;

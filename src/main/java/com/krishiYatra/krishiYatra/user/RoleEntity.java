@@ -1,5 +1,6 @@
 package com.krishiYatra.krishiYatra.user;
 
+import com.krishiYatra.krishiYatra.common.enums.RoleType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,6 +16,7 @@ public class RoleEntity {
     @Column(name = "ROLE_GUID")
     private String roleId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "ROLE_NAME", unique = true)
-    private String roleName;
+    private RoleType roleName;
 }

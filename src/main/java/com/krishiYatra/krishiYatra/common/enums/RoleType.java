@@ -1,9 +1,8 @@
 package com.krishiYatra.krishiYatra.common.enums;
 
-
-public enum RoleEnum {
+public enum RoleType {
     FARMER,
     BUYER,
-    DELIVERER,
+    DELIVERY,
     ADMIN
 }

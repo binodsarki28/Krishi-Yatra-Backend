@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.util.List;
+
 @Entity
 @Table(name = "BUYERS")
 @Getter
@@ -21,14 +23,16 @@ public class BuyerEntity extends Auditable {
     private String buyerId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "CONSUMER_TYPE")
+    @Column(name = "CONSUMER_TYPE", nullable = false)
     private ConsumerType consumerType;
 
+    @Column(name = "BUSINESS_NAME")
+    private String businessName;
+
     @Column(name = "IS_VERIFIED")
-    private boolean isVerified;
+    private boolean verified;
 
     @OneToOne
     @JoinColumn(name = "USER_GUID", nullable = false, unique = true)
     private UserEntity user;
 }
-
