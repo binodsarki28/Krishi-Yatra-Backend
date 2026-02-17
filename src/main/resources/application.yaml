@@ -24,3 +24,20 @@ spring:
 springdoc:
   api-docs:
     version: openapi_3_0
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: onlycoding6969@gmail.com
+    password: dzwg ttjn dbst knib
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+app:
+  otp:
+    expiration-minutes: 5
+    max-attempts: 5
