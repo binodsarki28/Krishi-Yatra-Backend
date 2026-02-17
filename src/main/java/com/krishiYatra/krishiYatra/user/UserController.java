@@ -2,6 +2,7 @@ package com.krishiYatra.krishiYatra.user;
 
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
 import com.krishiYatra.krishiYatra.user.dto.UserCreateRequest;
+import com.krishiYatra.krishiYatra.user.dto.UserLoginRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,12 @@ public class UserController {
 
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    @PostMapping("/login/user")
+    public ResponseEntity<ServerResponse> loginUser(@Validated @RequestBody UserLoginRequest request) {
+        ServerResponse response = userService.loginUser(request);
+        return new ResponseEntity<>(response, response.getHttpStatus());
     }
 
     @PostMapping("/register/user")
