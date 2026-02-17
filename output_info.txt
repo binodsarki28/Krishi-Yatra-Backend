@@ -1,0 +1,72 @@
+Initialized native services in: C:\Users\N I T R O 5\.gradle\native
+Initialized jansi services in: C:\Users\N I T R O 5\.gradle\native
+The client will now receive all logging from the daemon (pid: 6408). The daemon log file: C:\Users\N I T R O 5\.gradle\daemon\9.2.1\daemon-6408.out.log
+Starting 16th build in daemon [uptime: 7 mins 41.049 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 512 MiB, non-heap usage: 25% of 384 MiB]
+Using 16 worker leases.
+Operational build model parameters: {requiresToolingModels=false, parallelProjectExecution=false, configureOnDemand=false, configurationCache=false, configurationCacheParallelStore=false, configurationCacheParallelLoad=true, isolatedProjects=false, parallelProjectConfiguration=false, intermediateModelCache=false, parallelToolingApiActions=false, invalidateCoupledProjects=false, modelAsProjectDependency=false, resilientModelBuilding=false}
+Now considering [C:\Final Year Project\krishiYatra] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\Final Year Project\krishiYatra\settings.gradle'.
+Projects loaded. Root project using build file 'C:\Final Year Project\krishiYatra\build.gradle'.
+Included projects: [root project 'krishiYatra']
+
+> Configure project :
+Evaluating root project 'krishiYatra' using build file 'C:\Final Year Project\krishiYatra\build.gradle'.
+Resolved plugin [id: 'java']
+Resolved plugin [id: 'org.springframework.boot', version: '3.4.2']
+Resolved plugin [id: 'io.spring.dependency-management', version: '1.1.7']
+Applying dependency management to configuration 'annotationProcessor' in project 'krishiYatra'
+Applying dependency management to configuration 'apiElements' in project 'krishiYatra'
+Applying dependency management to configuration 'archives' in project 'krishiYatra'
+Applying dependency management to configuration 'bootArchives' in project 'krishiYatra'
+Applying dependency management to configuration 'compileClasspath' in project 'krishiYatra'
+Applying dependency management to configuration 'compileOnly' in project 'krishiYatra'
+Applying dependency management to configuration 'default' in project 'krishiYatra'
+Applying dependency management to configuration 'developmentOnly' in project 'krishiYatra'
+Applying dependency management to configuration 'implementation' in project 'krishiYatra'
+Applying dependency management to configuration 'mainSourceElements' in project 'krishiYatra'
+Applying dependency management to configuration 'productionRuntimeClasspath' in project 'krishiYatra'
+Applying dependency management to configuration 'runtimeClasspath' in project 'krishiYatra'
+Applying dependency management to configuration 'runtimeElements' in project 'krishiYatra'
+Applying dependency management to configuration 'runtimeOnly' in project 'krishiYatra'
+Applying dependency management to configuration 'testAndDevelopmentOnly' in project 'krishiYatra'
+Applying dependency management to configuration 'testAnnotationProcessor' in project 'krishiYatra'
+Applying dependency management to configuration 'testCompileClasspath' in project 'krishiYatra'
+Applying dependency management to configuration 'testCompileOnly' in project 'krishiYatra'
+Applying dependency management to configuration 'testImplementation' in project 'krishiYatra'
+Applying dependency management to configuration 'testResultsElementsForTest' in project 'krishiYatra'
+Applying dependency management to configuration 'testRuntimeClasspath' in project 'krishiYatra'
+Applying dependency management to configuration 'testRuntimeOnly' in project 'krishiYatra'
+All projects evaluated.
+Task name matched 'compileJava'
+Selected primary task 'compileJava' from project :
+Resolving global dependency management for project 'krishiYatra'
+Excluding []
+Excluding []
+Tasks to be executed: [task ':compileJava']
+Tasks that were excluded: []
+Resolve mutations for :compileJava (Thread[#2920,Execution worker,5,main]) started.
+:compileJava (Thread[#2920,Execution worker,5,main]) started.
+
+> Task :compileJava FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileJava'.
+> Could not resolve all files for configuration ':compileClasspath'.
+   > Could not find org.springframework.boot:spring-boot-starter-flyway:.
+     Required by:
+         root project 'krishiYatra'
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --debug option to get more log output.
+> Run with --scan to generate a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 2s
+1 actionable task: 1 executed
+Watched directory hierarchies: [C:\Final Year Project\krishiYatra]
