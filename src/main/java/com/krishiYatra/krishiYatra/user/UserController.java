@@ -17,7 +17,7 @@ public class UserController {
     }
 
     @PostMapping("/register/user")
-    public ResponseEntity<ServerResponse> registerUser(@Validated @ModelAttribute UserCreateRequest request) {
+    public ResponseEntity<ServerResponse> registerUser(@Validated @RequestBody UserCreateRequest request) {
         ServerResponse response = userService.registerUser(request);
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
