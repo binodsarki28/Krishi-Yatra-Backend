@@ -41,15 +41,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    public io.swagger.v3.oas.models.OpenAPI customOpenAPI() {
-        return new io.swagger.v3.oas.models.OpenAPI()
-                .info(new io.swagger.v3.oas.models.info.Info()
-                        .title("Krishi Yatra API")
-                        .version("1.0")
-                        .description("API Documentation for Krishi Yatra"));
-    }
-
-    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
