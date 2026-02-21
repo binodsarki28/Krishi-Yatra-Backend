@@ -22,14 +22,8 @@ public class FarmerEntity extends Auditable {
     @Column(name = "FARMER_GUID")
     private String farmerId;
 
-    @ElementCollection(targetClass = FarmType.class)
-    @Enumerated(EnumType.STRING)
-    @CollectionTable(
-            name = "FARMER_TYPES",
-            joinColumns = @JoinColumn(name = "FARMER_GUID")
-    )
-    @Column(name = "TYPE")
-    private List<FarmType> types;
+    @Column(name = "FARM_TYPES")
+    private String farmTypes;
 
     @Column(name = "FARM_NAME")
     private String farmName;

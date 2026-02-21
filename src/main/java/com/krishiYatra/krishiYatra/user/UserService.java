@@ -9,10 +9,8 @@ import com.krishiYatra.krishiYatra.user.dto.UserCreateRequest;
 import com.krishiYatra.krishiYatra.user.mapper.UserMapper;
 import com.krishiYatra.krishiYatra.user.dto.OtpRequestDto;
 import com.krishiYatra.krishiYatra.user.dto.OtpVerifyDto;
-import com.krishiYatra.krishiYatra.user.dto.OtpVerifyAndRegisterDto;
 import com.krishiYatra.krishiYatra.verification.EmailService;
 import com.krishiYatra.krishiYatra.verification.InMemoryOtpService;
-import com.krishiYatra.krishiYatra.verification.VerifiedEmailTracker;
 import com.krishiYatra.krishiYatra.verification.PendingRegistrationStore;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,7 +34,6 @@ public class UserService {
     private final JwtTokenProvider tokenProvider;
     private final InMemoryOtpService otpService;
     private final EmailService emailService;
-    private final VerifiedEmailTracker verifiedEmailTracker;
     private final PendingRegistrationStore pendingRegistrationStore;
 
     public UserService(UserMapper userMapper,
@@ -46,7 +43,6 @@ public class UserService {
                        JwtTokenProvider tokenProvider,
                        InMemoryOtpService otpService,
                        EmailService emailService,
-                       VerifiedEmailTracker verifiedEmailTracker,
                        PendingRegistrationStore pendingRegistrationStore) {
         this.userMapper = userMapper;
         this.userRepo = userRepo;
@@ -55,13 +51,51 @@ public class UserService {
         this.tokenProvider = tokenProvider;
         this.otpService = otpService;
         this.emailService = emailService;
-        this.verifiedEmailTracker = verifiedEmailTracker;
         this.pendingRegistrationStore = pendingRegistrationStore;
     }
 
-    /**
-     * Request/Resend OTP for email verification
-     */
+    public ServerResponse loginUser(UserLoginRequest loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = tokenProvider.generateToken(authentication);
+
+        UserEntity userDetails = (UserEntity) authentication.getPrincipal();
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+
+        JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getUsername(), roles);
+        return ServerResponse.successObjectResponse(UserConst.USER_LOGIN, HttpStatus.OK, jwtResponse);
+    }
+
+    public ServerResponse registerUser(UserCreateRequest request) {
+        // Check if email already exists
+        if (userRepo.existsByEmail(request.getEmail())) {
+            return ServerResponse.failureResponse(UserConst.EMAIL_EXISTS, HttpStatus.BAD_REQUEST);
+        }
+
+        if (userRepo.existsByUsername(request.getUsername())) {
+            return ServerResponse.failureResponse(UserConst.USERNAME_EXISTS, HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            // Store registration data
+            pendingRegistrationStore.store(request.getEmail(), request);
+
+            // Generate and send OTP
+            String otpCode = otpService.generateOtp(request.getEmail());
+            emailService.sendOtpEmail(request.getEmail(), otpCode);
+
+            return ServerResponse.successResponse("Verification code sent to your email.", HttpStatus.OK);
+        } catch (Exception e) {
+            return ServerResponse.failureResponse("Failed to send verification code: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    //Request/Resend OTP for email verification
     public ServerResponse requestOtp(OtpRequestDto request) {
         // Check if there's pending registration data
         UserCreateRequest pendingData = pendingRegistrationStore.get(request.getEmail());
@@ -87,9 +121,7 @@ public class UserService {
         }
     }
 
-    /**
-     * Verify OTP code and create user account
-     */
+    //Verify OTP code and create user account
     public ServerResponse verifyOtp(OtpVerifyDto request) {
         boolean isValid = otpService.verifyOtp(request.getEmail(), request.getOtpCode());
         
@@ -119,41 +151,5 @@ public class UserService {
         pendingRegistrationStore.remove(request.getEmail());
 
         return ServerResponse.successResponse(UserConst.USER_CREATED, HttpStatus.CREATED);
-    }
-
-    public ServerResponse loginUser(UserLoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = tokenProvider.generateToken(authentication);
-
-        UserEntity userDetails = (UserEntity) authentication.getPrincipal();
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-
-        JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getUsername(), roles);
-        return ServerResponse.successObjectResponse(UserConst.USER_LOGIN, HttpStatus.OK, jwtResponse);
-    }
-
-    public ServerResponse registerUser(UserCreateRequest request) {
-        // Check if email already exists
-        if (userRepo.existsByEmail(request.getEmail())) {
-            return ServerResponse.failureResponse(UserConst.EMAIL_EXISTS, HttpStatus.BAD_REQUEST);
-        }
-
-        try {
-            // Store registration data
-            pendingRegistrationStore.store(request.getEmail(), request);
-            
-            // Generate and send OTP
-            String otpCode = otpService.generateOtp(request.getEmail());
-            emailService.sendOtpEmail(request.getEmail(), otpCode);
-            
-            return ServerResponse.successResponse("Verification code sent to your email.", HttpStatus.OK);
-        } catch (Exception e) {
-            return ServerResponse.failureResponse("Failed to send verification code: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
     }
 }

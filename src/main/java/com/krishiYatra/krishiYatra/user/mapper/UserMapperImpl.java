@@ -2,9 +2,9 @@ package com.krishiYatra.krishiYatra.user.mapper;
 
 import com.krishiYatra.krishiYatra.user.UserEntity;
 import com.krishiYatra.krishiYatra.user.dto.UserCreateRequest;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class UserMapperImpl implements UserMapper {
 
     @Override

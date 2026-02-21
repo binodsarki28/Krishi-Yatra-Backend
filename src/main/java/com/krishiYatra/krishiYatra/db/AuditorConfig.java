@@ -1,5 +1,6 @@
 package com.krishiYatra.krishiYatra.db;
 
+import com.krishiYatra.krishiYatra.utils.UserUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
@@ -11,6 +12,6 @@ public class AuditorConfig {
 
     @Bean
     public AuditorAware<String> auditorProvider() {
-        return () -> Optional.of("SYSTEM"); // Fallback until security is added
+        return () -> Optional.of(UserUtil.getCurrentUsername());
     }
 }
