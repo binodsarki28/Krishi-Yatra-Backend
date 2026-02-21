@@ -34,7 +34,7 @@ public class DeliveryEntity extends Auditable {
     private String licenseNumber;
 
     @Column(name = "VEHICLE_PHOTO")
-    private String VehiclePhoto;
+    private String vehiclePhoto;
 
     @Column(name = "LICENSE_PHOTO")
     private String licensePhoto;
