@@ -2,6 +2,7 @@ package com.krishiYatra.krishiYatra.farmer;
 
 import com.krishiYatra.krishiYatra.common.enums.FarmType;
 import com.krishiYatra.krishiYatra.db.Auditable;
+import com.krishiYatra.krishiYatra.stock.StockEntity;
 import com.krishiYatra.krishiYatra.user.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -40,4 +41,7 @@ public class FarmerEntity extends Auditable {
     @OneToOne
     @JoinColumn(name = "USER_GUID", nullable = false, unique = true)
     private UserEntity user;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<StockEntity> stocks;
 }

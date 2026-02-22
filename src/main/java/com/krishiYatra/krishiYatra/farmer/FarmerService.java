@@ -2,6 +2,7 @@ package com.krishiYatra.krishiYatra.farmer;
 
 import com.krishiYatra.krishiYatra.common.enums.RoleType;
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
+import com.krishiYatra.krishiYatra.farmer.dto.FarmerResponse;
 import com.krishiYatra.krishiYatra.farmer.dto.RegisterFarmerRequest;
 import com.krishiYatra.krishiYatra.farmer.dto.VerifyFarmerRequest;
 import com.krishiYatra.krishiYatra.farmer.mapper.FarmerMapper;
@@ -14,6 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @Slf4j
 public class FarmerService {
@@ -23,14 +27,21 @@ public class FarmerService {
     private final RoleRepo roleRepo;
     private final FarmerMapper farmerMapper;
 
-    public FarmerService(FarmerRepo farmerRepo, 
-                         UserRepo userRepo, 
-                         RoleRepo roleRepo, 
+    public FarmerService(FarmerRepo farmerRepo,
+                         UserRepo userRepo,
+                         RoleRepo roleRepo,
                          FarmerMapper farmerMapper) {
         this.farmerRepo = farmerRepo;
         this.userRepo = userRepo;
         this.roleRepo = roleRepo;
         this.farmerMapper = farmerMapper;
+    }
+
+    @Transactional(readOnly = true)
+    public List<FarmerResponse> getUnverifiedFarmers() {
+        return farmerRepo.findByIsVerifiedFalse().stream()
+                .map(farmerMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -74,7 +85,7 @@ public class FarmerService {
             // If rejected, delete the farmer entity
             UserEntity user = farmer.getUser();
             farmerRepo.delete(farmer);
-            
+
             // Remove FARMER role from user if they were rejected
             roleRepo.findByRoleName(RoleType.FARMER).ifPresent(role -> {
                 user.getRoles().remove(role);

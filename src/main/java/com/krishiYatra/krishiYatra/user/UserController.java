@@ -28,6 +28,7 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<ServerResponse> registerUser(@Validated @RequestBody UserCreateRequest request) {
+        System.out.println("UserController: Received registration request for " + request.getEmail());
         ServerResponse response = userService.registerUser(request);
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
@@ -40,6 +41,7 @@ public class UserController {
 
     @PostMapping("/resend-otp")
     public ResponseEntity<ServerResponse> resendOtp(@Validated @RequestBody OtpRequestDto request) {
+        System.out.println("UserController: Received resend-otp request for " + request.getEmail());
         ServerResponse response = userService.requestOtp(request);
         return new ResponseEntity<>(response, response.getHttpStatus());
     }

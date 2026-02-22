@@ -12,6 +12,9 @@ import com.krishiYatra.krishiYatra.user.dto.OtpVerifyDto;
 import com.krishiYatra.krishiYatra.verification.EmailService;
 import com.krishiYatra.krishiYatra.verification.InMemoryOtpService;
 import com.krishiYatra.krishiYatra.verification.PendingRegistrationStore;
+import com.krishiYatra.krishiYatra.farmer.FarmerRepo;
+import com.krishiYatra.krishiYatra.buyer.BuyerRepo;
+import com.krishiYatra.krishiYatra.delivery.DeliveryRepo;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -35,6 +38,9 @@ public class UserService {
     private final InMemoryOtpService otpService;
     private final EmailService emailService;
     private final PendingRegistrationStore pendingRegistrationStore;
+    private final FarmerRepo farmerRepo;
+    private final BuyerRepo buyerRepo;
+    private final DeliveryRepo deliveryRepo;
 
     public UserService(UserMapper userMapper,
                        UserRepo userRepo,
@@ -43,6 +49,9 @@ public class UserService {
                        JwtTokenProvider tokenProvider,
                        InMemoryOtpService otpService,
                        EmailService emailService,
+                       FarmerRepo farmerRepo,
+                       BuyerRepo buyerRepo,
+                       DeliveryRepo deliveryRepo,
                        PendingRegistrationStore pendingRegistrationStore) {
         this.userMapper = userMapper;
         this.userRepo = userRepo;
@@ -51,6 +60,9 @@ public class UserService {
         this.tokenProvider = tokenProvider;
         this.otpService = otpService;
         this.emailService = emailService;
+        this.farmerRepo = farmerRepo;
+        this.buyerRepo = buyerRepo;
+        this.deliveryRepo = deliveryRepo;
         this.pendingRegistrationStore = pendingRegistrationStore;
     }
 
@@ -66,11 +78,23 @@ public class UserService {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getUsername(), roles);
+        List<String> verifiedRoles = new java.util.ArrayList<>();
+        if (roles.contains("FARMER")) {
+            farmerRepo.findByUser(userDetails).ifPresent(f -> { if (f.isVerified()) verifiedRoles.add("FARMER"); });
+        }
+        if (roles.contains("BUYER")) {
+            buyerRepo.findByUser(userDetails).ifPresent(b -> { if (b.isVerified()) verifiedRoles.add("BUYER"); });
+        }
+        if (roles.contains("DELIVERY")) {
+            deliveryRepo.findByUser(userDetails).ifPresent(d -> { if (d.isVerified()) verifiedRoles.add("DELIVERY"); });
+        }
+
+        JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getUsername(), userDetails.getFullName(), userDetails.getEmail(), roles, verifiedRoles);
         return ServerResponse.successObjectResponse(UserConst.USER_LOGIN, HttpStatus.OK, jwtResponse);
     }
 
     public ServerResponse registerUser(UserCreateRequest request) {
+        System.out.println("Processing registration for email: [" + request.getEmail() + "]");
         // Check if email already exists
         if (userRepo.existsByEmail(request.getEmail())) {
             return ServerResponse.failureResponse(UserConst.EMAIL_EXISTS, HttpStatus.BAD_REQUEST);
@@ -86,6 +110,7 @@ public class UserService {
 
             // Generate and send OTP
             String otpCode = otpService.generateOtp(request.getEmail());
+            System.out.println("Generated OTP for " + request.getEmail() + ": " + otpCode);
             emailService.sendOtpEmail(request.getEmail(), otpCode);
 
             return ServerResponse.successResponse("Verification code sent to your email.", HttpStatus.OK);
@@ -97,6 +122,7 @@ public class UserService {
 
     //Request/Resend OTP for email verification
     public ServerResponse requestOtp(OtpRequestDto request) {
+        System.out.println("Processing OTP resend request for email: [" + request.getEmail() + "]");
         // Check if there's pending registration data
         UserCreateRequest pendingData = pendingRegistrationStore.get(request.getEmail());
         if (pendingData == null) {

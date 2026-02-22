@@ -1,6 +1,7 @@
 package com.krishiYatra.krishiYatra.farmer;
 
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
+import com.krishiYatra.krishiYatra.farmer.dto.FarmerResponse;
 import com.krishiYatra.krishiYatra.farmer.dto.RegisterFarmerRequest;
 import com.krishiYatra.krishiYatra.farmer.dto.VerifyFarmerRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,10 +12,9 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/farmer")
@@ -62,5 +62,11 @@ public class FarmerController {
     public ResponseEntity<ServerResponse> verifyFarmer(@Valid @RequestBody VerifyFarmerRequest request) {
         ServerResponse response = farmerService.verifyFarmer(request);
         return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
+    @GetMapping("/unverified")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<FarmerResponse>> getUnverifiedFarmers() {
+        return new ResponseEntity<>(farmerService.getUnverifiedFarmers(), HttpStatus.OK);
     }
 }
