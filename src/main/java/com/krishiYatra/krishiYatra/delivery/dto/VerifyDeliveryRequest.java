@@ -10,8 +10,8 @@ import lombok.Setter;
 @Schema(description = "Request object for admin to verify or reject a delivery partner")
 public class VerifyDeliveryRequest {
     
-    @NotNull(message = "Delivery partner registration ID is required")
-    private String deliveryId;
+    @NotNull(message = "Username is required")
+    private String username;
 
     @NotNull(message = "Status (Approved: true, Rejected: false) is required")
     private Boolean approved;

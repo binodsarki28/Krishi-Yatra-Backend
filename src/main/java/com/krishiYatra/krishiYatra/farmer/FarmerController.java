@@ -1,7 +1,8 @@
 package com.krishiYatra.krishiYatra.farmer;
 
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
-import com.krishiYatra.krishiYatra.farmer.dto.FarmerResponse;
+import com.krishiYatra.krishiYatra.farmer.dto.FarmerListResponse;
+import com.krishiYatra.krishiYatra.farmer.dto.FarmerDetailResponse;
 import com.krishiYatra.krishiYatra.farmer.dto.RegisterFarmerRequest;
 import com.krishiYatra.krishiYatra.farmer.dto.VerifyFarmerRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,7 +15,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/v1/farmer")
@@ -28,12 +32,6 @@ public class FarmerController {
     }
 
     @Operation(summary = "Register an existing user as a farmer")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Farmer registered successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid input or user already a farmer"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized - JWT token missing or invalid"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - User lacks required authorities")
-    })
     @PostMapping("/register")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ServerResponse> registerForFarmer(@Valid @RequestBody RegisterFarmerRequest request) {
@@ -42,10 +40,6 @@ public class FarmerController {
     }
 
     @Operation(summary = "Example of a protected farmer endpoint")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Success"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Requires FARMER role")
-    })
     @PostMapping("/dashboard")
     @PreAuthorize("hasAuthority('FARMER')")
     public ServerResponse getFarmerDashboard() {
@@ -53,10 +47,6 @@ public class FarmerController {
     }
 
     @Operation(summary = "Verify or reject a farmer registration (Admin only)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Farmer status updated successfully"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Requires ADMIN role")
-    })
     @PostMapping("/verify-farmer")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ServerResponse> verifyFarmer(@Valid @RequestBody VerifyFarmerRequest request) {
@@ -64,9 +54,21 @@ public class FarmerController {
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
 
-    @GetMapping("/unverified")
+    @GetMapping("/list")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<List<FarmerResponse>> getUnverifiedFarmers() {
-        return new ResponseEntity<>(farmerService.getUnverifiedFarmers(), HttpStatus.OK);
+    public ResponseEntity<List<FarmerListResponse>> getFarmers(@RequestParam Map<String, String> requestParams, Pageable pageable) {
+        return new ResponseEntity<>(farmerService.getFarmers(requestParams, pageable), HttpStatus.OK);
+    }
+
+    @PostMapping("/block-unblock/{username}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<ServerResponse> blockUnblockFarmer(@PathVariable String username, @RequestParam boolean block) {
+        return new ResponseEntity<>(farmerService.blockUnblockFarmer(username, block), HttpStatus.OK);
+    }
+
+    @GetMapping("/detail/{username}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<FarmerDetailResponse> getFarmerDetail(@PathVariable String username) {
+        return new ResponseEntity<>(farmerService.getFarmerDetail(username), HttpStatus.OK);
     }
 }

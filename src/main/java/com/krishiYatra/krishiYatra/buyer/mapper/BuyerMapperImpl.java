@@ -1,6 +1,8 @@
 package com.krishiYatra.krishiYatra.buyer.mapper;
 
 import com.krishiYatra.krishiYatra.buyer.BuyerEntity;
+import com.krishiYatra.krishiYatra.buyer.dto.BuyerListResponse;
+import com.krishiYatra.krishiYatra.buyer.dto.BuyerDetailResponse;
 import com.krishiYatra.krishiYatra.buyer.dto.RegisterBuyerRequest;
 import org.springframework.stereotype.Service;
 
@@ -18,5 +20,46 @@ public class BuyerMapperImpl implements BuyerMapper {
         buyer.setBusinessLocation(request.getBusinessLocation());
         buyer.setVerified(false);
         return buyer;
+    }
+
+    @Override
+    public BuyerListResponse toResponse(BuyerEntity buyer) {
+        if (buyer == null) {
+            return null;
+        }
+        BuyerListResponse response = new BuyerListResponse();
+        response.setVerified(buyer.isVerified());
+
+        if (buyer.getUser() != null) {
+            response.setFullName(buyer.getUser().getFullName());
+            response.setUsername(buyer.getUser().getUsername());
+            response.setActive(buyer.getUser().isActive());
+        }
+
+        return response;
+    }
+
+    @Override
+    public BuyerDetailResponse toDetailResponse(BuyerEntity buyer) {
+        if (buyer == null) {
+            return null;
+        }
+        BuyerDetailResponse response = new BuyerDetailResponse();
+        response.setBuyerId(buyer.getBuyerId());
+        response.setConsumerType(buyer.getConsumerType());
+        response.setBusinessName(buyer.getBusinessName());
+        response.setBusinessLocation(buyer.getBusinessLocation());
+        response.setVerified(buyer.isVerified());
+        response.setCreatedAt(buyer.getCreatedAt());
+
+        if (buyer.getUser() != null) {
+            response.setFullName(buyer.getUser().getFullName());
+            response.setUsername(buyer.getUser().getUsername());
+            response.setEmail(buyer.getUser().getEmail());
+            response.setPhoneNumber(buyer.getUser().getPhoneNumber());
+            response.setActive(buyer.getUser().isActive());
+        }
+
+        return response;
     }
 }

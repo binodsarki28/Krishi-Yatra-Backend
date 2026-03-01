@@ -12,6 +12,9 @@ public class BuyerResponse {
     private String businessName;
     private String businessLocation;
     private boolean isVerified;
+    private boolean isActive;
     private String fullName;
+    private String username;
     private String email;
+    private String phoneNumber;
 }

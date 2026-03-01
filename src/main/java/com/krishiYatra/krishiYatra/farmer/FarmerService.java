@@ -2,7 +2,9 @@ package com.krishiYatra.krishiYatra.farmer;
 
 import com.krishiYatra.krishiYatra.common.enums.RoleType;
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
-import com.krishiYatra.krishiYatra.farmer.dto.FarmerResponse;
+import com.krishiYatra.krishiYatra.farmer.dao.IFarmerDao;
+import com.krishiYatra.krishiYatra.farmer.dto.FarmerListResponse;
+import com.krishiYatra.krishiYatra.farmer.dto.FarmerDetailResponse;
 import com.krishiYatra.krishiYatra.farmer.dto.RegisterFarmerRequest;
 import com.krishiYatra.krishiYatra.farmer.dto.VerifyFarmerRequest;
 import com.krishiYatra.krishiYatra.farmer.mapper.FarmerMapper;
@@ -27,21 +29,23 @@ public class FarmerService {
     private final RoleRepo roleRepo;
     private final FarmerMapper farmerMapper;
 
+    private final IFarmerDao farmerDao;
+
     public FarmerService(FarmerRepo farmerRepo,
                          UserRepo userRepo,
                          RoleRepo roleRepo,
-                         FarmerMapper farmerMapper) {
+                         FarmerMapper farmerMapper,
+                         IFarmerDao farmerDao) {
         this.farmerRepo = farmerRepo;
         this.userRepo = userRepo;
         this.roleRepo = roleRepo;
         this.farmerMapper = farmerMapper;
+        this.farmerDao = farmerDao;
     }
 
     @Transactional(readOnly = true)
-    public List<FarmerResponse> getUnverifiedFarmers() {
-        return farmerRepo.findByIsVerifiedFalse().stream()
-                .map(farmerMapper::toResponse)
-                .collect(Collectors.toList());
+    public List<FarmerListResponse> getFarmers(java.util.Map<String, String> params, org.springframework.data.domain.Pageable pageable) {
+        return farmerDao.getAllFarmers(params, pageable);
     }
 
     @Transactional
@@ -74,7 +78,7 @@ public class FarmerService {
 
     @Transactional
     public ServerResponse verifyFarmer(VerifyFarmerRequest request) {
-        FarmerEntity farmer = farmerRepo.findById(request.getFarmerId())
+        FarmerEntity farmer = farmerRepo.findByUser_Username(request.getUsername())
                 .orElseThrow(() -> new RuntimeException(FarmerConst.REGISTRATION_NOT_FOUND));
 
         if (request.getApproved()) {
@@ -96,5 +100,26 @@ public class FarmerService {
             log.info(message);
             return ServerResponse.successResponse(message, HttpStatus.OK);
         }
+    }
+
+    @Transactional
+    public ServerResponse blockUnblockFarmer(String username, boolean block) {
+        FarmerEntity farmer = farmerRepo.findByUser_Username(username)
+                .orElseThrow(() -> new RuntimeException(FarmerConst.REGISTRATION_NOT_FOUND));
+        
+        UserEntity user = farmer.getUser();
+        user.setActive(!block);
+        userRepo.save(user);
+        
+        String action = block ? "blocked" : "unblocked";
+        return ServerResponse.successResponse("Farmer " + action + " successfully", HttpStatus.OK);
+    }
+
+    @Transactional(readOnly = true)
+    public FarmerDetailResponse getFarmerDetail(String username) {
+        FarmerEntity farmer = farmerRepo.findByUser_Username(username)
+                .orElseThrow(() -> new RuntimeException(FarmerConst.REGISTRATION_NOT_FOUND));
+        
+        return farmerMapper.toDetailResponse(farmer);
     }
 }

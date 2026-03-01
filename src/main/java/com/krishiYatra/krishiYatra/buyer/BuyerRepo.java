@@ -9,6 +9,8 @@ import java.util.Optional;
 
 @Repository
 public interface BuyerRepo extends JpaRepository<BuyerEntity, String> {
-    List<BuyerEntity> findByIsVerifiedFalse();
+    List<BuyerEntity> findByVerifiedFalse();
     Optional<BuyerEntity> findByUser(UserEntity user);
+    Optional<BuyerEntity> findByUser_Username(String username);
+    long countByVerifiedFalse();
 }

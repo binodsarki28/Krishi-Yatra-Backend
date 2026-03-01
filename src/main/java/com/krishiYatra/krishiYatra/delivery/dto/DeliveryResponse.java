@@ -15,6 +15,9 @@ public class DeliveryResponse {
     private String vehiclePhoto;
     private String licensePhoto;
     private boolean isVerified;
+    private boolean isActive;
     private String fullName;
+    private String username;
     private String email;
+    private String phoneNumber;
 }

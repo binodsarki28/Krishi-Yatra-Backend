@@ -11,8 +11,8 @@ import lombok.Setter;
 @Schema(description = "Request object for admin to verify or reject a farmer")
 public class VerifyFarmerRequest {
     
-    @NotNull(message = "Farmer ID is required")
-    private String farmerId;
+    @NotNull(message = "Username is required")
+    private String username;
 
     @NotNull(message = "Status (Approved: true, Rejected: false) is required")
     private Boolean approved;

@@ -2,6 +2,8 @@ package com.krishiYatra.krishiYatra.delivery;
 
 import com.krishiYatra.krishiYatra.common.enums.RoleType;
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
+import com.krishiYatra.krishiYatra.delivery.dto.DeliveryListResponse;
+import com.krishiYatra.krishiYatra.delivery.dto.DeliveryDetailResponse;
 import com.krishiYatra.krishiYatra.delivery.dto.RegisterDeliveryRequest;
 import com.krishiYatra.krishiYatra.delivery.dto.VerifyDeliveryRequest;
 import com.krishiYatra.krishiYatra.delivery.mapper.DeliveryMapper;
@@ -15,6 +17,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -24,6 +29,13 @@ public class DeliveryService {
     private final UserRepo userRepo;
     private final RoleRepo roleRepo;
     private final DeliveryMapper deliveryMapper;
+
+    private final com.krishiYatra.krishiYatra.delivery.dao.IDeliveryDao deliveryDao;
+
+    @Transactional(readOnly = true)
+    public List<DeliveryListResponse> getDeliveries(java.util.Map<String, String> params, org.springframework.data.domain.Pageable pageable) {
+        return deliveryDao.getAllDeliveries(params, pageable);
+    }
 
     @Transactional
     public ServerResponse registerDelivery(RegisterDeliveryRequest request) {
@@ -55,7 +67,7 @@ public class DeliveryService {
 
     @Transactional
     public ServerResponse verifyDelivery(VerifyDeliveryRequest request) {
-        DeliveryEntity delivery = deliveryRepo.findById(request.getDeliveryId())
+        DeliveryEntity delivery = deliveryRepo.findByUser_Username(request.getUsername())
                 .orElseThrow(() -> new RuntimeException(DeliveryConst.REGISTRATION_NOT_FOUND));
 
         if (request.getApproved()) {
@@ -75,5 +87,26 @@ public class DeliveryService {
             log.info(message);
             return ServerResponse.successResponse(message, HttpStatus.OK);
         }
+    }
+
+    @Transactional
+    public ServerResponse blockUnblockDelivery(String username, boolean block) {
+        DeliveryEntity delivery = deliveryRepo.findByUser_Username(username)
+                .orElseThrow(() -> new RuntimeException(DeliveryConst.REGISTRATION_NOT_FOUND));
+        
+        UserEntity user = delivery.getUser();
+        user.setActive(!block);
+        userRepo.save(user);
+        
+        String action = block ? "blocked" : "unblocked";
+        return ServerResponse.successResponse("Delivery partner " + action + " successfully", HttpStatus.OK);
+    }
+
+    @Transactional(readOnly = true)
+    public DeliveryDetailResponse getDeliveryDetail(String username) {
+        DeliveryEntity delivery = deliveryRepo.findByUser_Username(username)
+                .orElseThrow(() -> new RuntimeException(DeliveryConst.REGISTRATION_NOT_FOUND));
+        
+        return deliveryMapper.toDetailResponse(delivery);
     }
 }

@@ -1,7 +1,8 @@
 package com.krishiYatra.krishiYatra.farmer.mapper;
 
 import com.krishiYatra.krishiYatra.farmer.FarmerEntity;
-import com.krishiYatra.krishiYatra.farmer.dto.FarmerResponse;
+import com.krishiYatra.krishiYatra.farmer.dto.FarmerListResponse;
+import com.krishiYatra.krishiYatra.farmer.dto.FarmerDetailResponse;
 import com.krishiYatra.krishiYatra.farmer.dto.RegisterFarmerRequest;
 import org.springframework.stereotype.Service;
 
@@ -34,16 +35,34 @@ public class FarmerMapperImpl implements FarmerMapper {
     }
 
     @Override
-    public FarmerResponse toResponse(FarmerEntity farmer) {
+    public FarmerListResponse toResponse(FarmerEntity farmer) {
         if (farmer == null) {
             return null;
         }
-        FarmerResponse response = new FarmerResponse();
+        FarmerListResponse response = new FarmerListResponse();
+        response.setVerified(farmer.isVerified());
+
+        if (farmer.getUser() != null) {
+            response.setFullName(farmer.getUser().getFullName());
+            response.setUsername(farmer.getUser().getUsername());
+            response.setActive(farmer.getUser().isActive());
+        }
+
+        return response;
+    }
+
+    @Override
+    public FarmerDetailResponse toDetailResponse(FarmerEntity farmer) {
+        if (farmer == null) {
+            return null;
+        }
+        FarmerDetailResponse response = new FarmerDetailResponse();
         response.setFarmerId(farmer.getFarmerId());
         response.setFarmName(farmer.getFarmName());
         response.setFarmLocation(farmer.getFarmLocation());
         response.setFarmArea(farmer.getFarmArea());
         response.setVerified(farmer.isVerified());
+        response.setCreatedAt(farmer.getCreatedAt());
 
         if (farmer.getFarmTypes() != null) {
             response.setFarmTypes(Arrays.asList(farmer.getFarmTypes().split(",")));
@@ -51,7 +70,10 @@ public class FarmerMapperImpl implements FarmerMapper {
 
         if (farmer.getUser() != null) {
             response.setFullName(farmer.getUser().getFullName());
+            response.setUsername(farmer.getUser().getUsername());
             response.setEmail(farmer.getUser().getEmail());
+            response.setPhoneNumber(farmer.getUser().getPhoneNumber());
+            response.setActive(farmer.getUser().isActive());
         }
 
         return response;

@@ -31,7 +31,7 @@ public class BuyerEntity extends Auditable {
     private String businessLocation;
 
     @Column(name = "IS_VERIFIED")
-    private boolean isVerified;
+    private boolean verified;
 
     @OneToOne
     @JoinColumn(name = "USER_GUID", nullable = false, unique = true)

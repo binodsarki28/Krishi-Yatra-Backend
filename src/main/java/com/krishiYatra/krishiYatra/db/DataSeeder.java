@@ -87,19 +87,14 @@ public class DataSeeder implements CommandLineRunner {
 
     private void seedNormalUser() {
         String username = "user";
-        if (userRepo.findByUsername(username).isEmpty()) {
-            UserEntity user = new UserEntity();
-            user.setFullName("Normal User");
-            user.setUsername(username);
-            user.setEmail("user@example.com");
-            user.setPhoneNumber("9811111111");
+        if (userRepo.findByUsername(username).isPresent()) {
+            UserEntity user = userRepo.findByUsername(username).get();
+            // Fix password just in case stub migration used dummy hash
             user.setPassword(passwordEncoder.encode("user123"));
-            user.setActive(true);
-
-            user.setRoles(new java.util.HashSet<>());
-            
             userRepo.save(user);
-            log.info("Seeded default normal user: {} / user123", username);
+            log.info("Normal user '{}' already exists via stub migration, password updated.", username);
+            return;
         }
+        log.warn("Normal user '{}' not found — expected from stub migration V201.", username);
     }
 }

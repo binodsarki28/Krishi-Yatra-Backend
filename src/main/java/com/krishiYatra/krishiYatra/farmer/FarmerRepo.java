@@ -9,6 +9,8 @@ import java.util.Optional;
 
 @Repository
 public interface FarmerRepo extends JpaRepository<FarmerEntity, String> {
-    List<FarmerEntity> findByIsVerifiedFalse();
+    List<FarmerEntity> findByVerifiedFalse();
     Optional<FarmerEntity> findByUser(UserEntity user);
+    Optional<FarmerEntity> findByUser_Username(String username);
+    long countByVerifiedFalse();
 }

@@ -1,5 +1,7 @@
 package com.krishiYatra.krishiYatra.buyer;
 
+import com.krishiYatra.krishiYatra.buyer.dto.BuyerListResponse;
+import com.krishiYatra.krishiYatra.buyer.dto.BuyerDetailResponse;
 import com.krishiYatra.krishiYatra.buyer.dto.RegisterBuyerRequest;
 import com.krishiYatra.krishiYatra.buyer.dto.VerifyBuyerRequest;
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
@@ -12,10 +14,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import org.springframework.data.domain.Pageable;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/v1/buyer")
@@ -50,5 +54,24 @@ public class BuyerController {
     public ResponseEntity<ServerResponse> verifyBuyer(@Valid @RequestBody VerifyBuyerRequest request) {
         ServerResponse response = buyerService.verifyBuyer(request);
         return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
+    @Operation(summary = "Get all buyer registrations (Admin only)")
+    @GetMapping("/list")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<BuyerListResponse>> getBuyers(@RequestParam Map<String, String> requestParams, Pageable pageable) {
+        return new ResponseEntity<>(buyerService.getBuyers(requestParams, pageable), HttpStatus.OK);
+    }
+
+    @PostMapping("/block-unblock/{username}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<ServerResponse> blockUnblockBuyer(@PathVariable String username, @RequestParam boolean block) {
+        return new ResponseEntity<>(buyerService.blockUnblockBuyer(username, block), HttpStatus.OK);
+    }
+
+    @GetMapping("/detail/{username}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<BuyerDetailResponse> getBuyerDetail(@PathVariable String username) {
+        return new ResponseEntity<>(buyerService.getBuyerDetail(username), HttpStatus.OK);
     }
 }

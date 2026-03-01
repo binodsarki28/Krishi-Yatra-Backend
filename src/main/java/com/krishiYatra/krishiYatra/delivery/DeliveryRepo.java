@@ -9,6 +9,8 @@ import java.util.Optional;
 
 @Repository
 public interface DeliveryRepo extends JpaRepository<DeliveryEntity, String> {
-    List<DeliveryEntity> findByIsVerifiedFalse();
+    List<DeliveryEntity> findByVerifiedFalse();
     Optional<DeliveryEntity> findByUser(UserEntity user);
+    Optional<DeliveryEntity> findByUser_Username(String username);
+    long countByVerifiedFalse();
 }

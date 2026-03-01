@@ -1,6 +1,5 @@
 package com.krishiYatra.krishiYatra.farmer;
 
-import com.krishiYatra.krishiYatra.common.enums.FarmType;
 import com.krishiYatra.krishiYatra.db.Auditable;
 import com.krishiYatra.krishiYatra.stock.StockEntity;
 import com.krishiYatra.krishiYatra.user.UserEntity;
@@ -36,12 +35,12 @@ public class FarmerEntity extends Auditable {
     private Double farmArea;
 
     @Column(name = "IS_VERIFIED")
-    private boolean isVerified;
+    private boolean verified;
 
     @OneToOne
     @JoinColumn(name = "USER_GUID", nullable = false, unique = true)
     private UserEntity user;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "farmer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<StockEntity> stocks;
 }

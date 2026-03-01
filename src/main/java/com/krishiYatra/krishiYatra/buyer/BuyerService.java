@@ -1,5 +1,7 @@
 package com.krishiYatra.krishiYatra.buyer;
 
+import com.krishiYatra.krishiYatra.buyer.dto.BuyerListResponse;
+import com.krishiYatra.krishiYatra.buyer.dto.BuyerDetailResponse;
 import com.krishiYatra.krishiYatra.buyer.dto.RegisterBuyerRequest;
 import com.krishiYatra.krishiYatra.buyer.dto.VerifyBuyerRequest;
 import com.krishiYatra.krishiYatra.buyer.mapper.BuyerMapper;
@@ -15,6 +17,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -24,6 +29,13 @@ public class BuyerService {
     private final UserRepo userRepo;
     private final RoleRepo roleRepo;
     private final BuyerMapper buyerMapper;
+
+    private final com.krishiYatra.krishiYatra.buyer.dao.IBuyerDao buyerDao;
+
+    @Transactional(readOnly = true)
+    public List<BuyerListResponse> getBuyers(java.util.Map<String, String> params, org.springframework.data.domain.Pageable pageable) {
+        return buyerDao.getAllBuyers(params, pageable);
+    }
 
     @Transactional
     public ServerResponse registerBuyer(RegisterBuyerRequest request) {
@@ -55,7 +67,7 @@ public class BuyerService {
 
     @Transactional
     public ServerResponse verifyBuyer(VerifyBuyerRequest request) {
-        BuyerEntity buyer = buyerRepo.findById(request.getBuyerId())
+        BuyerEntity buyer = buyerRepo.findByUser_Username(request.getUsername())
                 .orElseThrow(() -> new RuntimeException(BuyerConst.REGISTRATION_NOT_FOUND));
 
         if (request.getApproved()) {
@@ -75,5 +87,26 @@ public class BuyerService {
             log.info(message);
             return ServerResponse.successResponse(message, HttpStatus.OK);
         }
+    }
+
+    @Transactional
+    public ServerResponse blockUnblockBuyer(String username, boolean block) {
+        BuyerEntity buyer = buyerRepo.findByUser_Username(username)
+                .orElseThrow(() -> new RuntimeException(BuyerConst.REGISTRATION_NOT_FOUND));
+        
+        UserEntity user = buyer.getUser();
+        user.setActive(!block);
+        userRepo.save(user);
+        
+        String action = block ? "blocked" : "unblocked";
+        return ServerResponse.successResponse("Buyer " + action + " successfully", HttpStatus.OK);
+    }
+
+    @Transactional(readOnly = true)
+    public BuyerDetailResponse getBuyerDetail(String username) {
+        BuyerEntity buyer = buyerRepo.findByUser_Username(username)
+                .orElseThrow(() -> new RuntimeException(BuyerConst.REGISTRATION_NOT_FOUND));
+        
+        return buyerMapper.toDetailResponse(buyer);
     }
 }
