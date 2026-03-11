@@ -1,7 +1,7 @@
 package com.krishiYatra.krishiYatra.farmer;
 
-import com.krishiYatra.krishiYatra.common.enums.FarmType;
 import com.krishiYatra.krishiYatra.db.Auditable;
+import com.krishiYatra.krishiYatra.stock.StockEntity;
 import com.krishiYatra.krishiYatra.user.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -22,14 +22,8 @@ public class FarmerEntity extends Auditable {
     @Column(name = "FARMER_GUID")
     private String farmerId;
 
-    @ElementCollection(targetClass = FarmType.class)
-    @Enumerated(EnumType.STRING)
-    @CollectionTable(
-            name = "FARMER_TYPES",
-            joinColumns = @JoinColumn(name = "FARMER_GUID")
-    )
-    @Column(name = "TYPE")
-    private List<FarmType> types;
+    @Column(name = "FARM_TYPES")
+    private String farmTypes;
 
     @Column(name = "FARM_NAME")
     private String farmName;
@@ -41,9 +35,12 @@ public class FarmerEntity extends Auditable {
     private Double farmArea;
 
     @Column(name = "IS_VERIFIED")
-    private boolean isVerified;
+    private boolean verified;
 
     @OneToOne
     @JoinColumn(name = "USER_GUID", nullable = false, unique = true)
     private UserEntity user;
+
+    @OneToMany(mappedBy = "farmer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<StockEntity> stocks;
 }

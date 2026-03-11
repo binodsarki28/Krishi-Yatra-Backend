@@ -1,0 +1,40 @@
+package com.krishiYatra.krishiYatra.admin;
+
+import com.krishiYatra.krishiYatra.admin.dto.AdminStatsResponse;
+import com.krishiYatra.krishiYatra.buyer.BuyerRepo;
+import com.krishiYatra.krishiYatra.delivery.DeliveryRepo;
+import com.krishiYatra.krishiYatra.farmer.FarmerRepo;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("api/v1/admin")
+@Tag(name = "Admin Controller", description = "Endpoints for admin dashboard stats")
+public class AdminController {
+
+    private final FarmerRepo farmerRepo;
+    private final BuyerRepo buyerRepo;
+    private final DeliveryRepo deliveryRepo;
+
+    public AdminController(FarmerRepo farmerRepo, BuyerRepo buyerRepo, DeliveryRepo deliveryRepo) {
+        this.farmerRepo = farmerRepo;
+        this.buyerRepo = buyerRepo;
+        this.deliveryRepo = deliveryRepo;
+    }
+
+    @Operation(summary = "Get counts of pending applications for the dashboard")
+    @GetMapping("/stats")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<AdminStatsResponse> getStats() {
+        AdminStatsResponse stats = new AdminStatsResponse();
+        stats.setPendingFarmers(farmerRepo.countByVerifiedFalse());
+        stats.setPendingBuyers(buyerRepo.countByVerifiedFalse());
+        stats.setPendingDelivery(deliveryRepo.countByVerifiedFalse());
+        return ResponseEntity.ok(stats);
+    }
+}

@@ -24,7 +24,7 @@ public class DeliveryEntity extends Auditable {
     @Column(name = "VEHICLE_TYPE")
     private VehicleType vehicleType;
 
-    @Column(name = "VEHILCLE_BRAND")
+    @Column(name = "VEHICLE_BRAND")
     private String vehicleBrand;
 
     @Column(name = "NUMBER_PLATE")
@@ -34,13 +34,13 @@ public class DeliveryEntity extends Auditable {
     private String licenseNumber;
 
     @Column(name = "VEHICLE_PHOTO")
-    private String VehiclePhoto;
+    private String vehiclePhoto;
 
     @Column(name = "LICENSE_PHOTO")
     private String licensePhoto;
 
     @Column(name = "IS_VERIFIED")
-    private boolean isVerified;
+    private boolean verified;
 
     @OneToOne
     @JoinColumn(name = "USER_GUID", nullable = false, unique = true)

@@ -5,5 +5,7 @@ public enum ConsumerType {
     WHOLESALER,
     RESTAURANT,
     RETAILER,
-    NORMAL
+    NORMAL,
+    INDIVIDUAL,
+    HOTEL_RESTAURANT
 }

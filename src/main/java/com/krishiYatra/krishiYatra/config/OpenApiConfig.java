@@ -21,10 +21,17 @@ public class OpenApiConfig {
         localServer.setDescription("Local Server");
 
         return new OpenAPI()
-                .components(new Components())
+                .components(new Components()
+                        .addSecuritySchemes("bearer-key",
+                                new io.swagger.v3.oas.models.security.SecurityScheme()
+                                        .type(io.swagger.v3.oas.models.security.SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")))
                 .info(new Info()
-                        .title("API Title")
+                        .title("KrishiYatra API")
+                        .description("Agricultural Platform API Documentation")
                         .version("1.0"))
+                .addSecurityItem(new io.swagger.v3.oas.models.security.SecurityRequirement().addList("bearer-key"))
                 .servers(List.of(localServer));
     }
 }
