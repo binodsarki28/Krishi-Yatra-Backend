@@ -30,8 +30,8 @@ public class StockEntity extends Auditable {
     @Column(name = "DESCRIPTION")
     private String description;
 
-    @Column(name = "STOCK_IMAGES")
-    private List<String> stockImages;
+    @Column(name = "STOCK_IMAGES", columnDefinition = "TEXT")
+    private String stockImages;
 
     @Column(name = "QUANTITY")
     private Double quantity;

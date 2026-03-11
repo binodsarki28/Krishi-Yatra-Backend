@@ -29,7 +29,7 @@ public class DataSourceConfig {
 
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
 
-        if ("main".equals(branch)) {
+        if ("main".equals(branch) || "mysql".equals(System.getProperty("db.type"))) {
             // MySQL
             dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
             dataSource.setUrl(mysqlUrl);
@@ -38,7 +38,7 @@ public class DataSourceConfig {
         } else {
             // H2
             dataSource.setDriverClassName("org.h2.Driver");
-            dataSource.setUrl("jdbc:h2:mem:krishiyatra;DB_CLOSE_DELAY=-1;MODE=MySQL");
+            dataSource.setUrl("jdbc:h2:mem:krishi_yatra;DB_CLOSE_DELAY=-1;MODE=MySQL");
             dataSource.setUsername("sa");
             dataSource.setPassword("");
         }
