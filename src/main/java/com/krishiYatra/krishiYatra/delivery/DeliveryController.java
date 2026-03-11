@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("api/v1/delivery")
+@RequestMapping("/api/v1/delivery")
 @Tag(name = "Delivery Controller", description = "Endpoints for delivery partner management and registration")
 @RequiredArgsConstructor
 public class DeliveryController {

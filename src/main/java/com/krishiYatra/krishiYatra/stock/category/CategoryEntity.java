@@ -1,6 +1,5 @@
 package com.krishiYatra.krishiYatra.stock.category;
 
-import com.krishiYatra.krishiYatra.address.AddressEntity;
 import com.krishiYatra.krishiYatra.db.Auditable;
 import com.krishiYatra.krishiYatra.stock.subCategory.SubCategoryEntity;
 import jakarta.persistence.*;

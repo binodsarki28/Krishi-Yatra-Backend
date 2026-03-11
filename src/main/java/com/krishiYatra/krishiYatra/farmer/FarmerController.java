@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("api/v1/farmer")
+@RequestMapping("/api/v1/farmer")
 @Tag(name = "Farmer Controller", description = "Endpoints for farmer management and registration")
 public class FarmerController {
 

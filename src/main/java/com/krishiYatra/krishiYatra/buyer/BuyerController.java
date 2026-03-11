@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("api/v1/buyer")
+@RequestMapping("/api/v1/buyer")
 @Tag(name = "Buyer Controller", description = "Endpoints for buyer management and registration")
 @RequiredArgsConstructor
 public class BuyerController {
