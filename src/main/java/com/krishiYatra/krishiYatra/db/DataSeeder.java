@@ -5,6 +5,8 @@ import com.krishiYatra.krishiYatra.user.RoleEntity;
 import com.krishiYatra.krishiYatra.user.RoleRepo;
 import com.krishiYatra.krishiYatra.user.UserEntity;
 import com.krishiYatra.krishiYatra.user.UserRepo;
+import com.krishiYatra.krishiYatra.stock.category.CategoryRepo;
+import com.krishiYatra.krishiYatra.stock.subCategory.SubCategoryRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -21,6 +23,8 @@ public class DataSeeder implements CommandLineRunner {
     private final UserRepo userRepo;
     private final RoleRepo roleRepo;
     private final PasswordEncoder passwordEncoder;
+    private final CategoryRepo categoryRepo;
+    private final SubCategoryRepo subCategoryRepo;
 
     @Override
     public void run(String... args) {
@@ -34,6 +38,7 @@ public class DataSeeder implements CommandLineRunner {
         seedRoles();
         seedAdminUser();
         seedNormalUser();
+        verifyStockSeeding();
     }
 
     private String getCurrentGitBranch() {
@@ -89,12 +94,17 @@ public class DataSeeder implements CommandLineRunner {
         String username = "user";
         if (userRepo.findByUsername(username).isPresent()) {
             UserEntity user = userRepo.findByUsername(username).get();
-            // Fix password just in case stub migration used dummy hash
             user.setPassword(passwordEncoder.encode("user123"));
             userRepo.save(user);
-            log.info("Normal user '{}' already exists via stub migration, password updated.", username);
+            log.info("Normal user '{}' verified and password updated via DataSeeder.", username);
             return;
         }
-        log.warn("Normal user '{}' not found — expected from stub migration V201.", username);
+        log.warn("Normal user '{}' not found — expected from stub migration.", username);
+    }
+
+    private void verifyStockSeeding() {
+        long catCount = categoryRepo.count();
+        long subCount = subCategoryRepo.count();
+        log.info("Stock System Status: {} Categories and {} Sub-categories are active (loaded via Stub Migrations).", catCount, subCount);
     }
 }
