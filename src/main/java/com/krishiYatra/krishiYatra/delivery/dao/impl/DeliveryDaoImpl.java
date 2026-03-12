@@ -47,7 +47,7 @@ public class DeliveryDaoImpl implements IDeliveryDao {
                 userJoin.get("fullName"),
                 userJoin.get("username"),
                 root.get("vehicleType"),
-                root.get("licenseNumber"),
+                root.get("vehicleBrand"),
                 root.get("verified"),
                 userJoin.get("isActive")
             ));
@@ -68,9 +68,9 @@ public class DeliveryDaoImpl implements IDeliveryDao {
 
     private List<Predicate> buildPredicates(Root<DeliveryEntity> root, Join<DeliveryEntity, UserEntity> userJoin, CriteriaBuilder cb, Map<String, String> params) {
         List<Predicate> predicates = new ArrayList<>();
-        if (params.containsKey("licenseNumber")) {
-            String licenseNumber = params.get("licenseNumber").toLowerCase();
-            predicates.add(cb.like(cb.lower(root.get("licenseNumber")), "%" + licenseNumber + "%"));
+        if (params.containsKey("vehicleBrand") && !params.get("vehicleBrand").isEmpty()) {
+            String vehicleBrand = params.get("vehicleBrand").toLowerCase();
+            predicates.add(cb.like(cb.lower(root.get("vehicleBrand")), "%" + vehicleBrand + "%"));
         }
         if (params.containsKey("vehicleType") && !params.get("vehicleType").isEmpty()) {
             try {

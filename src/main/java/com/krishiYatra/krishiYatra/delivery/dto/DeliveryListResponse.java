@@ -15,7 +15,7 @@ public class DeliveryListResponse {
     private String fullName;
     private String username;
     private VehicleType vehicleType;
-    private String licenseNumber;
+    private String vehicleBrand;
     
     @JsonProperty("isVerified")
     private boolean isVerified;

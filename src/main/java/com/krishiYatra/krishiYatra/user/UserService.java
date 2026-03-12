@@ -178,4 +178,27 @@ public class UserService {
 
         return ServerResponse.successResponse(UserConst.USER_CREATED, HttpStatus.CREATED);
     }
+
+    public ServerResponse getCurrentUserRoles(String username) {
+        UserEntity userDetails = userRepo.findByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+            
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+
+        List<String> verifiedRoles = new java.util.ArrayList<>();
+        if (roles.contains("FARMER")) {
+            farmerRepo.findByUser(userDetails).ifPresent(f -> { if (f.isVerified()) verifiedRoles.add("FARMER"); });
+        }
+        if (roles.contains("BUYER")) {
+            buyerRepo.findByUser(userDetails).ifPresent(b -> { if (b.isVerified()) verifiedRoles.add("BUYER"); });
+        }
+        if (roles.contains("DELIVERY")) {
+            deliveryRepo.findByUser(userDetails).ifPresent(d -> { if (d.isVerified()) verifiedRoles.add("DELIVERY"); });
+        }
+
+        JwtResponse jwtResponse = new JwtResponse(null, userDetails.getUsername(), userDetails.getFullName(), userDetails.getEmail(), roles, verifiedRoles);
+        return ServerResponse.successObjectResponse("User details fetched successfully", HttpStatus.OK, jwtResponse);
+    }
 }

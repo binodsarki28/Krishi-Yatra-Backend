@@ -45,4 +45,13 @@ public class UserController {
         ServerResponse response = userService.requestOtp(request);
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<ServerResponse> getCurrentUser(org.springframework.security.core.Authentication authentication) {
+        if (authentication == null) {
+            return new ResponseEntity<>(ServerResponse.failureResponse("Unauthorized", org.springframework.http.HttpStatus.UNAUTHORIZED), org.springframework.http.HttpStatus.UNAUTHORIZED);
+        }
+        ServerResponse response = userService.getCurrentUserRoles(authentication.getName());
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
 }
