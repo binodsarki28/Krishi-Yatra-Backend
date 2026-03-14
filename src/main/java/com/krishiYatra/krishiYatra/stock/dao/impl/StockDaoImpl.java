@@ -46,16 +46,18 @@ public class StockDaoImpl implements IStockDao {
             predicates.add(cb.equal(root.get("active"), true));
         }
 
-        if (params.containsKey("stockName")) {
-            predicates.add(cb.like(cb.lower(root.get("stockName")), "%" + params.get("stockName").toLowerCase() + "%"));
+        if (params.containsKey("search") && !params.get("search").trim().isEmpty()) {
+            String search = "%" + params.get("search").trim().toLowerCase() + "%";
+            predicates.add(cb.or(
+                cb.like(cb.lower(root.get("stockName")), search),
+                cb.like(cb.lower(root.get("productName")), search)
+            ));
         }
-        if (params.containsKey("productName")) {
-            predicates.add(cb.like(cb.lower(root.get("productName")), "%" + params.get("productName").toLowerCase() + "%"));
-        }
-        if (params.containsKey("categoryId")) {
+
+        if (params.containsKey("categoryId") && !params.get("categoryId").trim().isEmpty()) {
             predicates.add(cb.equal(catJoin.get("categoryId"), params.get("categoryId")));
         }
-        if (params.containsKey("subCategoryId")) {
+        if (params.containsKey("subCategoryId") && !params.get("subCategoryId").trim().isEmpty()) {
             predicates.add(cb.equal(subCatJoin.get("subCategoryId"), params.get("subCategoryId")));
         }
         if (params.containsKey("farmerId")) {
@@ -91,6 +93,16 @@ public class StockDaoImpl implements IStockDao {
 
         cq.orderBy(cb.desc(root.get("createdAt")));
 
-        return em.createQuery(cq).getResultList();
+        var query = em.createQuery(cq);
+        
+        // Pagination
+        if (params.containsKey("page") && params.containsKey("size")) {
+            int page = Integer.parseInt(params.get("page"));
+            int size = Integer.parseInt(params.get("size"));
+            query.setFirstResult(page * size);
+            query.setMaxResults(size);
+        }
+
+        return query.getResultList();
     }
 }
