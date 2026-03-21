@@ -18,4 +18,5 @@ public class StockResponseDto {
     private String subCategoryName;
     private String subCategoryId;
     private String farmerName;
+    private boolean active;
 }

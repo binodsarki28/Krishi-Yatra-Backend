@@ -63,6 +63,13 @@ public class StockDaoImpl implements IStockDao {
         if (params.containsKey("farmerId")) {
             predicates.add(cb.equal(farmerJoin.get("farmerId"), params.get("farmerId")));
         }
+        if (params.containsKey("farmerSearch") && !params.get("farmerSearch").trim().isEmpty()) {
+            String farmerSearch = "%" + params.get("farmerSearch").trim().toLowerCase() + "%";
+            predicates.add(cb.or(
+                cb.like(cb.lower(userJoin.get("fullName")), farmerSearch),
+                cb.like(cb.lower(userJoin.get("username")), farmerSearch)
+            ));
+        }
         if (params.containsKey("farmLocation")) {
             predicates.add(cb.like(cb.lower(farmerJoin.get("farmLocation")), "%" + params.get("farmLocation").toLowerCase() + "%"));
         }

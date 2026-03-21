@@ -58,6 +58,8 @@ public class StockMapper {
             dto.setFarmerName(entity.getFarmer().getUser().getFullName());
         }
         
+        dto.setActive(entity.isActive());
+        
         return dto;
     }
 

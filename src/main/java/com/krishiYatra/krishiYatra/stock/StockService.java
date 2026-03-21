@@ -103,7 +103,9 @@ public class StockService {
             return ServerResponse.failureResponse("You are not authorized to delete this stock.", HttpStatus.UNAUTHORIZED);
         }
 
-        stockRepo.delete(entity);
+        entity.setActive(false);
+        stockRepo.save(entity);
+
         return ServerResponse.successResponse(StockConst.DELETE_STOCK, HttpStatus.OK);
     }
 
@@ -113,6 +115,18 @@ public class StockService {
 
         StockResponseDto responseDto = stockMapper.toResponseDto(entity);
         return ServerResponse.successObjectResponse(StockConst.FETCH_STOCK, HttpStatus.OK, responseDto);
+    }
+
+    @Transactional
+    public ServerResponse toggleStockStatus(String slug) {
+        StockEntity entity = stockRepo.findByStockSlug(slug)
+                .orElseThrow(() -> new RuntimeException(StockConst.STOCK_NOT_FOUND));
+
+        entity.setActive(!entity.isActive());
+        stockRepo.save(entity);
+        
+        String action = entity.isActive() ? "unblocked" : "blocked";
+        return ServerResponse.successResponse("Stock " + action + " successfully.", HttpStatus.OK);
     }
 
     public ServerResponse getStockList(Map<String, String> params) {

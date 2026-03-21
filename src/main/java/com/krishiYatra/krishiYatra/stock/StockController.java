@@ -49,6 +49,14 @@ public class StockController {
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
 
+    @Operation(summary = "Toggle stock active status (Admin only)")
+    @PutMapping("/toggle-status/{slug}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<ServerResponse> toggleStockStatus(@PathVariable String slug) {
+        ServerResponse response = stockService.toggleStockStatus(slug);
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
     @Operation(summary = "List all stocks with filters (Active only by default)")
     @GetMapping("/list")
     public ResponseEntity<ServerResponse> getStockList(@RequestParam Map<String, String> params) {
