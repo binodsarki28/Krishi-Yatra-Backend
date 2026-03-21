@@ -2,6 +2,11 @@ spring:
   application:
     name: KrishiYatra
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
   datasource:
     mysql:
       url: jdbc:mysql://localhost:3306/krishi-yatra
@@ -47,3 +52,8 @@ app:
   otp:
     expiration-minutes: 5
     max-attempts: 5
+
+cloudinary:
+  cloud-name: dcffdurtb
+  api-key: "448551618111328"
+  api-secret: PTnYks9WoHTcMTjpntnVchqOwcc

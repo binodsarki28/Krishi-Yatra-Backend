@@ -7,10 +7,12 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
+
 @Repository
 public interface DeliveryRepo extends JpaRepository<DeliveryEntity, String> {
-    List<DeliveryEntity> findByVerifiedFalse();
+    List<DeliveryEntity> findByStatus(VerificationStatus status);
     Optional<DeliveryEntity> findByUser(UserEntity user);
     Optional<DeliveryEntity> findByUser_Username(String username);
-    long countByVerifiedFalse();
+    long countByStatus(VerificationStatus status);
 }

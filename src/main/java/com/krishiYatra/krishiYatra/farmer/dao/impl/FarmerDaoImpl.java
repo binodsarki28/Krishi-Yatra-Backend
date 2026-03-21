@@ -46,7 +46,7 @@ public class FarmerDaoImpl implements IFarmerDao {
                 userJoin.get("username"),
                 root.get("farmTypes"),
                 root.get("farmLocation"),
-                root.get("verified"),
+                root.get("status"),
                 userJoin.get("isActive")
             ));
             
@@ -74,9 +74,13 @@ public class FarmerDaoImpl implements IFarmerDao {
             String farmLocation = params.get("farmLocation").toLowerCase();
             predicates.add(cb.like(cb.lower(root.get("farmLocation")), "%" + farmLocation + "%"));
         }
-        if (params.containsKey("verified")) {
-            boolean isVerified = Boolean.parseBoolean(params.get("verified"));
-            predicates.add(cb.equal(root.get("verified"), isVerified));
+        if (params.containsKey("status")) {
+            try {
+                com.krishiYatra.krishiYatra.common.enums.VerificationStatus stat = com.krishiYatra.krishiYatra.common.enums.VerificationStatus.valueOf(params.get("status").toUpperCase());
+                predicates.add(cb.equal(root.get("status"), stat));
+            } catch (IllegalArgumentException e) {
+                // Ignore invalid status
+            }
         }
         if (params.containsKey("fullName")) {
             String fullName = params.get("fullName").toLowerCase();

@@ -28,6 +28,10 @@ public class StockRequestDto {
     @Positive(message = "Price must be positive")
     private Double pricePerUnit;
 
+    @NotNull(message = "Minimum quantity is required")
+    @Positive(message = "Minimum quantity must be at least 1")
+    private Integer minQuantity = 1;
+
     @NotBlank(message = "Category is required")
     private String categoryId;
 

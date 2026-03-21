@@ -21,7 +21,7 @@ public class DeliveryMapperImpl implements DeliveryMapper {
         delivery.setLicenseNumber(request.getLicenseNumber());
         delivery.setVehiclePhoto(request.getVehiclePhoto());
         delivery.setLicensePhoto(request.getLicensePhoto());
-        delivery.setVerified(false);
+        delivery.setStatus(com.krishiYatra.krishiYatra.common.enums.VerificationStatus.PENDING);
         return delivery;
     }
 
@@ -31,7 +31,7 @@ public class DeliveryMapperImpl implements DeliveryMapper {
             return null;
         }
         DeliveryListResponse response = new DeliveryListResponse();
-        response.setVerified(delivery.isVerified());
+        response.setStatus(delivery.getStatus());
 
         if (delivery.getUser() != null) {
             response.setFullName(delivery.getUser().getFullName());
@@ -55,7 +55,7 @@ public class DeliveryMapperImpl implements DeliveryMapper {
         response.setLicenseNumber(delivery.getLicenseNumber());
         response.setVehiclePhoto(delivery.getVehiclePhoto());
         response.setLicensePhoto(delivery.getLicensePhoto());
-        response.setVerified(delivery.isVerified());
+        response.setStatus(delivery.getStatus());
         response.setCreatedAt(delivery.getCreatedAt());
 
         if (delivery.getUser() != null) {

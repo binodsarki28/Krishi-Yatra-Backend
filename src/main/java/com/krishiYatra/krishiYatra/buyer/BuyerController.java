@@ -65,8 +65,8 @@ public class BuyerController {
 
     @PostMapping("/block-unblock/{username}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<ServerResponse> blockUnblockBuyer(@PathVariable String username, @RequestParam boolean block) {
-        return new ResponseEntity<>(buyerService.blockUnblockBuyer(username, block), HttpStatus.OK);
+    public ResponseEntity<ServerResponse> blockUnblockBuyer(@PathVariable String username, @RequestParam boolean block, @RequestParam(required = false) String reason) {
+        return new ResponseEntity<>(buyerService.blockUnblockBuyer(username, block, reason), HttpStatus.OK);
     }
 
     @GetMapping("/detail/{username}")

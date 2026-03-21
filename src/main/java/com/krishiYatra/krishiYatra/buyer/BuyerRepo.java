@@ -7,10 +7,12 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
+
 @Repository
 public interface BuyerRepo extends JpaRepository<BuyerEntity, String> {
-    List<BuyerEntity> findByVerifiedFalse();
+    List<BuyerEntity> findByStatus(VerificationStatus status);
     Optional<BuyerEntity> findByUser(UserEntity user);
     Optional<BuyerEntity> findByUser_Username(String username);
-    long countByVerifiedFalse();
+    long countByStatus(VerificationStatus status);
 }

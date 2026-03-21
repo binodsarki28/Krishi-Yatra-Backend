@@ -62,8 +62,8 @@ public class FarmerController {
 
     @PostMapping("/block-unblock/{username}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<ServerResponse> blockUnblockFarmer(@PathVariable String username, @RequestParam boolean block) {
-        return new ResponseEntity<>(farmerService.blockUnblockFarmer(username, block), HttpStatus.OK);
+    public ResponseEntity<ServerResponse> blockUnblockFarmer(@PathVariable String username, @RequestParam boolean block, @RequestParam(required = false) String reason) {
+        return new ResponseEntity<>(farmerService.blockUnblockFarmer(username, block, reason), HttpStatus.OK);
     }
 
     @GetMapping("/detail/{username}")

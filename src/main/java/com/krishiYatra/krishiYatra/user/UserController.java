@@ -5,6 +5,7 @@ import com.krishiYatra.krishiYatra.user.dto.OtpRequestDto;
 import com.krishiYatra.krishiYatra.user.dto.OtpVerifyDto;
 import com.krishiYatra.krishiYatra.user.dto.UserCreateRequest;
 import com.krishiYatra.krishiYatra.user.dto.UserLoginRequest;
+import com.krishiYatra.krishiYatra.user.dto.PasswordUpdateRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -52,6 +53,28 @@ public class UserController {
             return new ResponseEntity<>(ServerResponse.failureResponse("Unauthorized", org.springframework.http.HttpStatus.UNAUTHORIZED), org.springframework.http.HttpStatus.UNAUTHORIZED);
         }
         ServerResponse response = userService.getCurrentUserRoles(authentication.getName());
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<ServerResponse> updateProfile(
+            org.springframework.security.core.Authentication authentication,
+            @RequestParam(value = "firstName", required = false) String firstName,
+            @RequestParam(value = "lastName", required = false) String lastName,
+            @RequestParam(value = "phoneNumber", required = false) String phoneNumber,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "currentUsername", required = false) String currentUsername,
+            @RequestParam(value = "profileImage", required = false) org.springframework.web.multipart.MultipartFile profileImage) {
+        if (authentication == null) {
+            return new ResponseEntity<>(ServerResponse.failureResponse("Unauthorized", org.springframework.http.HttpStatus.UNAUTHORIZED), org.springframework.http.HttpStatus.UNAUTHORIZED);
+        }
+        ServerResponse response = userService.updateProfile(authentication.getName(), firstName, lastName, phoneNumber, description, currentUsername, profileImage);
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity<ServerResponse> updatePassword(@Validated @RequestBody PasswordUpdateRequest request) {
+        ServerResponse response = userService.updatePassword(request);
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
 }

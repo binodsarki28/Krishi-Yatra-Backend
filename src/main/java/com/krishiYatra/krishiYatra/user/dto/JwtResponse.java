@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -17,15 +18,23 @@ public class JwtResponse {
     private String username;
     private String fullName;
     private String email;
+    private String phoneNumber;
+    private String profileUrl;
+    private String description;
     private List<String> roles;
     private List<String> verifiedRoles;
+    private Map<String, String> statusMessages;
 
-    public JwtResponse(String token, String username, String fullName, String email, List<String> roles, List<String> verifiedRoles) {
+    public JwtResponse(String token, String username, String fullName, String email, List<String> roles, List<String> verifiedRoles, Map<String, String> statusMessages, String phoneNumber, String profileUrl, String description) {
         this.token = token;
         this.username = username;
         this.fullName = fullName;
         this.email = email;
         this.roles = roles;
         this.verifiedRoles = verifiedRoles;
+        this.statusMessages = statusMessages;
+        this.phoneNumber = phoneNumber;
+        this.profileUrl = profileUrl;
+        this.description = description;
     }
 }

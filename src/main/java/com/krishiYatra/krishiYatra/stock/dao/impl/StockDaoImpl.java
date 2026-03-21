@@ -8,27 +8,33 @@ import com.krishiYatra.krishiYatra.stock.dto.StockListResponse;
 import com.krishiYatra.krishiYatra.user.UserEntity;
 import com.krishiYatra.krishiYatra.farmer.FarmerEntity;
 import com.krishiYatra.krishiYatra.utils.DaoUtil;
+import com.krishiYatra.krishiYatra.stock.mapper.StockMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.*;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class StockDaoImpl implements IStockDao {
 
     @PersistenceContext
     private EntityManager em;
 
+    private final StockMapper stockMapper;
+
     @Override
     public List<StockListResponse> getAllStocks(Map<String, String> params) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<StockListResponse> cq = cb.createQuery(StockListResponse.class);
+        CriteriaQuery<StockEntity> cq = cb.createQuery(StockEntity.class);
         Root<StockEntity> root = cq.from(StockEntity.class);
         
         Join<StockEntity, CategoryEntity> catJoin = root.join("category", JoinType.LEFT);
@@ -39,7 +45,7 @@ public class StockDaoImpl implements IStockDao {
         List<Predicate> predicates = new ArrayList<>();
         
         if (params.containsKey("all") && "true".equalsIgnoreCase(params.get("all"))) {
-            // Include all, don't add active predicate
+            // Include all
         } else if (params.containsKey("active")) {
             predicates.add(cb.equal(root.get("active"), Boolean.parseBoolean(params.get("active"))));
         } else {
@@ -86,18 +92,7 @@ public class StockDaoImpl implements IStockDao {
 
         DaoUtil.setPredicateToArray(predicates, cq, cb);
 
-        cq.select(cb.construct(StockListResponse.class,
-                root.get("stockName"),
-                root.get("productName"),
-                root.get("stockSlug"),
-                root.get("quantity"),
-                root.get("pricePerUnit"),
-                subCatJoin.get("subCategoryName"),
-                catJoin.get("categoryName"),
-                userJoin.get("fullName"),
-                root.get("active")
-        ));
-
+        cq.select(root); // Fetch roots instead of construction
         cq.orderBy(cb.desc(root.get("createdAt")));
 
         var query = em.createQuery(cq);
@@ -110,6 +105,8 @@ public class StockDaoImpl implements IStockDao {
             query.setMaxResults(size);
         }
 
-        return query.getResultList();
+        return query.getResultList().stream()
+                .map(stockMapper::toListResponse)
+                .collect(Collectors.toList());
     }
 }

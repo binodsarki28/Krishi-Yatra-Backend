@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
 
 @Service
 @Slf4j
@@ -82,7 +83,7 @@ public class FarmerService {
                 .orElseThrow(() -> new RuntimeException(FarmerConst.REGISTRATION_NOT_FOUND));
 
         if (request.getApproved()) {
-            farmer.setVerified(true);
+            farmer.setStatus(VerificationStatus.VERIFIED);
             farmerRepo.save(farmer);
             return ServerResponse.successResponse(FarmerConst.VERIFICATION_SUCCESS, HttpStatus.OK);
         } else {
@@ -103,13 +104,18 @@ public class FarmerService {
     }
 
     @Transactional
-    public ServerResponse blockUnblockFarmer(String username, boolean block) {
+    public ServerResponse blockUnblockFarmer(String username, boolean block, String reason) {
         FarmerEntity farmer = farmerRepo.findByUser_Username(username)
                 .orElseThrow(() -> new RuntimeException(FarmerConst.REGISTRATION_NOT_FOUND));
         
-        UserEntity user = farmer.getUser();
-        user.setActive(!block);
-        userRepo.save(user);
+        if (block) {
+            farmer.setStatus(VerificationStatus.BLOCKED);
+            farmer.setStatusMessage(reason != null && !reason.trim().isEmpty() ? "Blocked by admin. Reason: " + reason : "Your account has been blocked by the admin.");
+        } else {
+            farmer.setStatus(VerificationStatus.VERIFIED);
+            farmer.setStatusMessage(null);
+        }
+        farmerRepo.save(farmer);
         
         String action = block ? "blocked" : "unblocked";
         return ServerResponse.successResponse("Farmer " + action + " successfully", HttpStatus.OK);

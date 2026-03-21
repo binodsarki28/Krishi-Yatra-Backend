@@ -71,18 +71,14 @@ public class BuyerService {
                 .orElseThrow(() -> new RuntimeException(BuyerConst.REGISTRATION_NOT_FOUND));
 
         if (request.getApproved()) {
-            buyer.setVerified(true);
+            buyer.setStatus(com.krishiYatra.krishiYatra.common.enums.VerificationStatus.VERIFIED);
             buyerRepo.save(buyer);
             return ServerResponse.successResponse(BuyerConst.VERIFICATION_SUCCESS, HttpStatus.OK);
         } else {
-            UserEntity user = buyer.getUser();
-            buyerRepo.delete(buyer);
+            buyer.setStatus(com.krishiYatra.krishiYatra.common.enums.VerificationStatus.REJECTED);
+            buyer.setStatusMessage(request.getReason());
+            buyerRepo.save(buyer);
             
-            roleRepo.findByRoleName(RoleType.BUYER).ifPresent(role -> {
-                user.getRoles().remove(role);
-                userRepo.save(user);
-            });
-
             String message = BuyerConst.REJECTION_PREFIX + request.getReason();
             log.info(message);
             return ServerResponse.successResponse(message, HttpStatus.OK);
@@ -90,17 +86,27 @@ public class BuyerService {
     }
 
     @Transactional
-    public ServerResponse blockUnblockBuyer(String username, boolean block) {
+    public ServerResponse blockUnblockBuyer(String username, boolean block, String reason) {
         BuyerEntity buyer = buyerRepo.findByUser_Username(username)
                 .orElseThrow(() -> new RuntimeException(BuyerConst.REGISTRATION_NOT_FOUND));
+        
+        if (block) {
+            buyer.setStatus(com.krishiYatra.krishiYatra.common.enums.VerificationStatus.BLOCKED);
+            buyer.setStatusMessage(reason);
+        } else {
+            buyer.setStatus(com.krishiYatra.krishiYatra.common.enums.VerificationStatus.VERIFIED);
+            buyer.setStatusMessage(null);
+        }
         
         UserEntity user = buyer.getUser();
         user.setActive(!block);
         userRepo.save(user);
+        buyerRepo.save(buyer);
         
         String action = block ? "blocked" : "unblocked";
         return ServerResponse.successResponse("Buyer " + action + " successfully", HttpStatus.OK);
     }
+
 
     @Transactional(readOnly = true)
     public BuyerDetailResponse getBuyerDetail(String username) {

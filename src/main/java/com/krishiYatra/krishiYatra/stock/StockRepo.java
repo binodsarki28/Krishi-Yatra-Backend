@@ -7,4 +7,5 @@ import java.util.Optional;
 @Repository
 public interface StockRepo extends JpaRepository<StockEntity, String> {
     Optional<StockEntity> findByStockSlug(String stockSlug);
+    java.util.List<StockEntity> findByFarmer_FarmerId(String farmerId);
 }

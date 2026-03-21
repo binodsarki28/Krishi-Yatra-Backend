@@ -6,6 +6,7 @@ import com.krishiYatra.krishiYatra.user.dto.JwtResponse;
 import com.krishiYatra.krishiYatra.user.dto.UserLoginRequest;
 import com.krishiYatra.krishiYatra.user.constant.UserConst;
 import com.krishiYatra.krishiYatra.user.dto.UserCreateRequest;
+import com.krishiYatra.krishiYatra.user.dto.PasswordUpdateRequest;
 import com.krishiYatra.krishiYatra.user.mapper.UserMapper;
 import com.krishiYatra.krishiYatra.user.dto.OtpRequestDto;
 import com.krishiYatra.krishiYatra.user.dto.OtpVerifyDto;
@@ -15,6 +16,8 @@ import com.krishiYatra.krishiYatra.verification.PendingRegistrationStore;
 import com.krishiYatra.krishiYatra.farmer.FarmerRepo;
 import com.krishiYatra.krishiYatra.buyer.BuyerRepo;
 import com.krishiYatra.krishiYatra.delivery.DeliveryRepo;
+import com.krishiYatra.krishiYatra.config.CloudinaryService;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,7 +28,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.stream.Collectors;
+import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
 
 @Service
 public class UserService {
@@ -41,6 +47,7 @@ public class UserService {
     private final FarmerRepo farmerRepo;
     private final BuyerRepo buyerRepo;
     private final DeliveryRepo deliveryRepo;
+    private final CloudinaryService cloudinaryService;
 
     public UserService(UserMapper userMapper,
                        UserRepo userRepo,
@@ -52,7 +59,8 @@ public class UserService {
                        FarmerRepo farmerRepo,
                        BuyerRepo buyerRepo,
                        DeliveryRepo deliveryRepo,
-                       PendingRegistrationStore pendingRegistrationStore) {
+                       PendingRegistrationStore pendingRegistrationStore,
+                       CloudinaryService cloudinaryService) {
         this.userMapper = userMapper;
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
@@ -64,6 +72,7 @@ public class UserService {
         this.buyerRepo = buyerRepo;
         this.deliveryRepo = deliveryRepo;
         this.pendingRegistrationStore = pendingRegistrationStore;
+        this.cloudinaryService = cloudinaryService;
     }
 
     public ServerResponse loginUser(UserLoginRequest loginRequest) {
@@ -79,17 +88,37 @@ public class UserService {
                 .collect(Collectors.toList());
 
         List<String> verifiedRoles = new java.util.ArrayList<>();
+        Map<String, String> statusMessages = new HashMap<>();
+
         if (roles.contains("FARMER")) {
-            farmerRepo.findByUser(userDetails).ifPresent(f -> { if (f.isVerified()) verifiedRoles.add("FARMER"); });
+            farmerRepo.findByUser(userDetails).ifPresent(f -> { 
+                if (f.getStatus() == VerificationStatus.VERIFIED) verifiedRoles.add("FARMER"); 
+                else {
+                    String msg = f.getStatus() == VerificationStatus.BLOCKED ? "Your Farmer account has been BLOCKED. Reason: " : "Under verification (" + f.getStatus().name() + "). ";
+                    statusMessages.put("FARMER", f.getStatusMessage() != null ? (f.getStatus() == VerificationStatus.BLOCKED ? "Your account is BLOCKED: " + f.getStatusMessage() : f.getStatusMessage()) : msg);
+                }
+            });
         }
         if (roles.contains("BUYER")) {
-            buyerRepo.findByUser(userDetails).ifPresent(b -> { if (b.isVerified()) verifiedRoles.add("BUYER"); });
+            buyerRepo.findByUser(userDetails).ifPresent(b -> { 
+                if (b.getStatus() == VerificationStatus.VERIFIED) verifiedRoles.add("BUYER"); 
+                else {
+                    String msg = b.getStatus() == VerificationStatus.BLOCKED ? "Your Buyer account has been BLOCKED. Reason: " : "Under verification (" + b.getStatus().name() + "). ";
+                    statusMessages.put("BUYER", b.getStatusMessage() != null ? (b.getStatus() == VerificationStatus.BLOCKED ? "Your account is BLOCKED: " + b.getStatusMessage() : b.getStatusMessage()) : msg);
+                }
+            });
         }
         if (roles.contains("DELIVERY")) {
-            deliveryRepo.findByUser(userDetails).ifPresent(d -> { if (d.isVerified()) verifiedRoles.add("DELIVERY"); });
+            deliveryRepo.findByUser(userDetails).ifPresent(d -> { 
+                if (d.getStatus() == VerificationStatus.VERIFIED) verifiedRoles.add("DELIVERY"); 
+                else {
+                    String msg = d.getStatus() == VerificationStatus.BLOCKED ? "Your Linker account has been BLOCKED. Reason: " : "Under verification (" + d.getStatus().name() + "). ";
+                    statusMessages.put("DELIVERY", d.getStatusMessage() != null ? (d.getStatus() == VerificationStatus.BLOCKED ? "Your account is BLOCKED: " + d.getStatusMessage() : d.getStatusMessage()) : msg);
+                }
+            });
         }
 
-        JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getUsername(), userDetails.getFullName(), userDetails.getEmail(), roles, verifiedRoles);
+        JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getUsername(), userDetails.getFullName(), userDetails.getEmail(), roles, verifiedRoles, statusMessages, userDetails.getPhoneNumber(), userDetails.getProfileUrl(), userDetails.getDescription());
         return ServerResponse.successObjectResponse(UserConst.USER_LOGIN, HttpStatus.OK, jwtResponse);
     }
 
@@ -188,17 +217,130 @@ public class UserService {
                 .collect(Collectors.toList());
 
         List<String> verifiedRoles = new java.util.ArrayList<>();
+        Map<String, String> statusMessages = new HashMap<>();
+
         if (roles.contains("FARMER")) {
-            farmerRepo.findByUser(userDetails).ifPresent(f -> { if (f.isVerified()) verifiedRoles.add("FARMER"); });
+            farmerRepo.findByUser(userDetails).ifPresent(f -> { 
+                if (f.getStatus() == VerificationStatus.VERIFIED) verifiedRoles.add("FARMER"); 
+                else {
+                    String msg = f.getStatus() == VerificationStatus.BLOCKED ? "Your Farmer account has been BLOCKED. Reason: " : "Under verification (" + f.getStatus().name() + "). ";
+                    statusMessages.put("FARMER", f.getStatusMessage() != null ? (f.getStatus() == VerificationStatus.BLOCKED ? "Your account is BLOCKED: " + f.getStatusMessage() : f.getStatusMessage()) : msg);
+                }
+            });
         }
         if (roles.contains("BUYER")) {
-            buyerRepo.findByUser(userDetails).ifPresent(b -> { if (b.isVerified()) verifiedRoles.add("BUYER"); });
+            buyerRepo.findByUser(userDetails).ifPresent(b -> { 
+                if (b.getStatus() == VerificationStatus.VERIFIED) verifiedRoles.add("BUYER"); 
+                else {
+                    String msg = b.getStatus() == VerificationStatus.BLOCKED ? "Your Buyer account has been BLOCKED. Reason: " : "Under verification (" + b.getStatus().name() + "). ";
+                    statusMessages.put("BUYER", b.getStatusMessage() != null ? (b.getStatus() == VerificationStatus.BLOCKED ? "Your account is BLOCKED: " + b.getStatusMessage() : b.getStatusMessage()) : msg);
+                }
+            });
         }
         if (roles.contains("DELIVERY")) {
-            deliveryRepo.findByUser(userDetails).ifPresent(d -> { if (d.isVerified()) verifiedRoles.add("DELIVERY"); });
+            deliveryRepo.findByUser(userDetails).ifPresent(d -> { 
+                if (d.getStatus() == VerificationStatus.VERIFIED) verifiedRoles.add("DELIVERY"); 
+                else {
+                    String msg = d.getStatus() == VerificationStatus.BLOCKED ? "Your Linker account has been BLOCKED. Reason: " : "Under verification (" + d.getStatus().name() + "). ";
+                    statusMessages.put("DELIVERY", d.getStatusMessage() != null ? (d.getStatus() == VerificationStatus.BLOCKED ? "Your account is BLOCKED: " + d.getStatusMessage() : d.getStatusMessage()) : msg);
+                }
+            });
         }
 
-        JwtResponse jwtResponse = new JwtResponse(null, userDetails.getUsername(), userDetails.getFullName(), userDetails.getEmail(), roles, verifiedRoles);
+        JwtResponse jwtResponse = new JwtResponse(null, userDetails.getUsername(), userDetails.getFullName(), userDetails.getEmail(), roles, verifiedRoles, statusMessages, userDetails.getPhoneNumber(), userDetails.getProfileUrl(), userDetails.getDescription());
         return ServerResponse.successObjectResponse("User details fetched successfully", HttpStatus.OK, jwtResponse);
+    }
+
+    public ServerResponse updateProfile(String username, String firstName, String lastName, String phoneNumber, String description, String newUsername, MultipartFile profileImage) {
+        UserEntity user = userRepo.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        
+        if (newUsername != null && !newUsername.isEmpty() && !newUsername.equals(user.getUsername())) {
+             if (userRepo.existsByUsername(newUsername)) {
+                 return ServerResponse.failureResponse("Username already taken", HttpStatus.BAD_REQUEST);
+             }
+             user.setUsername(newUsername);
+        }
+        
+        if (firstName != null && !firstName.isEmpty()) {
+            String updatedFullName = firstName;
+            if (lastName != null && !lastName.isEmpty()) {
+                updatedFullName += " " + lastName;
+            } else {
+                // Keep original last name or just leave single first name
+                String[] parts = user.getFullName().split(" ");
+                if (parts.length > 1) {
+                    updatedFullName += " " + parts[1];
+                }
+            }
+            user.setFullName(updatedFullName);
+        } else if (lastName != null && !lastName.isEmpty()) {
+            String[] parts = user.getFullName().split(" ");
+            if (parts.length > 0) {
+                user.setFullName(parts[0] + " " + lastName);
+            } else {
+                user.setFullName(lastName);
+            }
+        }
+        
+        if (phoneNumber != null && !phoneNumber.isEmpty()) {
+            user.setPhoneNumber(phoneNumber);
+        }
+        if (description != null) {
+            user.setDescription(description);
+        }
+        if (profileImage != null && !profileImage.isEmpty()) {
+            String url = cloudinaryService.uploadFile(profileImage);
+            user.setProfileUrl(url);
+        }
+        userRepo.save(user);
+
+        List<String> roles = user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
+        List<String> verifiedRoles = new java.util.ArrayList<>();
+        Map<String, String> statusMessages = new HashMap<>();
+
+        if (roles.contains("FARMER")) {
+            farmerRepo.findByUser(user).ifPresent(f -> {
+                if (f.getStatus() == VerificationStatus.VERIFIED) verifiedRoles.add("FARMER");
+                else {
+                    String msg = f.getStatus() == VerificationStatus.BLOCKED ? "Your account is BLOCKED." : "Under verification.";
+                    statusMessages.put("FARMER", f.getStatusMessage() != null ? (f.getStatus() == VerificationStatus.BLOCKED ? "Your account is BLOCKED: " + f.getStatusMessage() : f.getStatusMessage()) : msg);
+                }
+            });
+        }
+        if (roles.contains("BUYER")) {
+            buyerRepo.findByUser(user).ifPresent(b -> {
+                if (b.getStatus() == VerificationStatus.VERIFIED) verifiedRoles.add("BUYER");
+                else {
+                    String msg = b.getStatus() == VerificationStatus.BLOCKED ? "Your account is BLOCKED." : "Under verification.";
+                    statusMessages.put("BUYER", b.getStatusMessage() != null ? (b.getStatus() == VerificationStatus.BLOCKED ? "Your account is BLOCKED: " + b.getStatusMessage() : b.getStatusMessage()) : msg);
+                }
+            });
+        }
+        if (roles.contains("DELIVERY")) {
+            deliveryRepo.findByUser(user).ifPresent(d -> {
+                if (d.getStatus() == VerificationStatus.VERIFIED) verifiedRoles.add("DELIVERY");
+                else {
+                    String msg = d.getStatus() == VerificationStatus.BLOCKED ? "Your account is BLOCKED." : "Under verification.";
+                    statusMessages.put("DELIVERY", d.getStatusMessage() != null ? (d.getStatus() == VerificationStatus.BLOCKED ? "Your account is BLOCKED: " + d.getStatusMessage() : d.getStatusMessage()) : msg);
+                }
+            });
+        }
+
+        JwtResponse jwtResponse = new JwtResponse(null, user.getUsername(), user.getFullName(), user.getEmail(), roles, verifiedRoles, statusMessages, user.getPhoneNumber(), user.getProfileUrl(), user.getDescription());
+        return ServerResponse.successObjectResponse("Profile updated successfully", HttpStatus.OK, jwtResponse);
+    }
+
+    public ServerResponse updatePassword(PasswordUpdateRequest request) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity user = userRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            return ServerResponse.failureResponse("Incorrect current password.", HttpStatus.BAD_REQUEST);
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepo.save(user);
+        return ServerResponse.successResponse("Password updated successfully", HttpStatus.OK);
     }
 }

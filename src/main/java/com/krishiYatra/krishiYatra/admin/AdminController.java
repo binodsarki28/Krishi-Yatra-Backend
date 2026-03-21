@@ -2,6 +2,7 @@ package com.krishiYatra.krishiYatra.admin;
 
 import com.krishiYatra.krishiYatra.admin.dto.AdminStatsResponse;
 import com.krishiYatra.krishiYatra.buyer.BuyerRepo;
+import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
 import com.krishiYatra.krishiYatra.delivery.DeliveryRepo;
 import com.krishiYatra.krishiYatra.farmer.FarmerRepo;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,9 +33,9 @@ public class AdminController {
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<AdminStatsResponse> getStats() {
         AdminStatsResponse stats = new AdminStatsResponse();
-        stats.setPendingFarmers(farmerRepo.countByVerifiedFalse());
-        stats.setPendingBuyers(buyerRepo.countByVerifiedFalse());
-        stats.setPendingDelivery(deliveryRepo.countByVerifiedFalse());
+        stats.setPendingFarmers(farmerRepo.countByStatus(VerificationStatus.PENDING));
+        stats.setPendingBuyers(buyerRepo.countByStatus(VerificationStatus.PENDING));
+        stats.setPendingDelivery(deliveryRepo.countByStatus(VerificationStatus.PENDING));
         return ResponseEntity.ok(stats);
     }
 }

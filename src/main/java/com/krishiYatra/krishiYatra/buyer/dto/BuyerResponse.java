@@ -3,6 +3,7 @@ package com.krishiYatra.krishiYatra.buyer.dto;
 import com.krishiYatra.krishiYatra.common.enums.ConsumerType;
 import lombok.Getter;
 import lombok.Setter;
+import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
 
 @Getter
 @Setter
@@ -11,7 +12,7 @@ public class BuyerResponse {
     private ConsumerType consumerType;
     private String businessName;
     private String businessLocation;
-    private boolean isVerified;
+    private VerificationStatus status;
     private boolean isActive;
     private String fullName;
     private String username;

@@ -71,18 +71,14 @@ public class DeliveryService {
                 .orElseThrow(() -> new RuntimeException(DeliveryConst.REGISTRATION_NOT_FOUND));
 
         if (request.getApproved()) {
-            delivery.setVerified(true);
+            delivery.setStatus(com.krishiYatra.krishiYatra.common.enums.VerificationStatus.VERIFIED);
             deliveryRepo.save(delivery);
             return ServerResponse.successResponse(DeliveryConst.VERIFICATION_SUCCESS, HttpStatus.OK);
         } else {
-            UserEntity user = delivery.getUser();
-            deliveryRepo.delete(delivery);
+            delivery.setStatus(com.krishiYatra.krishiYatra.common.enums.VerificationStatus.REJECTED);
+            delivery.setStatusMessage(request.getReason());
+            deliveryRepo.save(delivery);
             
-            roleRepo.findByRoleName(RoleType.DELIVERY).ifPresent(role -> {
-                user.getRoles().remove(role);
-                userRepo.save(user);
-            });
-
             String message = DeliveryConst.REJECTION_PREFIX + request.getReason();
             log.info(message);
             return ServerResponse.successResponse(message, HttpStatus.OK);
@@ -90,17 +86,27 @@ public class DeliveryService {
     }
 
     @Transactional
-    public ServerResponse blockUnblockDelivery(String username, boolean block) {
+    public ServerResponse blockUnblockDelivery(String username, boolean block, String reason) {
         DeliveryEntity delivery = deliveryRepo.findByUser_Username(username)
                 .orElseThrow(() -> new RuntimeException(DeliveryConst.REGISTRATION_NOT_FOUND));
+        
+        if (block) {
+            delivery.setStatus(com.krishiYatra.krishiYatra.common.enums.VerificationStatus.BLOCKED);
+            delivery.setStatusMessage(reason);
+        } else {
+            delivery.setStatus(com.krishiYatra.krishiYatra.common.enums.VerificationStatus.VERIFIED);
+            delivery.setStatusMessage(null);
+        }
         
         UserEntity user = delivery.getUser();
         user.setActive(!block);
         userRepo.save(user);
+        deliveryRepo.save(delivery);
         
         String action = block ? "blocked" : "unblocked";
         return ServerResponse.successResponse("Delivery partner " + action + " successfully", HttpStatus.OK);
     }
+
 
     @Transactional(readOnly = true)
     public DeliveryDetailResponse getDeliveryDetail(String username) {

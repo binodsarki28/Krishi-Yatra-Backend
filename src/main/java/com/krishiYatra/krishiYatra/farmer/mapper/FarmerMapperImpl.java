@@ -30,7 +30,7 @@ public class FarmerMapperImpl implements FarmerMapper {
         farmer.setFarmName(request.getFarmName());
         farmer.setFarmLocation(request.getFarmLocation());
         farmer.setFarmArea(request.getFarmArea());
-        farmer.setVerified(false);
+        farmer.setStatus(com.krishiYatra.krishiYatra.common.enums.VerificationStatus.PENDING);
         return farmer;
     }
 
@@ -40,7 +40,7 @@ public class FarmerMapperImpl implements FarmerMapper {
             return null;
         }
         FarmerListResponse response = new FarmerListResponse();
-        response.setVerified(farmer.isVerified());
+        response.setStatus(farmer.getStatus());
 
         if (farmer.getUser() != null) {
             response.setFullName(farmer.getUser().getFullName());
@@ -61,7 +61,7 @@ public class FarmerMapperImpl implements FarmerMapper {
         response.setFarmName(farmer.getFarmName());
         response.setFarmLocation(farmer.getFarmLocation());
         response.setFarmArea(farmer.getFarmArea());
-        response.setVerified(farmer.isVerified());
+        response.setStatus(farmer.getStatus());
         response.setCreatedAt(farmer.getCreatedAt());
 
         if (farmer.getFarmTypes() != null) {

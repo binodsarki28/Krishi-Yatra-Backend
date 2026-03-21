@@ -14,23 +14,54 @@ import java.util.Map;
 @RestController
 @RequestMapping("api/v1/stock")
 @RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class StockController {
 
     private final StockService stockService;
+    private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
     @Operation(summary = "Create stock (Verified Farmer only)")
-    @PostMapping("/create")
+
+    @PostMapping(value = "/create", consumes = { org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE })
     @PreAuthorize("hasAuthority('FARMER')")
-    public ResponseEntity<ServerResponse> createStock(@Valid @RequestBody StockRequestDto requestDto) {
-        ServerResponse response = stockService.createStock(requestDto);
+    public ResponseEntity<ServerResponse> createStock(
+            org.springframework.web.multipart.MultipartHttpServletRequest request) throws Exception {
+        log.info("DIAGNOSTIC - All Part Names: {}", request.getFileMap().keySet());
+        
+        // Manual parse stockData
+        String stockDataJson = new String(request.getFile("stockData").getBytes());
+        StockRequestDto requestDto = objectMapper.readValue(stockDataJson, StockRequestDto.class);
+        
+        java.util.List<org.springframework.web.multipart.MultipartFile> images = new java.util.ArrayList<>();
+        request.getMultiFileMap().forEach((key, list) -> {
+            if (key.toLowerCase().contains("image")) {
+                images.addAll(list);
+            }
+        });
+        System.out.println("DEBUG (Manual Total): Received " + images.size() + " files total");
+        ServerResponse response = stockService.createStock(requestDto, images.toArray(new org.springframework.web.multipart.MultipartFile[0]));
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
 
     @Operation(summary = "Update stock (Verified Farmer owner only, uses slug in body)")
-    @PutMapping("/update")
+    @PutMapping(value = "/update", consumes = { org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE })
     @PreAuthorize("hasAuthority('FARMER')")
-    public ResponseEntity<ServerResponse> updateStock(@Valid @RequestBody StockRequestDto requestDto) {
-        ServerResponse response = stockService.updateStock(requestDto);
+    public ResponseEntity<ServerResponse> updateStock(
+            org.springframework.web.multipart.MultipartHttpServletRequest request) throws Exception {
+        log.info("DIAGNOSTIC - All Part Names: {}", request.getFileMap().keySet());
+        
+        // Manual parse stockData
+        String stockDataJson = new String(request.getFile("stockData").getBytes());
+        StockRequestDto requestDto = objectMapper.readValue(stockDataJson, StockRequestDto.class);
+
+        java.util.List<org.springframework.web.multipart.MultipartFile> images = new java.util.ArrayList<>();
+        request.getMultiFileMap().forEach((key, list) -> {
+            if (key.toLowerCase().contains("image")) {
+                images.addAll(list);
+            }
+        });
+        System.out.println("DEBUG (Manual Total): Received " + images.size() + " files total");
+        ServerResponse response = stockService.updateStock(requestDto, images.toArray(new org.springframework.web.multipart.MultipartFile[0]));
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
 
@@ -99,6 +130,13 @@ public class StockController {
     @GetMapping("/subcategories")
     public ResponseEntity<ServerResponse> getSubCategories(@RequestParam(required = false) String categoryId) {
         ServerResponse response = stockService.getSubCategories(categoryId);
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+    @Operation(summary = "Adjust stock quantity (increment/decrement)")
+    @PutMapping("/adjust")
+    @PreAuthorize("hasAuthority('FARMER')")
+    public ResponseEntity<ServerResponse> adjustStockQuantity(@RequestParam String slug, @RequestParam Double amount) {
+        ServerResponse response = stockService.adjustStockQuantity(slug, amount);
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
 }

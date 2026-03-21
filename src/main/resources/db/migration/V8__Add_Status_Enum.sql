@@ -1,0 +1,2 @@
+-- This migration is replaced by updates to the original CREATE TABLE scripts (V3, V4, V5).
+-- We empty this file to avoid duplicate column errors if someone runs it from scratch.
