@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
 
 @Getter
 @Setter
@@ -16,8 +17,8 @@ public class FarmerListResponse {
     private String farmTypes;
     private String farmLocation;
     
-    @JsonProperty("isVerified")
-    private boolean isVerified;
+    @JsonProperty("status")
+    private VerificationStatus status;
     
     @JsonProperty("isActive")
     private boolean isActive;

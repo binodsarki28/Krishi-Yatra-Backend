@@ -22,6 +22,7 @@ public class CategoryEntity extends Auditable {
     @Column(name = "CATEGORY_NAME", unique = true)
     private String categoryName;
 
-    @OneToOne(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    private SubCategoryEntity subCategory;
+    @com.fasterxml.jackson.annotation.JsonManagedReference
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<SubCategoryEntity> subCategories;
 }

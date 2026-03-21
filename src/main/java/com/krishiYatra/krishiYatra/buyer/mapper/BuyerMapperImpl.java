@@ -18,7 +18,7 @@ public class BuyerMapperImpl implements BuyerMapper {
         buyer.setConsumerType(request.getConsumerType());
         buyer.setBusinessName(request.getBusinessName());
         buyer.setBusinessLocation(request.getBusinessLocation());
-        buyer.setVerified(false);
+        buyer.setStatus(com.krishiYatra.krishiYatra.common.enums.VerificationStatus.PENDING);
         return buyer;
     }
 
@@ -28,7 +28,7 @@ public class BuyerMapperImpl implements BuyerMapper {
             return null;
         }
         BuyerListResponse response = new BuyerListResponse();
-        response.setVerified(buyer.isVerified());
+        response.setStatus(buyer.getStatus());
 
         if (buyer.getUser() != null) {
             response.setFullName(buyer.getUser().getFullName());
@@ -49,7 +49,7 @@ public class BuyerMapperImpl implements BuyerMapper {
         response.setConsumerType(buyer.getConsumerType());
         response.setBusinessName(buyer.getBusinessName());
         response.setBusinessLocation(buyer.getBusinessLocation());
-        response.setVerified(buyer.isVerified());
+        response.setStatus(buyer.getStatus());
         response.setCreatedAt(buyer.getCreatedAt());
 
         if (buyer.getUser() != null) {

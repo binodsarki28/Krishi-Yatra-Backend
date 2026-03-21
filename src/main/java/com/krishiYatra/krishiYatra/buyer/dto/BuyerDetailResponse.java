@@ -13,7 +13,7 @@ public class BuyerDetailResponse {
     private ConsumerType consumerType;
     private String businessName;
     private String businessLocation;
-    private boolean verified;
+    private com.krishiYatra.krishiYatra.common.enums.VerificationStatus status;
     private String fullName;
     private String email;
     private String phoneNumber;

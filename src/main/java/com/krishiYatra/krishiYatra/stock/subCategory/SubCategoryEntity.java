@@ -22,7 +22,8 @@ public class SubCategoryEntity extends Auditable {
     @Column(name = "SUB_CATEGORY_NAME", unique = true)
     private String subCategoryName;
 
-    @OneToOne
-    @JoinColumn(name = "CATEGORY_GUID", referencedColumnName = "CATEGORY_GUID", unique = true)
+    @com.fasterxml.jackson.annotation.JsonBackReference
+    @ManyToOne
+    @JoinColumn(name = "CATEGORY_GUID", referencedColumnName = "CATEGORY_GUID", nullable = false)
     private CategoryEntity category;
 }

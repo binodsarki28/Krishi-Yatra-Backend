@@ -47,7 +47,7 @@ public class BuyerDaoImpl implements IBuyerDao {
                 userJoin.get("username"),
                 root.get("consumerType"),
                 root.get("businessLocation"),
-                root.get("verified"),
+                root.get("status"),
                 userJoin.get("isActive")
             ));
             
@@ -80,9 +80,13 @@ public class BuyerDaoImpl implements IBuyerDao {
                 predicates.add(cb.equal(cb.literal(1), cb.literal(0)));
             }
         }
-        if (params.containsKey("verified")) {
-            boolean isVerified = Boolean.parseBoolean(params.get("verified"));
-            predicates.add(cb.equal(root.get("verified"), isVerified));
+        if (params.containsKey("status")) {
+            try {
+                com.krishiYatra.krishiYatra.common.enums.VerificationStatus stat = com.krishiYatra.krishiYatra.common.enums.VerificationStatus.valueOf(params.get("status").toUpperCase());
+                predicates.add(cb.equal(root.get("status"), stat));
+            } catch (IllegalArgumentException e) {
+                // Ignore invalid status
+            }
         }
         if (params.containsKey("fullName")) {
             String fullName = params.get("fullName").toLowerCase();

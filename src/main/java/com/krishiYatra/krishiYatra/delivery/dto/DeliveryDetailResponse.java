@@ -15,7 +15,7 @@ public class DeliveryDetailResponse {
     private String licenseNumber;
     private String vehiclePhoto;
     private String licensePhoto;
-    private boolean verified;
+    private com.krishiYatra.krishiYatra.common.enums.VerificationStatus status;
     private String fullName;
     private String email;
     private String phoneNumber;

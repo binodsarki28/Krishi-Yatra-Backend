@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
 
 @Entity
 @Table(name = "BUYERS")
@@ -30,8 +31,12 @@ public class BuyerEntity extends Auditable {
     @Column(name = "BUSINESS_LOCATION")
     private String businessLocation;
 
-    @Column(name = "IS_VERIFIED")
-    private boolean verified;
+    @Column(name = "STATUS")
+    @Enumerated(EnumType.STRING)
+    private VerificationStatus status = VerificationStatus.PENDING;
+    
+    @Column(name = "STATUS_MESSAGE", length = 500)
+    private String statusMessage;
 
     @OneToOne
     @JoinColumn(name = "USER_GUID", nullable = false, unique = true)

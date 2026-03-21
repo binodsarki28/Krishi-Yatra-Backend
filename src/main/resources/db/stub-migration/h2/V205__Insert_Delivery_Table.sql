@@ -6,9 +6,9 @@ SELECT '550e8400-e29b-41d4-a716-446655440099', ROLE_GUID
 FROM ROLES WHERE ROLE_NAME = 'DELIVERY';
 
 -- Insert delivery record
-INSERT INTO DELIVERY (DELIVERY_GUID, VEHICLE_TYPE, VEHICLE_BRAND, NUMBER_PLATE, LICENSE_NUMBER, IS_VERIFIED, USER_GUID, CREATED_TIME, CREATED_USER, MODIFIED_TIME, MODIFIED_USER)
+INSERT INTO DELIVERY (DELIVERY_GUID, VEHICLE_TYPE, VEHICLE_BRAND, NUMBER_PLATE, LICENSE_NUMBER, STATUS, USER_GUID, CREATED_TIME, CREATED_USER, MODIFIED_TIME, MODIFIED_USER)
 VALUES ('d0000000-0000-0000-0000-000000000001', 'VAN', 'Tata Ace', 'BA 1 KA 2345', 'DL-12345678',
-        FALSE, '550e8400-e29b-41d4-a716-446655440099', CURRENT_TIMESTAMP, 'system', CURRENT_TIMESTAMP, 'system');
+        'PENDING', '550e8400-e29b-41d4-a716-446655440099', CURRENT_TIMESTAMP, 'system', CURRENT_TIMESTAMP, 'system');
 
 -- Dummy Delivery Partners (15)
 -- Role assignments
@@ -29,19 +29,19 @@ INSERT INTO USER_ROLES (USER_GUID, ROLE_GUID) SELECT 'u_d_14', ROLE_GUID FROM RO
 INSERT INTO USER_ROLES (USER_GUID, ROLE_GUID) SELECT 'u_d_15', ROLE_GUID FROM ROLES WHERE ROLE_NAME = 'DELIVERY';
 
 -- Delivery Records
-INSERT INTO DELIVERY (DELIVERY_GUID, VEHICLE_TYPE, VEHICLE_BRAND, NUMBER_PLATE, LICENSE_NUMBER, IS_VERIFIED, USER_GUID) VALUES
-('d_id_01', 'TRUCK', 'Tata', 'BA 2 PA 1234', '12-34-5678', TRUE, 'u_d_01'),
-('d_id_02', 'PICKUP', 'Toyota', 'BA 3 PA 5678', '87-65-4321', FALSE, 'u_d_02'),
-('d_id_03', 'VAN', 'Mahindra', 'BA 1 CHA 9012', '10-20-3040', TRUE, 'u_d_03'),
-('d_id_04', 'TRUCK', 'Ashok Leyland', 'LU 2 KH 4455', '55-44-3322', FALSE, 'u_d_04'),
-('d_id_05', 'MOTORCYCLE', 'Honda', 'BA 55 PA 6789', '99-88-7766', TRUE, 'u_d_05'),
-('d_id_06', 'VAN', 'Suzuki', 'BA 2 CHA 1122', '11-22-3344', FALSE, 'u_d_06'),
-('d_id_07', 'PICKUP', 'Isuzu', 'ME 1 CHA 3344', '33-44-5566', TRUE, 'u_d_07'),
-('d_id_08', 'TRUCK', 'Eicher', 'BA 4 KH 7788', '77-88-9900', FALSE, 'u_d_08'),
-('d_id_09', 'MOTORCYCLE', 'Yamaha', 'BA 60 PA 1122', '22-33-4455', TRUE, 'u_d_09'),
-('d_id_10', 'VAN', 'Force', 'BA 3 CHA 5566', '55-66-7788', FALSE, 'u_d_10'),
-('d_id_11', 'PICKUP', 'Ford', 'BA 1 CHA 7788', '88-77-6655', TRUE, 'u_d_11'),
-('d_id_12', 'TRUCK', 'Tata', 'BA 2 KH 9900', '99-00-1122', FALSE, 'u_d_12'),
-('d_id_13', 'VAN', 'Changan', 'BA 1 CHA 2233', '22-33-4411', TRUE, 'u_d_13'),
-('d_id_14', 'PICKUP', 'Nissan', 'BA 4 CHA 5566', '66-55-4433', FALSE, 'u_d_14'),
-('d_id_15', 'TRUCK', 'Volvo', 'BA 1 KH 8899', '88-99-7766', TRUE, 'u_d_15');
+INSERT INTO DELIVERY (DELIVERY_GUID, VEHICLE_TYPE, VEHICLE_BRAND, NUMBER_PLATE, LICENSE_NUMBER, STATUS, USER_GUID) VALUES
+('d_id_01', 'TRUCK', 'Tata', 'BA 2 PA 1234', '12-34-5678', 'VERIFIED', 'u_d_01'),
+('d_id_02', 'PICKUP', 'Toyota', 'BA 3 PA 5678', '87-65-4321', 'PENDING', 'u_d_02'),
+('d_id_03', 'VAN', 'Mahindra', 'BA 1 CHA 9012', '10-20-3040', 'VERIFIED', 'u_d_03'),
+('d_id_04', 'TRUCK', 'Ashok Leyland', 'LU 2 KH 4455', '55-44-3322', 'PENDING', 'u_d_04'),
+('d_id_05', 'MOTORCYCLE', 'Honda', 'BA 55 PA 6789', '99-88-7766', 'VERIFIED', 'u_d_05'),
+('d_id_06', 'VAN', 'Suzuki', 'BA 2 CHA 1122', '11-22-3344', 'PENDING', 'u_d_06'),
+('d_id_07', 'PICKUP', 'Isuzu', 'ME 1 CHA 3344', '33-44-5566', 'VERIFIED', 'u_d_07'),
+('d_id_08', 'TRUCK', 'Eicher', 'BA 4 KH 7788', '77-88-9900', 'PENDING', 'u_d_08'),
+('d_id_09', 'MOTORCYCLE', 'Yamaha', 'BA 60 PA 1122', '22-33-4455', 'VERIFIED', 'u_d_09'),
+('d_id_10', 'VAN', 'Force', 'BA 3 CHA 5566', '55-66-7788', 'PENDING', 'u_d_10'),
+('d_id_11', 'PICKUP', 'Ford', 'BA 1 CHA 7788', '88-77-6655', 'VERIFIED', 'u_d_11'),
+('d_id_12', 'TRUCK', 'Tata', 'BA 2 KH 9900', '99-00-1122', 'PENDING', 'u_d_12'),
+('d_id_13', 'VAN', 'Changan', 'BA 1 CHA 2233', '22-33-4411', 'VERIFIED', 'u_d_13'),
+('d_id_14', 'PICKUP', 'Nissan', 'BA 4 CHA 5566', '66-55-4433', 'PENDING', 'u_d_14'),
+('d_id_15', 'TRUCK', 'Volvo', 'BA 1 KH 8899', '88-99-7766', 'VERIFIED', 'u_d_15');

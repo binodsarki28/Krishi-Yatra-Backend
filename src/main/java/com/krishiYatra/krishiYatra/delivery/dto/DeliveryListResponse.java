@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
 
 @Getter
 @Setter
@@ -15,10 +16,10 @@ public class DeliveryListResponse {
     private String fullName;
     private String username;
     private VehicleType vehicleType;
-    private String licenseNumber;
+    private String vehicleBrand;
     
-    @JsonProperty("isVerified")
-    private boolean isVerified;
+    @JsonProperty("status")
+    private VerificationStatus status;
     
     @JsonProperty("isActive")
     private boolean isActive;

@@ -65,8 +65,8 @@ public class DeliveryController {
 
     @PostMapping("/block-unblock/{username}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<ServerResponse> blockUnblockDelivery(@PathVariable String username, @RequestParam boolean block) {
-        return new ResponseEntity<>(deliveryService.blockUnblockDelivery(username, block), HttpStatus.OK);
+    public ResponseEntity<ServerResponse> blockUnblockDelivery(@PathVariable String username, @RequestParam boolean block, @RequestParam(required = false) String reason) {
+        return new ResponseEntity<>(deliveryService.blockUnblockDelivery(username, block, reason), HttpStatus.OK);
     }
 
     @GetMapping("/detail/{username}")

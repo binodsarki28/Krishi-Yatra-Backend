@@ -44,6 +44,11 @@ public class UserEntity extends Auditable implements UserDetails {
     @Column(name = "PHONE_NUMBER")
     private String phoneNumber;
 
+    @Column(name = "PROFILE_URL", length = 255)
+    private String profileUrl;
+
+    @Column(name = "DESCRIPTION", length = 800)
+    private String description;
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",

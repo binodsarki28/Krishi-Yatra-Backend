@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
 
 @Getter
 @Setter
@@ -17,8 +18,8 @@ public class BuyerListResponse {
     private ConsumerType consumerType;
     private String businessLocation;
     
-    @JsonProperty("isVerified")
-    private boolean isVerified;
+    @JsonProperty("status")
+    private VerificationStatus status;
     
     @JsonProperty("isActive")
     private boolean isActive;
