@@ -1,4 +1,84 @@
 package com.krishiYatra.krishiYatra.order;
 
+import com.krishiYatra.krishiYatra.common.response.ServerResponse;
+import com.krishiYatra.krishiYatra.order.dto.OrderCreateRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import java.util.List;
+import java.util.Map;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/v1/order")
+@RequiredArgsConstructor
 public class OrderController {
+    private final OrderService orderService;
+
+    @Operation(summary = "Create order (Buyer only)")
+    @PostMapping("/create")
+    @PreAuthorize("hasAuthority('BUYER')")
+    public ResponseEntity<ServerResponse> createOrder(@Valid @RequestBody OrderCreateRequest request) {
+        ServerResponse response = orderService.createOrder(request);
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
+    @Operation(summary = "Delivery accepts an order")
+    @PostMapping("/delivery/accept/{orderId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ServerResponse> acceptOrderByDelivery(@PathVariable String orderId) {
+        ServerResponse response = orderService.acceptOrderByDelivery(orderId);
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
+    @Operation(summary = "Get all pending orders available for delivery")
+    @GetMapping("/pending")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ServerResponse> getPendingOrders() {
+        ServerResponse response = orderService.getPendingOrders();
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
+    @Operation(summary = "Get farmer address for a stock")
+    @GetMapping("/farmer-address/{stockSlug}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ServerResponse> getFarmerAddress(@PathVariable String stockSlug) {
+        ServerResponse response = orderService.getFarmerAddressByStockSlug(stockSlug);
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
+    @Operation(summary = "Get order details by ID")
+    @GetMapping("/detail/{orderId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ServerResponse> getOrderDetails(@PathVariable String orderId) {
+        ServerResponse response = orderService.getOrderById(orderId);
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
+    @Operation(summary = "Update order checkpoints")
+    @PostMapping("/update-checkpoints/{orderId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ServerResponse> updateCheckpoints(@PathVariable String orderId, @RequestBody Map<String, String> body) {
+        String checkpoints = body.getOrDefault("checkpoints", "");
+        ServerResponse response = orderService.updateOrderCheckpoints(orderId, checkpoints);
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
+    @Operation(summary = "Mark order as delivered")
+    @PostMapping("/mark-as-delivered/{orderId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ServerResponse> markAsDelivered(@PathVariable String orderId) {
+        ServerResponse response = orderService.markOrderAsDelivered(orderId);
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
+    @Operation(summary = "Get all orders accepted by current delivery linker")
+    @GetMapping("/linker/accepted")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ServerResponse> getMyAcceptedOrders() {
+        ServerResponse response = orderService.getMyAcceptedOrders();
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
 }
