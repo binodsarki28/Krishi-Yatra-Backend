@@ -28,17 +28,11 @@ public class AddressEntity extends Auditable {
     @Column(name = "MUNICIPALITY")
     private String municipality;
 
-    @Column(name = "CITY")
-    private String city;
-
     @Column(name = "WARD_NO")
-    private String wardNo;
+    private int wardNo;
 
     @Column(name = "STREET_NAME")
     private String streetName;
-
-    @Column(name = "OTHER")
-    private String other;
 
     @OneToOne
     @JoinColumn(name = "USER_GUID", referencedColumnName = "USER_GUID", unique = true)

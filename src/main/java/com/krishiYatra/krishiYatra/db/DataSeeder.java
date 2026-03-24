@@ -132,8 +132,7 @@ public class DataSeeder implements CommandLineRunner {
                 address.setProvince("Bagmati Province");
                 address.setDistrict("Kathmandu");
                 address.setMunicipality("Kathmandu Metropolitan City");
-                address.setWardNo("1");
-                address.setOther("Baneshwor");
+                address.setWardNo(1);
                 addressRepo.save(address);
             }
         });
@@ -182,8 +181,7 @@ public class DataSeeder implements CommandLineRunner {
                 address.setProvince("Bagmati Province");
                 address.setDistrict("Chitwan");
                 address.setMunicipality("Bharatpur Metropolitan City");
-                address.setWardNo("10");
-                address.setOther("Madi-10");
+                address.setWardNo(10);
                 addressRepo.save(address);
             }
         });

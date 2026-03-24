@@ -17,6 +17,16 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
     private final OrderService orderService;
 
+    @Operation(summary = "Get list of orders dynamically mapped to current user")
+    @GetMapping("/list")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ServerResponse> getOrders(
+            @RequestParam Map<String, String> requestParams,
+            org.springframework.data.domain.Pageable pageable) {
+        ServerResponse response = orderService.getOrders(requestParams, pageable);
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
     @Operation(summary = "Create order (Buyer only)")
     @PostMapping("/create")
     @PreAuthorize("hasAuthority('BUYER')")

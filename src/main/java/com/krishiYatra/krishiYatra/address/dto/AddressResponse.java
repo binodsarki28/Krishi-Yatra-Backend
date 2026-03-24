@@ -8,13 +8,10 @@ import lombok.Setter;
 @Setter
 @Builder
 public class AddressResponse {
-    private String addressId;
     private String province;
     private String district;
     private String municipality;
-    private String city;
-    private String wardNo;
+    private int wardNo;
     private String streetName;
-    private String other;
     private String fullAddress;
 }

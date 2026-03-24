@@ -22,5 +22,14 @@ public class OrderResponse {
     private String vehicleType;
     private String checkpoints;
     private String notes;
+    
+    // Additional Participant Fields
+    private String farmerName;
+    private String farmerPhone;
+    private String buyerName;
+    private String buyerPhone;
+    private String deliveryName;
+    private String deliveryPhone;
+
     private LocalDateTime createdAt;
 }

@@ -30,4 +30,47 @@ public class OrderMapperImpl implements OrderMapper {
         entity.setDeliveryFee(request.getDeliveryFee());
         return entity;
     }
+
+    @Override
+    public com.krishiYatra.krishiYatra.order.dto.OrderResponse toResponse(OrderEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        com.krishiYatra.krishiYatra.order.dto.OrderResponse response = new com.krishiYatra.krishiYatra.order.dto.OrderResponse();
+        response.setOrderId(entity.getOrderId());
+        StockEntity stock = entity.getStock();
+        if (stock != null) {
+            response.setStockSlug(stock.getStockSlug());
+            response.setProductName(stock.getProductName());
+        }
+        response.setOrderQuantity(entity.getOrderQuantity());
+        response.setPerUnitPrice(entity.getPerUnitPrice());
+        response.setTotalPrice(entity.getTotalPrice());
+        response.setOrderStatus(entity.getOrderStatus());
+        response.setPickupAddress(entity.getPickupAddress());
+        response.setDropAddress(entity.getDropAddress());
+        response.setDeliveryFee(entity.getDeliveryFee());
+        response.setVehicleType(entity.getVehicleType());
+        response.setCheckpoints(entity.getCheckpoints());
+        response.setNotes(entity.getNotes());
+        response.setCreatedAt(entity.getCreatedAt());
+
+        if (entity.getFarmer() != null && entity.getFarmer().getUser() != null) {
+            response.setFarmerName(entity.getFarmer().getUser().getFullName());
+            response.setFarmerPhone(entity.getFarmer().getUser().getPhoneNumber());
+        }
+
+        if (entity.getBuyer() != null && entity.getBuyer().getUser() != null) {
+            response.setBuyerName(entity.getBuyer().getUser().getFullName());
+            response.setBuyerPhone(entity.getBuyer().getUser().getPhoneNumber());
+        }
+
+        if (entity.getDelivery() != null && entity.getDelivery().getUser() != null) {
+            response.setDeliveryName(entity.getDelivery().getUser().getFullName());
+            response.setDeliveryPhone(entity.getDelivery().getUser().getPhoneNumber());
+        }
+
+        return response;
+    }
 }

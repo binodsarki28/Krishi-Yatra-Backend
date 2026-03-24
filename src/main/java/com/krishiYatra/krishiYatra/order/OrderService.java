@@ -36,6 +36,7 @@ public class OrderService {
     private final DeliveryRepo deliveryRepo;
     private final OrderMapper orderMapper;
     private final AddressService addressService;
+    private final com.krishiYatra.krishiYatra.order.dao.IOrderDao orderDao;
 
     @Transactional
     public ServerResponse createOrder(OrderCreateRequest request) {
@@ -250,5 +251,24 @@ public class OrderService {
                 .collect(Collectors.toList());
 
         return ServerResponse.successObjectResponse("Fetched accepted orders", HttpStatus.OK, responses, responses.size());
+    }
+
+    public ServerResponse getOrders(java.util.Map<String, String> requestParams, org.springframework.data.domain.Pageable pageable) {
+        UserEntity currentUser = UserUtil.getCurrentUser();
+        if (currentUser != null) {
+            boolean isAdmin = currentUser.getRoles().stream().anyMatch(r -> r.getRoleName().name().equals("ADMIN"));
+            if (!isAdmin) {
+                if (currentUser.getRoles().stream().anyMatch(r -> r.getRoleName() == com.krishiYatra.krishiYatra.common.enums.RoleType.FARMER)) {
+                    requestParams.put("filterFarmerUserId", currentUser.getUserId());
+                } else if (currentUser.getRoles().stream().anyMatch(r -> r.getRoleName() == com.krishiYatra.krishiYatra.common.enums.RoleType.DELIVERY)) {
+                    requestParams.put("filterDeliveryUserId", currentUser.getUserId());
+                } else if (currentUser.getRoles().stream().anyMatch(r -> r.getRoleName() == com.krishiYatra.krishiYatra.common.enums.RoleType.BUYER)) {
+                    requestParams.put("filterBuyerUserId", currentUser.getUserId());
+                }
+            }
+        }
+
+        java.util.List<OrderResponse> orders = orderDao.getAllOrders(requestParams, pageable);
+        return ServerResponse.successObjectResponse("Orders fetched successfully.", HttpStatus.OK, orders);
     }
 }

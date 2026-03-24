@@ -5,6 +5,7 @@ import com.krishiYatra.krishiYatra.stock.dto.StockRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,18 @@ public class StockController {
         log.info("DIAGNOSTIC - All Part Names: {}", request.getFileMap().keySet());
         
         // Manual parse stockData
-        String stockDataJson = new String(request.getFile("stockData").getBytes());
+        String stockDataJson;
+        if (request.getFile("stockData") != null) {
+            stockDataJson = new String(request.getFile("stockData").getBytes());
+        } else {
+            stockDataJson = request.getParameter("stockData");
+        }
+        
+        if (stockDataJson == null || stockDataJson.isEmpty()) {
+            return new ResponseEntity<>(ServerResponse.failureResponse("Stock data is missing in the request", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+        
+        System.out.println("StockController handles create request. Raw JSON: " + stockDataJson);
         StockRequestDto requestDto = objectMapper.readValue(stockDataJson, StockRequestDto.class);
         
         java.util.List<org.springframework.web.multipart.MultipartFile> images = new java.util.ArrayList<>();
@@ -51,7 +63,17 @@ public class StockController {
         log.info("DIAGNOSTIC - All Part Names: {}", request.getFileMap().keySet());
         
         // Manual parse stockData
-        String stockDataJson = new String(request.getFile("stockData").getBytes());
+        String stockDataJson;
+        if (request.getFile("stockData") != null) {
+            stockDataJson = new String(request.getFile("stockData").getBytes());
+        } else {
+            stockDataJson = request.getParameter("stockData");
+        }
+        
+        if (stockDataJson == null || stockDataJson.isEmpty()) {
+            return new ResponseEntity<>(ServerResponse.failureResponse("Stock data is missing in the request", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+        
         StockRequestDto requestDto = objectMapper.readValue(stockDataJson, StockRequestDto.class);
 
         java.util.List<org.springframework.web.multipart.MultipartFile> images = new java.util.ArrayList<>();

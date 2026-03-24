@@ -36,7 +36,13 @@ public class GlobalExceptionHandler {
     
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ServerResponse> handleGeneralException(Exception ex) {
-        ServerResponse response = ServerResponse.failureResponse(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        System.err.println("ANTIGRAVITY ERROR CAUGHT in GlobalHandler: " + ex.getClass().getName());
+        ex.printStackTrace(); // Log the exact error
+        String errMsg = ex.getMessage();
+        if (errMsg == null || errMsg.isEmpty()) {
+            errMsg = "Internal Server Error: " + ex.getClass().getSimpleName();
+        }
+        ServerResponse response = ServerResponse.failureResponse(errMsg, HttpStatus.INTERNAL_SERVER_ERROR);
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

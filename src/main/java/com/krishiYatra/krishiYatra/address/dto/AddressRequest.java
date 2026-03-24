@@ -1,6 +1,8 @@
 package com.krishiYatra.krishiYatra.address.dto;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,11 +18,8 @@ public class AddressRequest {
     @NotBlank(message = "Municipality is required")
     private String municipality;
 
-    private String city;
-
-    private String wardNo;
+    @NotNull(message = "Ward No is required")
+    @Min(value = 1, message = "Ward No must be at least 1")
+    private Integer wardNo;
     private String streetName;
-
-    @NotBlank(message = "Specific location details are required")
-    private String other;
 }

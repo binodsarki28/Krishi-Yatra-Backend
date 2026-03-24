@@ -30,4 +30,12 @@ public class AddressController {
         ServerResponse response = addressService.getMyAddress();
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
+
+    @Operation(summary = "Delete the logged-in user's address")
+    @DeleteMapping("/delete")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ServerResponse> deleteAddress() {
+        ServerResponse response = addressService.deleteMyAddress();
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
 }
