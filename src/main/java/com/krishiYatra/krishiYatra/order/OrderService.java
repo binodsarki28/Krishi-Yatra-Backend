@@ -23,13 +23,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class OrderService {
+    @PersistenceContext
+    private EntityManager em;
     private final OrderRepo orderRepo;
     private final StockRepo stockRepo;
     private final BuyerRepo buyerRepo;
@@ -83,7 +88,7 @@ public class OrderService {
         stock.setQuantity(stock.getQuantity() - request.getOrderQuantity());
         stockRepo.save(stock);
 
-        return ServerResponse.successResponse(OrderConst.CREATE_ORDER, HttpStatus.CREATED);
+        return ServerResponse.successObjectResponse(OrderConst.CREATE_ORDER, HttpStatus.CREATED, saved.getOrderId());
     }
 
     @Transactional
@@ -114,10 +119,24 @@ public class OrderService {
         }
 
         order.setDelivery(delivery);
-        order.setOrderStatus(OrderStatus.SHIPPING);
+        order.setOrderStatus(OrderStatus.ACCEPTED);
         orderRepo.save(order);
 
         return ServerResponse.successResponse(OrderConst.DELIVERY_ACCEPTED, HttpStatus.OK);
+    }
+
+    @Transactional
+    public ServerResponse markAsPickedUp(String orderId) {
+        OrderEntity order = orderRepo.findById(orderId).orElse(null);
+        if (order == null) return ServerResponse.failureResponse("Order not found", HttpStatus.NOT_FOUND);
+        
+        if (order.getOrderStatus() != OrderStatus.ACCEPTED) {
+            return ServerResponse.failureResponse("Order must be ACCEPTED before picking up.", HttpStatus.BAD_REQUEST);
+        }
+        
+        order.setOrderStatus(OrderStatus.SHIPPING);
+        orderRepo.save(order);
+        return ServerResponse.successResponse("Order picked up and is now SHIPPING.", HttpStatus.OK);
     }
 
     public ServerResponse getPendingOrders() {
@@ -175,6 +194,24 @@ public class OrderService {
         resp.setCheckpoints(order.getCheckpoints());
         resp.setNotes(order.getNotes());
         resp.setCreatedAt(order.getCreatedAt());
+        
+        // Set Farmer Information
+        if (order.getFarmer() != null && order.getFarmer().getUser() != null) {
+            resp.setFarmerName(order.getFarmer().getUser().getFullName());
+            resp.setFarmerPhone(order.getFarmer().getUser().getPhoneNumber());
+        }
+        
+        // Set Buyer Information
+        if (order.getBuyer() != null && order.getBuyer().getUser() != null) {
+            resp.setBuyerName(order.getBuyer().getUser().getFullName());
+            resp.setBuyerPhone(order.getBuyer().getUser().getPhoneNumber());
+        }
+        
+        // Set Delivery Information
+        if (order.getDelivery() != null && order.getDelivery().getUser() != null) {
+            resp.setDeliveryName(order.getDelivery().getUser().getFullName());
+            resp.setDeliveryPhone(order.getDelivery().getUser().getPhoneNumber());
+        }
         
         return ServerResponse.successObjectResponse("Order details fetched", HttpStatus.OK, resp, 1);
     }
@@ -253,7 +290,7 @@ public class OrderService {
         return ServerResponse.successObjectResponse("Fetched accepted orders", HttpStatus.OK, responses, responses.size());
     }
 
-    public ServerResponse getOrders(java.util.Map<String, String> requestParams, org.springframework.data.domain.Pageable pageable) {
+    public ServerResponse getOrders(Map<String, String> requestParams, org.springframework.data.domain.Pageable pageable) {
         UserEntity currentUser = UserUtil.getCurrentUser();
         if (currentUser != null) {
             boolean isAdmin = currentUser.getRoles().stream().anyMatch(r -> r.getRoleName().name().equals("ADMIN"));
@@ -268,7 +305,64 @@ public class OrderService {
             }
         }
 
-        java.util.List<OrderResponse> orders = orderDao.getAllOrders(requestParams, pageable);
+        List<OrderResponse> orders = orderDao.getAllOrders(requestParams, pageable);
         return ServerResponse.successObjectResponse("Orders fetched successfully.", HttpStatus.OK, orders);
+    }
+
+    public ServerResponse getOrdersByBuyer(Map<String, String> requestParams, org.springframework.data.domain.Pageable pageable) {
+        UserEntity currentUser = UserUtil.getCurrentUser();
+        if (currentUser == null) {
+            return ServerResponse.failureResponse("Unauthorized", HttpStatus.UNAUTHORIZED);
+        }
+
+        Optional<BuyerEntity> buyerOpt = buyerRepo.findByUser(currentUser);
+        if (buyerOpt.isEmpty()) {
+            return ServerResponse.failureResponse("Buyer profile not found", HttpStatus.NOT_FOUND);
+        }
+
+        requestParams.put("filterBuyerUserId", currentUser.getUserId());
+        List<OrderResponse> orders = orderDao.getAllOrders(requestParams, pageable);
+
+        return ServerResponse.successObjectResponse("Your bought orders fetched successfully.", HttpStatus.OK, orders, orders.size());
+    }
+
+    public ServerResponse getOrdersByFarmer(Map<String, String> requestParams, org.springframework.data.domain.Pageable pageable) {
+        UserEntity currentUser = UserUtil.getCurrentUser();
+        if (currentUser == null) {
+            return ServerResponse.failureResponse("Unauthorized", HttpStatus.UNAUTHORIZED);
+        }
+
+        Optional<com.krishiYatra.krishiYatra.farmer.FarmerEntity> farmerOpt = 
+            em.createQuery("SELECT f FROM FarmerEntity f WHERE f.user.userId = :userId", com.krishiYatra.krishiYatra.farmer.FarmerEntity.class)
+              .setParameter("userId", currentUser.getUserId())
+              .getResultList()
+              .stream()
+              .findFirst();
+
+        if (farmerOpt.isEmpty()) {
+            return ServerResponse.failureResponse("Farmer profile not found", HttpStatus.NOT_FOUND);
+        }
+
+        requestParams.put("filterFarmerUserId", currentUser.getUserId());
+        List<OrderResponse> orders = orderDao.getAllOrders(requestParams, pageable);
+
+        return ServerResponse.successObjectResponse("Your sold orders fetched successfully.", HttpStatus.OK, orders, orders.size());
+    }
+
+    public ServerResponse getOrdersByDelivery(Map<String, String> requestParams, org.springframework.data.domain.Pageable pageable) {
+        UserEntity currentUser = UserUtil.getCurrentUser();
+        if (currentUser == null) {
+            return ServerResponse.failureResponse("Unauthorized", HttpStatus.UNAUTHORIZED);
+        }
+
+        Optional<DeliveryEntity> deliveryOpt = deliveryRepo.findByUser(currentUser);
+        if (deliveryOpt.isEmpty()) {
+            return ServerResponse.failureResponse("Delivery profile not found", HttpStatus.NOT_FOUND);
+        }
+
+        requestParams.put("filterDeliveryUserId", currentUser.getUserId());
+        List<OrderResponse> orders = orderDao.getAllOrders(requestParams, pageable);
+
+        return ServerResponse.successObjectResponse("Your delivered orders fetched successfully.", HttpStatus.OK, orders, orders.size());
     }
 }

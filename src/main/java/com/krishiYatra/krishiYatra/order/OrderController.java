@@ -84,11 +84,49 @@ public class OrderController {
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
 
+    @Operation(summary = "Mark order as picked up")
+    @PostMapping("/mark-as-picked-up/{orderId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ServerResponse> markAsPickedUp(@PathVariable String orderId) {
+        ServerResponse response = orderService.markAsPickedUp(orderId);
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
     @Operation(summary = "Get all orders accepted by current delivery linker")
     @GetMapping("/linker/accepted")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ServerResponse> getMyAcceptedOrders() {
         ServerResponse response = orderService.getMyAcceptedOrders();
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
+    @Operation(summary = "Get buyer orders with pagination and sorting")
+    @GetMapping("/buyer/my-orders")
+    @PreAuthorize("hasAuthority('BUYER')")
+    public ResponseEntity<ServerResponse> getOrdersByBuyer(
+            @RequestParam Map<String, String> requestParams,
+            org.springframework.data.domain.Pageable pageable) {
+        ServerResponse response = orderService.getOrdersByBuyer(requestParams, pageable);
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
+    @Operation(summary = "Get farmer orders with pagination and sorting")
+    @GetMapping("/farmer/my-orders")
+    @PreAuthorize("hasAuthority('FARMER')")
+    public ResponseEntity<ServerResponse> getOrdersByFarmer(
+            @RequestParam Map<String, String> requestParams,
+            org.springframework.data.domain.Pageable pageable) {
+        ServerResponse response = orderService.getOrdersByFarmer(requestParams, pageable);
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
+    @Operation(summary = "Get delivery orders with pagination and sorting")
+    @GetMapping("/delivery/my-orders")
+    @PreAuthorize("hasAuthority('DELIVERY')")
+    public ResponseEntity<ServerResponse> getOrdersByDelivery(
+            @RequestParam Map<String, String> requestParams,
+            org.springframework.data.domain.Pageable pageable) {
+        ServerResponse response = orderService.getOrdersByDelivery(requestParams, pageable);
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
 }

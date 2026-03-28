@@ -68,7 +68,7 @@ public class FarmerService {
         farmer.setUser(managedUser);
         farmerRepo.save(farmer);
 
-        // Add Farmer role to user
+        // Add a Farmer role to user
         roleRepo.findByRoleName(RoleType.FARMER).ifPresent(role -> {
             managedUser.getRoles().add(role);
             userRepo.save(managedUser);
