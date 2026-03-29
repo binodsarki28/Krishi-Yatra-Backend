@@ -51,6 +51,10 @@ public class StockService {
             return ServerResponse.failureResponse(StockConst.FARMER_NOT_VERIFIED, HttpStatus.FORBIDDEN);
         }
 
+        if (farmer.getUser().getAddress() == null) {
+            return ServerResponse.failureResponse("Please set your address in Profile before listing a product.", HttpStatus.FORBIDDEN);
+        }
+
         CategoryEntity category = categoryRepo.findById(dto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
         SubCategoryEntity subCategory = subCategoryRepo.findById(dto.getSubCategoryId())

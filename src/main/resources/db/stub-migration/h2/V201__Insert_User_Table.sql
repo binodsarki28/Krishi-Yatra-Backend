@@ -10,6 +10,11 @@ VALUES ('550e8400-e29b-41d4-a716-446655440099', 'Normal User', 'user', 'user@exa
         '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', '9811111111', TRUE,
         '2024-12-03 15:40:09.849', 'System', '2024-12-03 15:40:09.849', 'system');
 
+-- Explicit Buyer and Delivery for automated testing
+INSERT INTO USERS (USER_GUID, FULL_NAME, USERNAME, EMAIL, PASSWORD, PHONE_NUMBER, IS_ACTIVE) VALUES
+('buyer', 'Verified Buyer', 'buyer', 'buyer@test.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', '9888888888', TRUE),
+('delivery', 'Verified Delivery', 'delivery', 'delivery@test.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', '9899999999', TRUE);
+
 -- Adding 45 dummy users for each role (15 Farmers, 15 Buyers, 15 Delivery)
 -- Farmer Users (f_user_1 to f_user_15)
 INSERT INTO USERS (USER_GUID, FULL_NAME, USERNAME, EMAIL, PASSWORD, PHONE_NUMBER, IS_ACTIVE) VALUES

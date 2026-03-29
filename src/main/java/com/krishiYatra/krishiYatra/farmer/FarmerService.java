@@ -60,19 +60,13 @@ public class FarmerService {
         UserEntity managedUser = userRepo.findByUsername(user.getUsername())
                 .orElseThrow(() -> new RuntimeException(FarmerConst.USER_NOT_FOUND));
 
-        if (managedUser.getRoles().stream().anyMatch(r -> r.getRoleName() == RoleType.FARMER)) {
+        if (farmerRepo.findByUser(managedUser).isPresent()) {
             return ServerResponse.failureResponse(FarmerConst.ALREADY_FARMER, HttpStatus.BAD_REQUEST);
         }
 
         FarmerEntity farmer = farmerMapper.toEntity(request);
         farmer.setUser(managedUser);
         farmerRepo.save(farmer);
-
-        // Add Farmer role to user
-        roleRepo.findByRoleName(RoleType.FARMER).ifPresent(role -> {
-            managedUser.getRoles().add(role);
-            userRepo.save(managedUser);
-        });
 
         return ServerResponse.successResponse(FarmerConst.REGISTRATION_SUCCESS, HttpStatus.CREATED);
     }
@@ -88,14 +82,7 @@ public class FarmerService {
             return ServerResponse.successResponse(FarmerConst.VERIFICATION_SUCCESS, HttpStatus.OK);
         } else {
             // If rejected, delete the farmer entity
-            UserEntity user = farmer.getUser();
             farmerRepo.delete(farmer);
-
-            // Remove FARMER role from user if they were rejected
-            roleRepo.findByRoleName(RoleType.FARMER).ifPresent(role -> {
-                user.getRoles().remove(role);
-                userRepo.save(user);
-            });
 
             String message = FarmerConst.REJECTION_PREFIX + request.getReason();
             log.info(message);

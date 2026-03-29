@@ -1,5 +1,6 @@
 package com.krishiYatra.krishiYatra.stock.dao.impl;
 
+import com.krishiYatra.krishiYatra.address.AddressEntity;
 import com.krishiYatra.krishiYatra.stock.StockEntity;
 import com.krishiYatra.krishiYatra.stock.category.CategoryEntity;
 import com.krishiYatra.krishiYatra.stock.subCategory.SubCategoryEntity;
@@ -41,15 +42,21 @@ public class StockDaoImpl implements IStockDao {
         Join<StockEntity, SubCategoryEntity> subCatJoin = root.join("subCategory", JoinType.LEFT);
         Join<StockEntity, FarmerEntity> farmerJoin = root.join("farmer", JoinType.LEFT);
         Join<FarmerEntity, UserEntity> userJoin = farmerJoin.join("user", JoinType.LEFT);
+        Join<UserEntity, AddressEntity> addressJoin = userJoin.join("address", JoinType.LEFT);
 
         List<Predicate> predicates = new ArrayList<>();
         
         if (params.containsKey("all") && "true".equalsIgnoreCase(params.get("all"))) {
-            // Include all
-        } else if (params.containsKey("active")) {
-            predicates.add(cb.equal(root.get("active"), Boolean.parseBoolean(params.get("active"))));
+            // Admin panel: List everything including those without address
         } else {
-            predicates.add(cb.equal(root.get("active"), true));
+            // Public listing: Farmer MUST have an address to be listed
+            predicates.add(cb.isNotNull(addressJoin.get("addressId")));
+            
+            if (params.containsKey("active")) {
+                predicates.add(cb.equal(root.get("active"), Boolean.parseBoolean(params.get("active"))));
+            } else {
+                predicates.add(cb.equal(root.get("active"), true));
+            }
         }
 
         if (params.containsKey("search") && !params.get("search").trim().isEmpty()) {
