@@ -3,6 +3,8 @@ package com.krishiYatra.krishiYatra.common.exception;
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -27,8 +29,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({org.springframework.security.authentication.BadCredentialsException.class,
-            org.springframework.security.authentication.InternalAuthenticationServiceException.class})
+    @ExceptionHandler({
+            BadCredentialsException.class,
+            InternalAuthenticationServiceException.class})
     public ResponseEntity<ServerResponse> handleAuthenticationException() {
         ServerResponse response = ServerResponse.failureResponse(com.krishiYatra.krishiYatra.user.constant.UserConst.INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
@@ -37,7 +40,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ServerResponse> handleGeneralException(Exception ex) {
         System.err.println("ANTIGRAVITY ERROR CAUGHT in GlobalHandler: " + ex.getClass().getName());
-        ex.printStackTrace(); // Log the exact error
+        ex.printStackTrace();
         String errMsg = ex.getMessage();
         if (errMsg == null || errMsg.isEmpty()) {
             errMsg = "Internal Server Error: " + ex.getClass().getSimpleName();

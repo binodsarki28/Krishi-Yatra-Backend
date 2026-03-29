@@ -19,7 +19,6 @@ public class OrderResponse {
     private String pickupAddress;
     private String dropAddress;
     private Double deliveryFee;
-    private String vehicleType;
     private String checkpoints;
     private String notes;
     

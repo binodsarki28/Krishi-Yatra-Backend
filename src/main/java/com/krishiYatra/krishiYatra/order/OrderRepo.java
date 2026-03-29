@@ -12,7 +12,6 @@ import com.krishiYatra.krishiYatra.delivery.DeliveryEntity;
 public interface OrderRepo extends JpaRepository<OrderEntity, String> {
     List<OrderEntity> findByBuyer_BuyerId(String buyerId);
     List<OrderEntity> findByDeliveryIsNullAndOrderStatus(OrderStatus orderStatus);
-    List<OrderEntity> findByDeliveryIsNullAndOrderStatusAndVehicleType(OrderStatus orderStatus, String vehicleType);
     Optional<OrderEntity> findByOrderIdAndDeliveryIsNull(String orderId);
     List<OrderEntity> findByDelivery_DeliveryId(String deliveryId);
     List<OrderEntity> findByDeliveryAndOrderStatusIn(DeliveryEntity delivery, List<OrderStatus> orderStatuses);

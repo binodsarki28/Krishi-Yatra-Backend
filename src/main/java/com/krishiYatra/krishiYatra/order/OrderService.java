@@ -115,10 +115,12 @@ public class OrderService {
             return ServerResponse.failureResponse(OrderConst.ORDER_NOT_AVAILABLE_FOR_DELIVERY, HttpStatus.BAD_REQUEST);
         }
 
+        /*
         // Check vehicle compatibility
         if (order.getVehicleType() != null && !order.getVehicleType().equalsIgnoreCase(delivery.getVehicleType().name())) {
             return ServerResponse.failureResponse("Your vehicle type (" + delivery.getVehicleType() + ") does not match the required: " + order.getVehicleType(), HttpStatus.BAD_REQUEST);
         }
+        */
 
         order.setDelivery(delivery);
         order.setOrderStatus(OrderStatus.ACCEPTED);
@@ -148,9 +150,8 @@ public class OrderService {
         DeliveryEntity delivery = deliveryRepo.findByUser(currentUser).orElse(null);
         if (delivery == null) return ServerResponse.failureResponse("Delivery profile not found", HttpStatus.NOT_FOUND);
 
-        List<OrderEntity> pendingOrders = orderRepo.findByDeliveryIsNullAndOrderStatusAndVehicleType(
-            OrderStatus.PENDING, 
-            delivery.getVehicleType().name()
+        List<OrderEntity> pendingOrders = orderRepo.findByDeliveryIsNullAndOrderStatus(
+            OrderStatus.PENDING
         );
 
         List<OrderResponse> responses = pendingOrders.stream()
@@ -166,7 +167,7 @@ public class OrderService {
                     resp.setPickupAddress(order.getPickupAddress());
                     resp.setDropAddress(order.getDropAddress());
                     resp.setDeliveryFee(order.getDeliveryFee());
-                    resp.setVehicleType(order.getVehicleType());
+                    // resp.setVehicleType(order.getVehicleType());
                     resp.setCheckpoints(order.getCheckpoints());
                     resp.setNotes(order.getNotes());
                     resp.setCreatedAt(order.getCreatedAt());
@@ -193,7 +194,7 @@ public class OrderService {
         resp.setPickupAddress(order.getPickupAddress());
         resp.setDropAddress(order.getDropAddress());
         resp.setDeliveryFee(order.getDeliveryFee());
-        resp.setVehicleType(order.getVehicleType());
+        // resp.setVehicleType(order.getVehicleType());
         resp.setCheckpoints(order.getCheckpoints());
         resp.setNotes(order.getNotes());
         resp.setCreatedAt(order.getCreatedAt());
@@ -283,7 +284,7 @@ public class OrderService {
                     resp.setPickupAddress(order.getPickupAddress());
                     resp.setDropAddress(order.getDropAddress());
                     resp.setDeliveryFee(order.getDeliveryFee());
-                    resp.setVehicleType(order.getVehicleType());
+                    // resp.setVehicleType(order.getVehicleType());
                     resp.setCheckpoints(order.getCheckpoints());
                     resp.setNotes(order.getNotes());
                     resp.setCreatedAt(order.getCreatedAt());
