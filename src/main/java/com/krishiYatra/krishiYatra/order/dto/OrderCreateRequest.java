@@ -22,8 +22,6 @@ public class OrderCreateRequest {
     @NotBlank(message = "Drop address is required")
     private String dropAddress;
 
-    @NotBlank(message = "Vehicle type is required")
-    private String vehicleType;
 
     private String checkpoints;
 

@@ -61,12 +61,27 @@ public class FarmerService {
                 .orElseThrow(() -> new RuntimeException(FarmerConst.USER_NOT_FOUND));
 
         if (farmerRepo.findByUser(managedUser).isPresent()) {
+            // Fix for existing users: If they registered before the role-assignment fix was added,
+            // give them the role now if they try to register again.
+            if (!managedUser.getRoles().stream().anyMatch(r -> r.getRoleName() == RoleType.FARMER)) {
+                roleRepo.findByRoleName(RoleType.FARMER).ifPresent(role -> {
+                    managedUser.getRoles().add(role);
+                    userRepo.save(managedUser);
+                });
+                return ServerResponse.successResponse("Roles synced! Your Farmer dashboard should now be visible.", HttpStatus.OK);
+            }
             return ServerResponse.failureResponse(FarmerConst.ALREADY_FARMER, HttpStatus.BAD_REQUEST);
         }
 
         FarmerEntity farmer = farmerMapper.toEntity(request);
         farmer.setUser(managedUser);
         farmerRepo.save(farmer);
+
+        // Add Farmer role to user set (Crucial for frontend dashboard visibility)
+        roleRepo.findByRoleName(RoleType.FARMER).ifPresent(role -> {
+            managedUser.getRoles().add(role);
+            userRepo.save(managedUser);
+        });
 
         return ServerResponse.successResponse(FarmerConst.REGISTRATION_SUCCESS, HttpStatus.CREATED);
     }

@@ -59,8 +59,6 @@ public class OrderEntity extends Auditable {
     @Column(name = "DELIVERY_FEE")
     private Double deliveryFee;
 
-    @Column(name = "VEHICLE_TYPE")
-    private String vehicleType;
 
     @Column(name = "CHECKPOINTS", length = 3000)
     private String checkpoints;

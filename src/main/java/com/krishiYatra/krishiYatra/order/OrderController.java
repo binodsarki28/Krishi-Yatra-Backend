@@ -3,10 +3,10 @@ package com.krishiYatra.krishiYatra.order;
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
 import com.krishiYatra.krishiYatra.order.dto.OrderCreateRequest;
 import io.swagger.v3.oas.annotations.Operation;
-import java.util.List;
 import java.util.Map;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -139,8 +139,7 @@ public class OrderController {
     @GetMapping("/farmer/my-orders")
     @PreAuthorize("hasAuthority('FARMER')")
     public ResponseEntity<ServerResponse> getOrdersByFarmer(
-            @RequestParam Map<String, String> requestParams,
-            org.springframework.data.domain.Pageable pageable) {
+            @RequestParam Map<String, String> requestParams, Pageable pageable) {
         ServerResponse response = orderService.getOrdersByFarmer(requestParams, pageable);
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
@@ -149,8 +148,7 @@ public class OrderController {
     @GetMapping("/delivery/my-orders")
     @PreAuthorize("hasAuthority('DELIVERY')")
     public ResponseEntity<ServerResponse> getOrdersByDelivery(
-            @RequestParam Map<String, String> requestParams,
-            org.springframework.data.domain.Pageable pageable) {
+            @RequestParam Map<String, String> requestParams, Pageable pageable) {
         ServerResponse response = orderService.getOrdersByDelivery(requestParams, pageable);
         return new ResponseEntity<>(response, response.getHttpStatus());
     }

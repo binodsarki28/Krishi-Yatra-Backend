@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("api/v1/stock")
+@RequestMapping("/api/v1/stock")
 @RequiredArgsConstructor
 @lombok.extern.slf4j.Slf4j
 public class StockController {
@@ -87,14 +87,6 @@ public class StockController {
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
 
-    @Operation(summary = "Delete stock (Farmer owner only, uses slug)")
-    @DeleteMapping("/delete/{slug}")
-    @PreAuthorize("hasAuthority('FARMER')")
-    public ResponseEntity<ServerResponse> deleteStock(@PathVariable String slug) {
-        ServerResponse response = stockService.deleteStockBySlug(slug);
-        return new ResponseEntity<>(response, response.getHttpStatus());
-    }
-
     @Operation(summary = "Get stock details by slug")
     @GetMapping("/details/{slug}")
     public ResponseEntity<ServerResponse> getStockDetails(@PathVariable String slug) {
@@ -102,10 +94,10 @@ public class StockController {
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
 
-    @Operation(summary = "Toggle stock active status (Admin only)")
-    @PutMapping("/toggle-status/{slug}")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<ServerResponse> toggleStockStatus(@PathVariable String slug) {
+    @Operation(summary = "Soft Delete or Undelete stock (Active/Inactive toggle)")
+    @PutMapping("/delete-or-undelete/{slug}")
+    @PreAuthorize("hasAuthority('FARMER')")
+    public ResponseEntity<ServerResponse> deleteOrUndeleteStock(@PathVariable String slug) {
         ServerResponse response = stockService.toggleStockStatus(slug);
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
