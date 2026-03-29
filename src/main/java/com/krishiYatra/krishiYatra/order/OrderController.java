@@ -100,6 +100,31 @@ public class OrderController {
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
 
+    @Operation(summary = "Cancel an order")
+    @PutMapping("/cancel/{orderId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ServerResponse> cancelOrder(@PathVariable String orderId) {
+        ServerResponse response = orderService.cancelOrder(orderId);
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
+    @Operation(summary = "Report a conflict on an order")
+    @PostMapping("/report-conflict/{orderId}")
+    @PreAuthorize("hasAuthority('BUYER')")
+    public ResponseEntity<ServerResponse> reportConflict(@PathVariable String orderId, @RequestBody Map<String, String> body) {
+        String message = body.getOrDefault("message", "No message provided");
+        ServerResponse response = orderService.reportConflict(orderId, message);
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
+    @Operation(summary = "Resolve a conflict on an order (Admin only)")
+    @PutMapping("/resolve-conflict/{orderId}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<ServerResponse> resolveConflict(@PathVariable String orderId) {
+        ServerResponse response = orderService.resolveConflict(orderId);
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
     @Operation(summary = "Get buyer orders with pagination and sorting")
     @GetMapping("/buyer/my-orders")
     @PreAuthorize("hasAuthority('BUYER')")

@@ -47,6 +47,7 @@ public class UserService {
     private final FarmerRepo farmerRepo;
     private final BuyerRepo buyerRepo;
     private final DeliveryRepo deliveryRepo;
+    private final RoleRepo roleRepo;
     private final CloudinaryService cloudinaryService;
 
     public UserService(UserMapper userMapper,
@@ -59,6 +60,7 @@ public class UserService {
                        FarmerRepo farmerRepo,
                        BuyerRepo buyerRepo,
                        DeliveryRepo deliveryRepo,
+                       RoleRepo roleRepo,
                        PendingRegistrationStore pendingRegistrationStore,
                        CloudinaryService cloudinaryService) {
         this.userMapper = userMapper;
@@ -71,6 +73,7 @@ public class UserService {
         this.farmerRepo = farmerRepo;
         this.buyerRepo = buyerRepo;
         this.deliveryRepo = deliveryRepo;
+        this.roleRepo = roleRepo;
         this.pendingRegistrationStore = pendingRegistrationStore;
         this.cloudinaryService = cloudinaryService;
     }
@@ -90,15 +93,14 @@ public class UserService {
         List<String> verifiedRoles = new java.util.ArrayList<>();
         Map<String, String> statusMessages = new HashMap<>();
 
-        if (roles.contains("FARMER")) {
-            farmerRepo.findByUser(userDetails).ifPresent(f -> { 
-                if (f.getStatus() == VerificationStatus.VERIFIED) verifiedRoles.add("FARMER"); 
-                else {
-                    String msg = f.getStatus() == VerificationStatus.BLOCKED ? "Your Farmer account has been BLOCKED. Reason: " : "Under verification (" + f.getStatus().name() + "). ";
-                    statusMessages.put("FARMER", f.getStatusMessage() != null ? (f.getStatus() == VerificationStatus.BLOCKED ? "Your account is BLOCKED: " + f.getStatusMessage() : f.getStatusMessage()) : msg);
-                }
-            });
-        }
+        // Check for role-based profiles (Verified status)
+        farmerRepo.findByUser(userDetails).ifPresent(f -> { 
+            if (f.getStatus() == VerificationStatus.VERIFIED) verifiedRoles.add("FARMER"); 
+            else {
+                String msg = f.getStatus() == VerificationStatus.BLOCKED ? "Your Farmer account has been BLOCKED. Reason: " : "Under verification (" + f.getStatus().name() + "). ";
+                statusMessages.put("FARMER", f.getStatusMessage() != null ? (f.getStatus() == VerificationStatus.BLOCKED ? "Your account is BLOCKED: " + f.getStatusMessage() : f.getStatusMessage()) : msg);
+            }
+        });
         if (roles.contains("BUYER")) {
             buyerRepo.findByUser(userDetails).ifPresent(b -> { 
                 if (b.getStatus() == VerificationStatus.VERIFIED) verifiedRoles.add("BUYER"); 
@@ -200,6 +202,8 @@ public class UserService {
 
         UserEntity user = userMapper.entityToUserCreateRequest(userData);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setActive(true);
+        roleRepo.findByRoleName(com.krishiYatra.krishiYatra.common.enums.RoleType.FARMER).ifPresent(role -> user.getRoles().add(role));
         userRepo.save(user);
 
         // Clean up

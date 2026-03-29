@@ -55,6 +55,7 @@ public class OrderMapperImpl implements OrderMapper {
         response.setCheckpoints(entity.getCheckpoints());
         response.setNotes(entity.getNotes());
         response.setCreatedAt(entity.getCreatedAt());
+        response.setConflictMessage(entity.getConflictMessage());
 
         if (entity.getFarmer() != null && entity.getFarmer().getUser() != null) {
             response.setFarmerName(entity.getFarmer().getUser().getFullName());

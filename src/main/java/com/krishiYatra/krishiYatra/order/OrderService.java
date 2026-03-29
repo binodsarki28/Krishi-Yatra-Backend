@@ -15,6 +15,7 @@ import com.krishiYatra.krishiYatra.order.mapper.OrderMapper;
 import com.krishiYatra.krishiYatra.stock.StockEntity;
 import com.krishiYatra.krishiYatra.stock.StockRepo;
 import com.krishiYatra.krishiYatra.user.UserEntity;
+import com.krishiYatra.krishiYatra.farmer.FarmerRepo;
 import com.krishiYatra.krishiYatra.utils.UserUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,7 @@ public class OrderService {
     private final StockRepo stockRepo;
     private final BuyerRepo buyerRepo;
     private final DeliveryRepo deliveryRepo;
+    private final FarmerRepo farmerRepo;
     private final OrderMapper orderMapper;
     private final AddressService addressService;
     private final com.krishiYatra.krishiYatra.order.dao.IOrderDao orderDao;
@@ -168,6 +170,7 @@ public class OrderService {
                     resp.setCheckpoints(order.getCheckpoints());
                     resp.setNotes(order.getNotes());
                     resp.setCreatedAt(order.getCreatedAt());
+                    resp.setConflictMessage(order.getConflictMessage());
                     return resp;
                 })
                 .collect(Collectors.toList());
@@ -194,6 +197,7 @@ public class OrderService {
         resp.setCheckpoints(order.getCheckpoints());
         resp.setNotes(order.getNotes());
         resp.setCreatedAt(order.getCreatedAt());
+        resp.setConflictMessage(order.getConflictMessage());
         
         // Set Farmer Information
         if (order.getFarmer() != null && order.getFarmer().getUser() != null) {
@@ -283,6 +287,7 @@ public class OrderService {
                     resp.setCheckpoints(order.getCheckpoints());
                     resp.setNotes(order.getNotes());
                     resp.setCreatedAt(order.getCreatedAt());
+                    resp.setConflictMessage(order.getConflictMessage());
                     return resp;
                 })
                 .collect(Collectors.toList());
@@ -290,12 +295,67 @@ public class OrderService {
         return ServerResponse.successObjectResponse("Fetched accepted orders", HttpStatus.OK, responses, responses.size());
     }
 
+    @Transactional
+    public ServerResponse cancelOrder(String orderId) {
+        OrderEntity order = orderRepo.findById(orderId)
+                .orElse(null);
+        if (order == null) return ServerResponse.failureResponse("Order not found", HttpStatus.NOT_FOUND);
+
+        if (order.getOrderStatus() == OrderStatus.DELIVERED || order.getOrderStatus() == OrderStatus.CANCELLED) {
+            return ServerResponse.failureResponse("Cannot cancel an order that is already delivered or cancelled.", HttpStatus.BAD_REQUEST);
+        }
+
+        // Restore stock quantity
+        StockEntity stock = order.getStock();
+        if (stock != null) {
+            stock.setQuantity(stock.getQuantity() + order.getOrderQuantity());
+            stockRepo.save(stock);
+        }
+
+        order.setOrderStatus(OrderStatus.CANCELLED);
+        orderRepo.save(order);
+        return ServerResponse.successResponse("Order cancelled successfully and stock restored.", HttpStatus.OK);
+    }
+
+    @Transactional
+    public ServerResponse reportConflict(String orderId, String message) {
+        OrderEntity order = orderRepo.findById(orderId)
+                .orElse(null);
+        if (order == null) return ServerResponse.failureResponse("Order not found", HttpStatus.NOT_FOUND);
+
+        if (order.getOrderStatus() != OrderStatus.DELIVERED) {
+            return ServerResponse.failureResponse("Conflict can only be reported for delivered orders.", HttpStatus.BAD_REQUEST);
+        }
+
+        order.setOrderStatus(OrderStatus.CONFLICT);
+        order.setConflictMessage(message);
+        order.setConflictRaisedAt(java.time.LocalDateTime.now());
+        orderRepo.save(order);
+        return ServerResponse.successResponse("Conflict reported successfully. Admin will review it.", HttpStatus.OK);
+    }
+
+    @Transactional
+    public ServerResponse resolveConflict(String orderId) {
+        OrderEntity order = orderRepo.findById(orderId)
+                .orElse(null);
+        if (order == null) return ServerResponse.failureResponse("Order not found", HttpStatus.NOT_FOUND);
+
+        if (order.getOrderStatus() != OrderStatus.CONFLICT) {
+            return ServerResponse.failureResponse("Only orders with CONFLICT status can be resolved.", HttpStatus.BAD_REQUEST);
+        }
+
+        order.setOrderStatus(OrderStatus.RESOLVED);
+        order.setConflictResolvedAt(java.time.LocalDateTime.now());
+        orderRepo.save(order);
+        return ServerResponse.successResponse("Conflict marked as RESOLVED.", HttpStatus.OK);
+    }
+
     public ServerResponse getOrders(Map<String, String> requestParams, org.springframework.data.domain.Pageable pageable) {
         UserEntity currentUser = UserUtil.getCurrentUser();
         if (currentUser != null) {
             boolean isAdmin = currentUser.getRoles().stream().anyMatch(r -> r.getRoleName().name().equals("ADMIN"));
             if (!isAdmin) {
-                if (currentUser.getRoles().stream().anyMatch(r -> r.getRoleName() == com.krishiYatra.krishiYatra.common.enums.RoleType.FARMER)) {
+                if (farmerRepo.findByUser(currentUser).isPresent()) {
                     requestParams.put("filterFarmerUserId", currentUser.getUserId());
                 } else if (currentUser.getRoles().stream().anyMatch(r -> r.getRoleName() == com.krishiYatra.krishiYatra.common.enums.RoleType.DELIVERY)) {
                     requestParams.put("filterDeliveryUserId", currentUser.getUserId());

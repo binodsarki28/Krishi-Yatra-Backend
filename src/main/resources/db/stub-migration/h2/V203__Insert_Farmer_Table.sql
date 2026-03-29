@@ -1,6 +1,6 @@
 -- Stub: Register user (user123) as a FARMER (isVerified = false)
 
--- Assign FARMER role
+-- Assign USER role
 INSERT INTO USER_ROLES (USER_GUID, ROLE_GUID)
 SELECT '550e8400-e29b-41d4-a716-446655440099', ROLE_GUID
 FROM ROLES WHERE ROLE_NAME = 'FARMER';

@@ -70,21 +70,61 @@ public class OrderDaoImpl implements IOrderDao {
         Join<OrderEntity, DeliveryEntity> deliveryJoin = root.join("delivery", JoinType.LEFT);
         Join<DeliveryEntity, UserEntity> deliveryUserJoin = deliveryJoin.join("user", JoinType.LEFT);
 
-        // Role based filtering from Controller
+        // Role based filtering from Controller (Internal IDs)
         if (params.containsKey("filterFarmerUserId")) {
-            predicates.add(cb.equal(farmerUserJoin.get("id"), params.get("filterFarmerUserId")));
+            predicates.add(cb.equal(farmerUserJoin.get("userId"), params.get("filterFarmerUserId")));
         }
         if (params.containsKey("filterBuyerUserId")) {
-            predicates.add(cb.equal(buyerUserJoin.get("id"), params.get("filterBuyerUserId")));
+            predicates.add(cb.equal(buyerUserJoin.get("userId"), params.get("filterBuyerUserId")));
         }
         if (params.containsKey("filterDeliveryUserId")) {
-            predicates.add(cb.equal(deliveryUserJoin.get("id"), params.get("filterDeliveryUserId")));
+            predicates.add(cb.equal(deliveryUserJoin.get("userId"), params.get("filterDeliveryUserId")));
         }
 
-        // Search by Order ID
+        // Specific search fields
+        if (params.containsKey("orderId") && !params.get("orderId").trim().isEmpty()) {
+            predicates.add(cb.like(cb.lower(root.get("orderId")), "%" + params.get("orderId").trim().toLowerCase() + "%"));
+        }
+        if (params.containsKey("productName") && !params.get("productName").trim().isEmpty()) {
+            predicates.add(cb.like(cb.lower(root.get("stock").get("productName")), "%" + params.get("productName").trim().toLowerCase() + "%"));
+        }
+        if (params.containsKey("buyer") && !params.get("buyer").trim().isEmpty()) {
+            String buyer = params.get("buyer").trim().toLowerCase();
+            predicates.add(cb.or(
+                cb.like(cb.lower(buyerUserJoin.get("fullName")), "%" + buyer + "%"),
+                cb.like(cb.lower(buyerUserJoin.get("username")), "%" + buyer + "%")
+            ));
+        }
+        if (params.containsKey("farmer") && !params.get("farmer").trim().isEmpty()) {
+            String farmer = params.get("farmer").trim().toLowerCase();
+            predicates.add(cb.or(
+                cb.like(cb.lower(farmerUserJoin.get("fullName")), "%" + farmer + "%"),
+                cb.like(cb.lower(farmerUserJoin.get("username")), "%" + farmer + "%")
+            ));
+        }
+        if (params.containsKey("delivery") && !params.get("delivery").trim().isEmpty()) {
+            String delivery = params.get("delivery").trim().toLowerCase();
+            predicates.add(cb.or(
+                cb.like(cb.lower(deliveryUserJoin.get("fullName")), "%" + delivery + "%"),
+                cb.like(cb.lower(deliveryUserJoin.get("username")), "%" + delivery + "%")
+            ));
+        }
+
+        // Global Search (Fallback for general search bar)
         if (params.containsKey("search") && !params.get("search").trim().isEmpty()) {
-            String search = params.get("search").trim();
-            predicates.add(cb.equal(root.get("orderId"), search));
+            String search = "%" + params.get("search").trim().toLowerCase() + "%";
+            List<Predicate> sP = new ArrayList<>();
+            
+            sP.add(cb.like(cb.lower(root.get("orderId")), search));
+            sP.add(cb.like(cb.lower(root.get("stock").get("productName")), search));
+            sP.add(cb.like(cb.lower(farmerUserJoin.get("fullName")), search));
+            sP.add(cb.like(cb.lower(farmerUserJoin.get("username")), search));
+            sP.add(cb.like(cb.lower(buyerUserJoin.get("fullName")), search));
+            sP.add(cb.like(cb.lower(buyerUserJoin.get("username")), search));
+            sP.add(cb.like(cb.lower(deliveryUserJoin.get("fullName")), search));
+            sP.add(cb.like(cb.lower(deliveryUserJoin.get("username")), search));
+            
+            predicates.add(cb.or(sP.toArray(new Predicate[0])));
         }
 
         // Status filter
