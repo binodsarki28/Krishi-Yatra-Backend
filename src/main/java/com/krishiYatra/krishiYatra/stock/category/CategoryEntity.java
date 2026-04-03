@@ -15,9 +15,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class CategoryEntity extends Auditable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "CATEGORY_GUID")
-    private String categoryId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "CATEGORY_ID")
+    private int categoryId;
 
     @Column(name = "CATEGORY_NAME", unique = true)
     private String categoryName;
@@ -25,4 +25,7 @@ public class CategoryEntity extends Auditable {
     @com.fasterxml.jackson.annotation.JsonManagedReference
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<SubCategoryEntity> subCategories;
+
+    @Column(nullable = false)
+    private boolean active = true;
 }

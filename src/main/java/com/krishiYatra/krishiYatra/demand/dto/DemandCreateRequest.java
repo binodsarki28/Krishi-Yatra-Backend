@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class DemandCreateRequest {
-    private String categoryGuid;
-    private String subCategoryGuid;
+    private int categoryId;
+    private int subCategoryId;
     private Double quantity;
     private Double expectedPricePerUnit;
     private String description;

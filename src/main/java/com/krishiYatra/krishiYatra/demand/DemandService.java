@@ -50,10 +50,10 @@ public class DemandService {
         BuyerEntity buyer = buyerRepo.findByUser(currentUser).orElse(null);
         if (buyer == null) return ServerResponse.failureResponse(DemandConst.ONLY_BUYERS, HttpStatus.FORBIDDEN);
 
-        CategoryEntity category = categoryRepo.findById(request.getCategoryGuid()).orElse(null);
+        CategoryEntity category = categoryRepo.findById(request.getCategoryId()).orElse(null);
         if (category == null) return ServerResponse.failureResponse("Category not found", HttpStatus.NOT_FOUND);
 
-        SubCategoryEntity subCategory = subCategoryRepo.findById(request.getSubCategoryGuid()).orElse(null);
+        SubCategoryEntity subCategory = subCategoryRepo.findById(request.getSubCategoryId()).orElse(null);
         if (subCategory == null) return ServerResponse.failureResponse("Sub-category not found", HttpStatus.NOT_FOUND);
 
         DemandEntity entity = demandMapper.toEntity(request, category, subCategory, buyer);
@@ -79,7 +79,7 @@ public class DemandService {
         BuyerEntity buyer = buyerRepo.findByUser(currentUser).orElse(null);
         if (buyer == null) return ServerResponse.failureResponse(DemandConst.ONLY_BUYERS, HttpStatus.FORBIDDEN);
 
-        Map<String, String> params = Map.of("buyerGuid", buyer.getBuyerId(), "active", "true");
+        Map<String, String> params = Map.of("buyerId", buyer.getBuyerId(), "active", "true");
         Pageable pageable = PageRequest.of(page, size);
         List<DemandResponse> list = demandDao.getDemands(params, pageable);
         long count = demandDao.countDemands(params);

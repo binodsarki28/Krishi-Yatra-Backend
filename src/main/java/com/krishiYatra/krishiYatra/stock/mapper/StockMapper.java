@@ -74,12 +74,14 @@ public class StockMapper {
         dto.setQuantity(entity.getQuantity());
         dto.setPricePerUnit(entity.getPricePerUnit());
         dto.setMinQuantity(entity.getMinQuantity());
-        dto.setStockImages(entity.getStockImageUrls()); // Use helper method
+        dto.setStockImages(entity.getStockImageUrls()); 
         dto.setActive(entity.isActive());
         
         if (entity.getSubCategory() != null) {
+            dto.setSubCategoryId(entity.getSubCategory().getSubCategoryId());
             dto.setSubCategoryName(entity.getSubCategory().getSubCategoryName());
             if (entity.getSubCategory().getCategory() != null) {
+                dto.setCategoryId(entity.getSubCategory().getCategory().getCategoryId());
                 dto.setCategoryName(entity.getSubCategory().getCategory().getCategoryName());
             }
         }

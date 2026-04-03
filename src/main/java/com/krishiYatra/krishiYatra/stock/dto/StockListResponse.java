@@ -17,7 +17,9 @@ public class StockListResponse {
     private Double quantity;
     private Double pricePerUnit;
     private String subCategoryName;
+    private int subCategoryId;
     private String categoryName;
+    private int categoryId;
     private String farmerName;
     private Integer minQuantity;
     private List<String> stockImages;

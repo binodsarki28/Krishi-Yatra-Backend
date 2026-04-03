@@ -71,12 +71,12 @@ public class DemandDaoImpl implements IDemandDao {
         boolean active = params.get("active") == null || Boolean.parseBoolean(params.get("active"));
         predicates.add(cb.equal(root.get("active"), active));
 
-        if (params.containsKey("categoryGuid") && !params.get("categoryGuid").isEmpty()) {
-            predicates.add(cb.equal(root.get("category").get("categoryId"), params.get("categoryGuid")));
+        if (params.containsKey("categoryId") && !params.get("categoryId").isEmpty()) {
+            predicates.add(cb.equal(root.get("category").get("categoryId"), params.get("categoryId")));
         }
 
-        if (params.containsKey("subCategoryGuid") && !params.get("subCategoryGuid").isEmpty()) {
-            predicates.add(cb.equal(root.get("subCategory").get("subCategoryId"), params.get("subCategoryGuid")));
+        if (params.containsKey("subCategoryId") && !params.get("subCategoryId").isEmpty()) {
+            predicates.add(cb.equal(root.get("subCategory").get("subCategoryId"), params.get("subCategoryId")));
         }
 
         if (params.containsKey("status") && !params.get("status").isEmpty()) {
@@ -86,8 +86,8 @@ public class DemandDaoImpl implements IDemandDao {
             } catch (Exception ignored) {}
         }
 
-        if (params.containsKey("buyerGuid") && !params.get("buyerGuid").isEmpty()) {
-            predicates.add(cb.equal(root.get("buyer").get("buyerId"), params.get("buyerGuid")));
+        if (params.containsKey("buyerId") && !params.get("buyerId").isEmpty()) {
+            predicates.add(cb.equal(root.get("buyer").get("buyerId"), params.get("buyerId")));
         }
 
         if (params.containsKey("farmerGuid") && !params.get("farmerGuid").isEmpty()) {

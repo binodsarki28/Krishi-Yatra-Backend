@@ -212,7 +212,7 @@ public class StockService {
     }
 
     @Transactional
-    public ServerResponse createSubCategory(String categoryId, String name) {
+    public ServerResponse createSubCategory(int categoryId, String name) {
         CategoryEntity category = categoryRepo.findById(categoryId)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
         SubCategoryEntity subCategory = new SubCategoryEntity();
@@ -224,34 +224,22 @@ public class StockService {
 
     public ServerResponse getCategories() {
         List<CategoryResponseDto> categories = categoryRepo.findAll().stream()
+                .filter(CategoryEntity::isActive)
                 .map(stockMapper::toCategoryDto)
                 .collect(Collectors.toList());
         return ServerResponse.successObjectResponse("Categories fetched successfully", HttpStatus.OK, categories);
     }
 
-    public ServerResponse getSubCategories(String categoryId) {
+    public ServerResponse getSubCategories(Integer categoryId) {
         List<SubCategoryEntity> subCategories;
-        if (categoryId != null && !categoryId.isEmpty()) {
-            subCategories = subCategoryRepo.findByCategory_CategoryId(categoryId);
+        if (categoryId != null) {
+            subCategories = subCategoryRepo.findByCategory_CategoryIdAndActiveTrue(categoryId);
         } else {
-
-            subCategories = subCategoryRepo.findAll();
+            subCategories = subCategoryRepo.findByActiveTrue();
         }
         List<SubCategoryResponseDto> response = subCategories.stream()
                 .map(stockMapper::toSubCategoryDto)
                 .collect(Collectors.toList());
         return ServerResponse.successObjectResponse("Sub-categories fetched successfully", HttpStatus.OK, response);
-    }
-
-    @Transactional
-    public ServerResponse adjustStockQuantity(String slug, Double amount) {
-        StockEntity entity = stockRepo.findByStockSlug(slug)
-                .orElseThrow(() -> new RuntimeException(StockConst.STOCK_NOT_FOUND));
-        
-        entity.setQuantity(entity.getQuantity() + amount);
-        if (entity.getQuantity() < 0) entity.setQuantity(0.0);
-        
-        stockRepo.save(entity);
-        return ServerResponse.successResponse("Stock quantity adjusted", HttpStatus.OK);
     }
 }

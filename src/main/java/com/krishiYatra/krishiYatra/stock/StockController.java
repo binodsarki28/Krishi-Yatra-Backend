@@ -128,7 +128,7 @@ public class StockController {
     @Operation(summary = "Create sub-category")
     @PostMapping("/subcategory/create")
     @PreAuthorize("hasAuthority('FARMER')")
-    public ResponseEntity<ServerResponse> createSubCategory(@RequestParam String categoryId, @RequestParam String name) {
+    public ResponseEntity<ServerResponse> createSubCategory(@RequestParam int categoryId, @RequestParam String name) {
         ServerResponse response = stockService.createSubCategory(categoryId, name);
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
@@ -142,15 +142,8 @@ public class StockController {
 
     @Operation(summary = "Get sub-categories by category")
     @GetMapping("/subcategories")
-    public ResponseEntity<ServerResponse> getSubCategories(@RequestParam(required = false) String categoryId) {
+    public ResponseEntity<ServerResponse> getSubCategories(@RequestParam(required = false) Integer categoryId) {
         ServerResponse response = stockService.getSubCategories(categoryId);
-        return new ResponseEntity<>(response, response.getHttpStatus());
-    }
-    @Operation(summary = "Adjust stock quantity (increment/decrement)")
-    @PutMapping("/adjust")
-    @PreAuthorize("hasAuthority('FARMER')")
-    public ResponseEntity<ServerResponse> adjustStockQuantity(@RequestParam String slug, @RequestParam Double amount) {
-        ServerResponse response = stockService.adjustStockQuantity(slug, amount);
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
 }

@@ -69,10 +69,10 @@ public class StockEntity extends Auditable {
     private FarmerEntity farmer;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CATEGORY_GUID", referencedColumnName = "CATEGORY_GUID", nullable = false)
+    @JoinColumn(name = "CATEGORY_ID", referencedColumnName = "CATEGORY_ID", nullable = false)
     private CategoryEntity category;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "SUB_CATEGORY_GUID", referencedColumnName = "SUB_CATEGORY_GUID", nullable = false)
+    @JoinColumn(name = "SUB_CATEGORY_ID", referencedColumnName = "SUB_CATEGORY_ID", nullable = false)
     private SubCategoryEntity subCategory;
 }

@@ -25,11 +25,11 @@ public class DemandEntity extends Auditable {
     private String demandId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CATEGORY_GUID", nullable = false)
+    @JoinColumn(name = "CATEGORY_ID", nullable = false)
     private CategoryEntity category;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "SUB_CATEGORY_GUID", nullable = false)
+    @JoinColumn(name = "SUB_CATEGORY_ID", nullable = false)
     private SubCategoryEntity subCategory;
 
     @Column(name = "QUANTITY", nullable = false)

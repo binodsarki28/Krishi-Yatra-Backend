@@ -32,9 +32,9 @@ public class StockRequestDto {
     @Positive(message = "Minimum quantity must be at least 1")
     private Integer minQuantity = 1;
 
-    @NotBlank(message = "Category is required")
-    private String categoryId;
+    @NotNull(message = "Category is required")
+    private Integer categoryId;
 
-    @NotBlank(message = "Sub-category is required")
-    private String subCategoryId;
+    @NotNull(message = "Sub-category is required")
+    private Integer subCategoryId;
 }

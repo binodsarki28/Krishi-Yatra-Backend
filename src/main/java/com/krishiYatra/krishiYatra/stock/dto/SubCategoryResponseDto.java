@@ -10,8 +10,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SubCategoryResponseDto {
-    private String subCategoryId;
+    private int subCategoryId;
     private String subCategoryName;
-    private String categoryId;
+    private Integer categoryId;
     private String categoryName;
 }
