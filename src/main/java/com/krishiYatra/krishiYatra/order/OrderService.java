@@ -44,6 +44,7 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final AddressService addressService;
     private final com.krishiYatra.krishiYatra.order.dao.IOrderDao orderDao;
+    private final com.krishiYatra.krishiYatra.notification.handler.OrderCreatedNotificationHandler orderCreatedNotificationHandler;
 
     @Transactional
     public ServerResponse createOrder(OrderCreateRequest request) {
@@ -89,6 +90,20 @@ public class OrderService {
 
         stock.setQuantity(stock.getQuantity() - request.getOrderQuantity());
         stockRepo.save(stock);
+
+        // Notify Buyer, Farmer, and Delivery Riders
+        try {
+            com.krishiYatra.krishiYatra.notification.dto.OrderNotificationDto notificationDto = 
+                com.krishiYatra.krishiYatra.notification.dto.OrderNotificationDto.builder()
+                    .orderId(saved.getOrderId())
+                    .productName(stock.getProductName())
+                    .farmerUsername(stock.getFarmer().getUser().getUsername())
+                    .buyerUsername(buyer.getUser().getUsername())
+                    .build();
+            orderCreatedNotificationHandler.handle(notificationDto);
+        } catch (Exception e) {
+            log.error("Failed to send order creation notifications: {}", e.getMessage());
+        }
 
         return ServerResponse.successObjectResponse(OrderConst.CREATE_ORDER, HttpStatus.CREATED, saved.getOrderId());
     }

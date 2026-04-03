@@ -32,6 +32,7 @@ public class NotificationService {
     private final UserRepo userRepo;
     private final EmailService emailService;
     private final NotificationRepo notificationRepo;
+    private final com.krishiYatra.krishiYatra.delivery.DeliveryRepo deliveryRepo;
 
     @Transactional
     public ServerResponse saveFcmToken(String username, String fcmToken, String deviceName) {
@@ -175,6 +176,15 @@ public class NotificationService {
         for (String uname : usernames) {
             sendToUser(uname, title, body, type, category);
         }
+    }
+
+    public List<String> findUsernamesByRole(String roleNameStr) {
+        com.krishiYatra.krishiYatra.common.enums.RoleType roleType = com.krishiYatra.krishiYatra.common.enums.RoleType.valueOf(roleNameStr);
+        return userRepo.findUsernamesByRole(roleType);
+    }
+
+    public List<String> findVerifiedDeliveryUsernames() {
+        return deliveryRepo.findUsernamesByStatus(com.krishiYatra.krishiYatra.common.enums.VerificationStatus.VERIFIED);
     }
 
     @Transactional

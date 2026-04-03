@@ -15,4 +15,7 @@ public interface DeliveryRepo extends JpaRepository<DeliveryEntity, String> {
     Optional<DeliveryEntity> findByUser(UserEntity user);
     Optional<DeliveryEntity> findByUser_Username(String username);
     long countByStatus(VerificationStatus status);
+
+    @org.springframework.data.jpa.repository.Query("SELECT d.user.username FROM DeliveryEntity d WHERE d.status = :status")
+    java.util.List<String> findUsernamesByStatus(@org.springframework.data.repository.query.Param("status") VerificationStatus status);
 }
