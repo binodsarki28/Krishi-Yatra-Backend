@@ -31,6 +31,7 @@ public class DeliveryService {
     private final DeliveryMapper deliveryMapper;
 
     private final com.krishiYatra.krishiYatra.delivery.dao.IDeliveryDao deliveryDao;
+    private final com.krishiYatra.krishiYatra.notification.handler.VerificationNotificationHandler verificationNotificationHandler;
 
     @Transactional(readOnly = true)
     public List<DeliveryListResponse> getDeliveries(java.util.Map<String, String> params, org.springframework.data.domain.Pageable pageable) {
@@ -73,11 +74,28 @@ public class DeliveryService {
         if (request.getApproved()) {
             delivery.setStatus(com.krishiYatra.krishiYatra.common.enums.VerificationStatus.VERIFIED);
             deliveryRepo.save(delivery);
+
+            // Notify Rider
+            try {
+                verificationNotificationHandler.notifyDeliveryStatus(delivery.getUser(), true, null);
+            } catch (Exception e) {
+                log.error("Failed to send delivery verification notification: {}", e.getMessage());
+            }
+
             return ServerResponse.successResponse(DeliveryConst.VERIFICATION_SUCCESS, HttpStatus.OK);
         } else {
-            delivery.setStatus(com.krishiYatra.krishiYatra.common.enums.VerificationStatus.REJECTED);
-            delivery.setStatusMessage(request.getReason());
-            deliveryRepo.save(delivery);
+            // Store user for notification
+            UserEntity user = delivery.getUser();
+
+            // If rejected, delete the delivery entity so they can re-apply
+            deliveryRepo.delete(delivery);
+
+            // Notify Rider
+            try {
+                verificationNotificationHandler.notifyDeliveryStatus(user, false, request.getReason());
+            } catch (Exception e) {
+                log.error("Failed to send delivery rejection notification: {}", e.getMessage());
+            }
             
             String message = DeliveryConst.REJECTION_PREFIX + request.getReason();
             log.info(message);

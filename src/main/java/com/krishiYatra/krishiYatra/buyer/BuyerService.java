@@ -31,6 +31,7 @@ public class BuyerService {
     private final BuyerMapper buyerMapper;
 
     private final com.krishiYatra.krishiYatra.buyer.dao.IBuyerDao buyerDao;
+    private final com.krishiYatra.krishiYatra.notification.handler.VerificationNotificationHandler verificationNotificationHandler;
 
     @Transactional(readOnly = true)
     public List<BuyerListResponse> getBuyers(java.util.Map<String, String> params, org.springframework.data.domain.Pageable pageable) {
@@ -73,11 +74,28 @@ public class BuyerService {
         if (request.getApproved()) {
             buyer.setStatus(com.krishiYatra.krishiYatra.common.enums.VerificationStatus.VERIFIED);
             buyerRepo.save(buyer);
+
+            // Notify buyer
+            try {
+                verificationNotificationHandler.notifyBuyerStatus(buyer.getUser(), true, null);
+            } catch (Exception e) {
+                log.error("Failed to send buyer verification notification: {}", e.getMessage());
+            }
+
             return ServerResponse.successResponse(BuyerConst.VERIFICATION_SUCCESS, HttpStatus.OK);
         } else {
-            buyer.setStatus(com.krishiYatra.krishiYatra.common.enums.VerificationStatus.REJECTED);
-            buyer.setStatusMessage(request.getReason());
-            buyerRepo.save(buyer);
+            // Store user for notification
+            UserEntity user = buyer.getUser();
+
+            // If rejected, delete the buyer entity so they can re-apply
+            buyerRepo.delete(buyer);
+
+            // Notify buyer
+            try {
+                verificationNotificationHandler.notifyBuyerStatus(user, false, request.getReason());
+            } catch (Exception e) {
+                log.error("Failed to send buyer rejection notification: {}", e.getMessage());
+            }
             
             String message = BuyerConst.REJECTION_PREFIX + request.getReason();
             log.info(message);

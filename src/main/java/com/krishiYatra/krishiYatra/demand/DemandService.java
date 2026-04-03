@@ -14,6 +14,7 @@ import com.krishiYatra.krishiYatra.stock.category.CategoryEntity;
 import com.krishiYatra.krishiYatra.stock.category.CategoryRepo;
 import com.krishiYatra.krishiYatra.stock.subCategory.SubCategoryEntity;
 import com.krishiYatra.krishiYatra.stock.subCategory.SubCategoryRepo;
+import com.krishiYatra.krishiYatra.notification.handler.DemandNotificationHandler;
 import com.krishiYatra.krishiYatra.user.UserEntity;
 import com.krishiYatra.krishiYatra.utils.UserUtil;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,7 @@ public class DemandService {
     private final BuyerRepo buyerRepo;
     private final FarmerRepo farmerRepo;
     private final IDemandDao demandDao;
+    private final DemandNotificationHandler demandNotificationHandler;
 
     @Transactional
     public ServerResponse createDemand(DemandCreateRequest request) {
@@ -58,6 +60,9 @@ public class DemandService {
         entity.setStatus(DemandStatus.OPEN);
         entity.setActive(true);
         DemandEntity saved = demandRepo.save(entity);
+
+        // Notify all verified farmers
+        demandNotificationHandler.handleDemandCreated(saved);
 
         return ServerResponse.successObjectResponse(DemandConst.DEMAND_CREATED, HttpStatus.CREATED, demandMapper.toResponse(saved));
     }
@@ -128,8 +133,11 @@ public class DemandService {
 
         demand.setStatus(DemandStatus.ACCEPTED);
         demand.setAcceptedBy(farmer);
-        demandRepo.save(demand);
+        DemandEntity saved = demandRepo.save(demand);
 
-        return ServerResponse.successObjectResponse(DemandConst.DEMAND_ACCEPTED, HttpStatus.OK, demandMapper.toResponse(demand));
+        // Notify Buyer and Farmer
+        demandNotificationHandler.handleDemandAccepted(saved, farmer);
+
+        return ServerResponse.successObjectResponse(DemandConst.DEMAND_ACCEPTED, HttpStatus.OK, demandMapper.toResponse(saved));
     }
 }

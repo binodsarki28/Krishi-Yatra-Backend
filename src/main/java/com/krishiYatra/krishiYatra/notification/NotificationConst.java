@@ -18,6 +18,19 @@ public class NotificationConst {
     public static final String EDIT_STOCK_URL = "/farmer/stocks/update/%s";
     public static final String AVAILABLE_JOBS_URL = "/delivery/jobs/available";
 
+    // Demand URLs
+    public static final String DEMAND_MARKET_URL = "/demands";
+    public static final String BUYER_DEMANDS_URL = "/stocks";
+    public static final String FARMER_STOCKS_URL = "/farmer/stocks/my-stocks";
+
+    // Role-based Dashboards & Registration URLs
+    public static final String URL_FARMER_DASHBOARD = "/farmer";
+    public static final String URL_FARMER_REGISTER = "/farmer/register";
+    public static final String URL_BUYER_DASHBOARD = "/buyer";
+    public static final String URL_BUYER_REGISTER = "/buyer/register";
+    public static final String URL_DELIVERY_DASHBOARD = "/delivery";
+    public static final String URL_DELIVERY_REGISTER = "/delivery/register";
+
     // Order Created Notification Templates
     public static final String ORDER_CREATED_FARMER_TITLE = "New Order Received!";
     public static final String ORDER_CREATED_FARMER_BODY = "You have received a new order for %s (ID: %s). Wait for the rider to accept.";
@@ -63,4 +76,19 @@ public class NotificationConst {
     // Stock Notifications
     public static final String STOCK_LOW_TITLE = "Low Stock Alert!";
     public static final String STOCK_LOW_BODY = "Your stock '%s' is running low (Current: %.2f). Click to restock!";
+
+    // Demand Notifications
+    public static final String DEMAND_CREATED_TITLE = "New Market Demand!";
+    public static final String DEMAND_CREATED_BODY = "A new demand for %s (%.2f) has been posted. Claim it now!";
+    public static final String DEMAND_ACCEPTED_BUYER_TITLE = "Demand Accepted!";
+    public static final String DEMAND_ACCEPTED_BUYER_BODY = "Farmer '%s' has accepted your demand for %s. View your demand dashboard.";
+    public static final String DEMAND_ACCEPTED_FARMER_TITLE = "Acceptance Confirmed";
+    public static final String DEMAND_ACCEPTED_FARMER_BODY = "You've successfully accepted the demand for %s. View your stock list to fulfill.";
+
+    // Verification Notifications
+    public static final String VERIFICATION_APPROVED_TITLE = "Application Approved!";
+    public static final String VERIFICATION_APPROVED_BODY = "Congratulations! Your request for %s role has been verified. You can now access your dashboard.";
+    public static final String VERIFICATION_REJECTED_TITLE = "Application Rejected";
+    public static final String VERIFICATION_REJECTED_BODY = "Your application for %s role was declined. Reason: %s. Register again.";
+
 }
