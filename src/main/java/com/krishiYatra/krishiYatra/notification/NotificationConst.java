@@ -64,9 +64,6 @@ public class NotificationConst {
     public static final String ORDER_CONFLICT_RIDER_TITLE = "Alert: Dispute Raised!";
     public static final String ORDER_CONFLICT_RIDER_BODY = "The buyer has reported a conflict for order %s (ID: %s).";
     
-    public static final String ORDER_CONFLICT_TITLE = "Conflict Reported!";
-    public static final String ORDER_CONFLICT_BODY = "A conflict has been reported for order %s (%s). Admin will review: %s";
-    
     public static final String ORDER_RESOLVED_TITLE = "Conflict Resolved!";
     public static final String ORDER_RESOLVED_BODY = "Conflict for order %s (%s) has been resolved. Status updated to RESOLVED.";
     
