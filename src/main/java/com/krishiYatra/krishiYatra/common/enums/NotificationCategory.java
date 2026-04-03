@@ -1,0 +1,16 @@
+package com.krishiYatra.krishiYatra.common.enums;
+
+public enum NotificationCategory {
+    ORDER_CREATED,
+    ORDER_ACCEPTED,
+    ORDER_SHIPPED,
+    ORDER_DELIVERED,
+    ORDER_CONFLICT,
+    DEMAND_CREATED,
+    DEMAND_ACCEPTED,
+    STOCK_LOW,
+    VERIFICATION_SUCCESS,
+    VERIFICATION_FAILURE,
+    GENERAL,
+    SYSTEM
+}

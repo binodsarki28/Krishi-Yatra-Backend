@@ -11,9 +11,7 @@ spring:
     mysql:
       url: jdbc:mysql://localhost:3306/krishi-yatra
       username: root
-      password: "WJ
-      
-      28@krhps" #
+      password: "WJ28@krhps"
     url: jdbc:h2:mem:krishi_yatra;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
     username: sa

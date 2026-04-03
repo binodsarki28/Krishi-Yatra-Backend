@@ -28,4 +28,8 @@ public class UserUtil {
         }
         return null;
     }
+
+    public static UserEntity checkCurrentUser() {
+        return getCurrentUser();
+    }
 }

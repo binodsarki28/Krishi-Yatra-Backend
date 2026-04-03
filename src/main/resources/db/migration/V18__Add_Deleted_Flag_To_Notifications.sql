@@ -1,0 +1,1 @@
+ALTER TABLE notifications ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE;
