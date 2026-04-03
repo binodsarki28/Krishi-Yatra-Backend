@@ -24,8 +24,9 @@ public class OrderCreatedNotificationHandler {
         if (dto.getBuyerUsername() != null) {
             String buyerTitle = NotificationConst.ORDER_CREATED_BUYER_TITLE;
             String buyerBody = String.format(NotificationConst.ORDER_CREATED_BUYER_BODY, productName, orderId);
+            String url = String.format(NotificationConst.TRACK_URL_BUYER, orderId);
             notificationService.sendToUser(dto.getBuyerUsername(), buyerTitle, buyerBody, 
-                NotificationType.BOTH, NotificationCategory.ORDER_CREATED);
+                NotificationType.PUSH, NotificationCategory.ORDER_CREATED, url);
         }
         
         // 2. Notify the Farmer
@@ -33,8 +34,9 @@ public class OrderCreatedNotificationHandler {
             String farmerTitle = NotificationConst.ORDER_CREATED_FARMER_TITLE;
             String farmerBody = String.format(NotificationConst.ORDER_CREATED_FARMER_BODY, productName, orderId);
             
+            String url = String.format(NotificationConst.TRACK_URL_FARMER, orderId);
             notificationService.sendToUser(dto.getFarmerUsername(), farmerTitle, farmerBody, 
-                NotificationType.BOTH, NotificationCategory.ORDER_CREATED);
+                NotificationType.PUSH, NotificationCategory.ORDER_CREATED, url);
         }
 
         // 3. Notify all VERIFIED Delivery Riders (Exclude the Buyer and the Farmer themselves)
@@ -50,7 +52,7 @@ public class OrderCreatedNotificationHandler {
             String deliveryBody = String.format(NotificationConst.ORDER_CREATED_DELIVERY_BODY, productName, orderId);
             
             notificationService.sendToUsers(deliveryUsernames, deliveryTitle, deliveryBody, 
-                NotificationType.PUSH, NotificationCategory.ORDER_CREATED);
+                NotificationType.PUSH, NotificationCategory.ORDER_CREATED, NotificationConst.AVAILABLE_JOBS_URL);
         }
     }
 }

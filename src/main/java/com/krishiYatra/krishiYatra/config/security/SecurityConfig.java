@@ -56,6 +56,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/stock/list", "/api/v1/stock/details/**", "/api/v1/stock/categories", "/api/v1/stock/subcategories").permitAll()
                         .requestMatchers("/api/v1/demand/list").permitAll()
                         .requestMatchers("/api/v1/notification/**").permitAll()
+                        .requestMatchers("/api/v1/order/detail/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().authenticated()
                 )

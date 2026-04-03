@@ -14,4 +14,6 @@ public class OrderNotificationDto {
     private String productName;
     private String farmerUsername;
     private String buyerUsername;
+    private String checkpointName;
+    private String deliveryUsername;
 }

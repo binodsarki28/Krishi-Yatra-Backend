@@ -11,12 +11,17 @@ import com.krishiYatra.krishiYatra.delivery.DeliveryEntity;
 import com.krishiYatra.krishiYatra.delivery.DeliveryRepo;
 import com.krishiYatra.krishiYatra.order.dto.OrderCreateRequest;
 import com.krishiYatra.krishiYatra.order.dto.OrderResponse;
-import com.krishiYatra.krishiYatra.order.mapper.OrderMapper;
+import com.krishiYatra.krishiYatra.notification.NotificationConst;
+import com.krishiYatra.krishiYatra.notification.NotificationService;
+import com.krishiYatra.krishiYatra.notification.dto.OrderNotificationDto;
+import com.krishiYatra.krishiYatra.notification.handler.*;
 import com.krishiYatra.krishiYatra.stock.StockEntity;
 import com.krishiYatra.krishiYatra.stock.StockRepo;
 import com.krishiYatra.krishiYatra.user.UserEntity;
 import com.krishiYatra.krishiYatra.farmer.FarmerRepo;
 import com.krishiYatra.krishiYatra.utils.UserUtil;
+import com.krishiYatra.krishiYatra.order.mapper.OrderMapper;
+import com.krishiYatra.krishiYatra.order.dao.IOrderDao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,15 +32,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class OrderService {
-    @PersistenceContext
-    private EntityManager em;
     private final OrderRepo orderRepo;
     private final StockRepo stockRepo;
     private final BuyerRepo buyerRepo;
@@ -43,8 +44,16 @@ public class OrderService {
     private final FarmerRepo farmerRepo;
     private final OrderMapper orderMapper;
     private final AddressService addressService;
-    private final com.krishiYatra.krishiYatra.order.dao.IOrderDao orderDao;
-    private final com.krishiYatra.krishiYatra.notification.handler.OrderCreatedNotificationHandler orderCreatedNotificationHandler;
+    private final IOrderDao orderDao;
+    private final NotificationService notificationService;
+    private final OrderCreatedNotificationHandler orderCreatedNotificationHandler;
+    private final OrderAcceptedNotificationHandler orderAcceptedNotificationHandler;
+    private final OrderPickedUpNotificationHandler orderPickedUpNotificationHandler;
+    private final OrderCheckpointNotificationHandler orderCheckpointNotificationHandler;
+    private final OrderDeliveredNotificationHandler orderDeliveredNotificationHandler;
+    private final OrderConflictNotificationHandler orderConflictNotificationHandler;
+    private final OrderResolvedNotificationHandler orderResolvedNotificationHandler;
+    private final OrderCancelledNotificationHandler orderCancelledNotificationHandler;
 
     @Transactional
     public ServerResponse createOrder(OrderCreateRequest request) {
@@ -91,15 +100,26 @@ public class OrderService {
         stock.setQuantity(stock.getQuantity() - request.getOrderQuantity());
         stockRepo.save(stock);
 
+        // Check if stock is low
+        if (stock.getQuantity() < stock.getMinQuantity()) {
+            String farmerName = stock.getFarmer().getUser().getUsername();
+            String title = NotificationConst.STOCK_LOW_TITLE;
+            String body = String.format(NotificationConst.STOCK_LOW_BODY, stock.getProductName(), stock.getQuantity());
+            
+            notificationService.sendToUser(farmerName, title, body, 
+                com.krishiYatra.krishiYatra.common.enums.NotificationType.PUSH, 
+                com.krishiYatra.krishiYatra.common.enums.NotificationCategory.STOCK_LOW,
+                String.format(NotificationConst.EDIT_STOCK_URL, stock.getStockSlug()));
+        }
+
         // Notify Buyer, Farmer, and Delivery Riders
         try {
-            com.krishiYatra.krishiYatra.notification.dto.OrderNotificationDto notificationDto = 
-                com.krishiYatra.krishiYatra.notification.dto.OrderNotificationDto.builder()
-                    .orderId(saved.getOrderId())
-                    .productName(stock.getProductName())
-                    .farmerUsername(stock.getFarmer().getUser().getUsername())
-                    .buyerUsername(buyer.getUser().getUsername())
-                    .build();
+            OrderNotificationDto notificationDto = OrderNotificationDto.builder()
+                .orderId(saved.getOrderId())
+                .productName(stock.getProductName())
+                .farmerUsername(stock.getFarmer().getUser().getUsername())
+                .buyerUsername(buyer.getUser().getUsername())
+                .build();
             orderCreatedNotificationHandler.handle(notificationDto);
         } catch (Exception e) {
             log.error("Failed to send order creation notifications: {}", e.getMessage());
@@ -130,16 +150,18 @@ public class OrderService {
             return ServerResponse.failureResponse(OrderConst.ORDER_NOT_AVAILABLE_FOR_DELIVERY, HttpStatus.BAD_REQUEST);
         }
 
-        /*
-        // Check vehicle compatibility
-        if (order.getVehicleType() != null && !order.getVehicleType().equalsIgnoreCase(delivery.getVehicleType().name())) {
-            return ServerResponse.failureResponse("Your vehicle type (" + delivery.getVehicleType() + ") does not match the required: " + order.getVehicleType(), HttpStatus.BAD_REQUEST);
-        }
-        */
-
         order.setDelivery(delivery);
         order.setOrderStatus(OrderStatus.ACCEPTED);
-        orderRepo.save(order);
+        OrderEntity savedOrder = orderRepo.save(order);
+
+        // Notify Buyer and Farmer (No notification for rider as they are the ones accepting)
+        OrderNotificationDto notificationDto = OrderNotificationDto.builder()
+                .orderId(savedOrder.getOrderId())
+                .productName(savedOrder.getStock().getProductName())
+                .buyerUsername(savedOrder.getBuyer().getUser().getUsername())
+                .farmerUsername(savedOrder.getStock().getFarmer().getUser().getUsername())
+                .build();
+        orderAcceptedNotificationHandler.handle(notificationDto);
 
         return ServerResponse.successResponse(OrderConst.DELIVERY_ACCEPTED, HttpStatus.OK);
     }
@@ -154,7 +176,16 @@ public class OrderService {
         }
         
         order.setOrderStatus(OrderStatus.SHIPPING);
-        orderRepo.save(order);
+        OrderEntity savedOrder = orderRepo.save(order);
+
+        // Notify Buyer only (Farmer already knows physically)
+        OrderNotificationDto notificationDto = OrderNotificationDto.builder()
+                .orderId(savedOrder.getOrderId())
+                .productName(savedOrder.getStock().getProductName())
+                .buyerUsername(savedOrder.getBuyer().getUser().getUsername())
+                .build();
+        orderPickedUpNotificationHandler.handle(notificationDto);
+
         return ServerResponse.successResponse("Order picked up and is now SHIPPING.", HttpStatus.OK);
     }
 
@@ -182,7 +213,6 @@ public class OrderService {
                     resp.setPickupAddress(order.getPickupAddress());
                     resp.setDropAddress(order.getDropAddress());
                     resp.setDeliveryFee(order.getDeliveryFee());
-                    // resp.setVehicleType(order.getVehicleType());
                     resp.setCheckpoints(order.getCheckpoints());
                     resp.setNotes(order.getNotes());
                     resp.setCreatedAt(order.getCreatedAt());
@@ -209,11 +239,11 @@ public class OrderService {
         resp.setPickupAddress(order.getPickupAddress());
         resp.setDropAddress(order.getDropAddress());
         resp.setDeliveryFee(order.getDeliveryFee());
-        // resp.setVehicleType(order.getVehicleType());
         resp.setCheckpoints(order.getCheckpoints());
         resp.setNotes(order.getNotes());
         resp.setCreatedAt(order.getCreatedAt());
         resp.setConflictMessage(order.getConflictMessage());
+        resp.setConflictRaisedAt(order.getConflictRaisedAt());
         
         // Set Farmer Information
         if (order.getFarmer() != null && order.getFarmer().getUser() != null) {
@@ -242,8 +272,33 @@ public class OrderService {
         if (order == null) return ServerResponse.failureResponse("Order not found", HttpStatus.NOT_FOUND);
         
         order.setCheckpoints(checkpoints);
-        orderRepo.save(order);
+        OrderEntity savedOrder = orderRepo.save(order);
+
+        // Notify Buyer and Farmer about the latest checkpoint reached
+        String latestCheckpoint = extractLatestCheckpoint(checkpoints);
+        if (latestCheckpoint != null) {
+            OrderNotificationDto notificationDto = OrderNotificationDto.builder()
+                .orderId(savedOrder.getOrderId())
+                .productName(savedOrder.getStock().getProductName())
+                .buyerUsername(savedOrder.getBuyer().getUser().getUsername())
+                .farmerUsername(savedOrder.getStock().getFarmer().getUser().getUsername())
+                .checkpointName(latestCheckpoint)
+                .build();
+            orderCheckpointNotificationHandler.handle(notificationDto);
+        }
+
         return ServerResponse.successResponse("Checkpoints updated", HttpStatus.OK);
+    }
+
+    private String extractLatestCheckpoint(String checkpoints) {
+        if (checkpoints == null || !checkpoints.contains("(Reached)")) return null;
+        String[] parts = checkpoints.split("\\|");
+        for (int i = parts.length - 1; i >= 0; i--) {
+            if (parts[i].contains("(Reached)")) {
+                return parts[i].replace("(Reached)", "").trim();
+            }
+        }
+        return null;
     }
 
     @Transactional
@@ -253,7 +308,16 @@ public class OrderService {
         
         order.setOrderStatus(OrderStatus.DELIVERED);
         order.setDeliveredAt(java.time.LocalDateTime.now());
-        orderRepo.save(order);
+        OrderEntity savedOrder = orderRepo.save(order);
+
+        // Notify Farmer only (Buyer is usually the one receiving it physically)
+        OrderNotificationDto notificationDto = OrderNotificationDto.builder()
+                .orderId(savedOrder.getOrderId())
+                .productName(savedOrder.getStock().getProductName())
+                .farmerUsername(savedOrder.getStock().getFarmer().getUser().getUsername())
+                .build();
+        orderDeliveredNotificationHandler.handle(notificationDto);
+
         return ServerResponse.successResponse("Order delivered successfully", HttpStatus.OK);
     }
 
@@ -329,12 +393,27 @@ public class OrderService {
         }
 
         order.setOrderStatus(OrderStatus.CANCELLED);
-        orderRepo.save(order);
+        OrderEntity savedOrder = orderRepo.save(order);
+
+        // Notify all 3 parties (Buyer, Farmer, and Delivery if assigned)
+        OrderNotificationDto notificationDto = OrderNotificationDto.builder()
+                .orderId(savedOrder.getOrderId())
+                .productName(savedOrder.getStock().getStockName())
+                .buyerUsername(savedOrder.getBuyer().getUser().getUsername())
+                .farmerUsername(savedOrder.getStock().getFarmer().getUser().getUsername())
+                .deliveryUsername(savedOrder.getDelivery() != null ? savedOrder.getDelivery().getUser().getUsername() : null)
+                .build();
+        orderCancelledNotificationHandler.handle(notificationDto);
+
         return ServerResponse.successResponse("Order cancelled successfully and stock restored.", HttpStatus.OK);
     }
 
     @Transactional
     public ServerResponse reportConflict(String orderId, String message) {
+        if (message == null || message.trim().isEmpty()) {
+            return ServerResponse.failureResponse("Conflict message is compulsory and cannot be empty.", HttpStatus.BAD_REQUEST);
+        }
+
         OrderEntity order = orderRepo.findById(orderId)
                 .orElse(null);
         if (order == null) return ServerResponse.failureResponse("Order not found", HttpStatus.NOT_FOUND);
@@ -346,7 +425,17 @@ public class OrderService {
         order.setOrderStatus(OrderStatus.CONFLICT);
         order.setConflictMessage(message);
         order.setConflictRaisedAt(java.time.LocalDateTime.now());
-        orderRepo.save(order);
+        OrderEntity savedOrder = orderRepo.save(order);
+
+        // Notify Farmer and Delivery (Buyer is already the one reporting it)
+        OrderNotificationDto notificationDto = OrderNotificationDto.builder()
+                .orderId(savedOrder.getOrderId())
+                .productName(savedOrder.getStock().getStockName())
+                .farmerUsername(savedOrder.getStock().getFarmer().getUser().getUsername())
+                .deliveryUsername(savedOrder.getDelivery() != null ? savedOrder.getDelivery().getUser().getUsername() : null)
+                .build();
+        orderConflictNotificationHandler.handle(notificationDto, message);
+
         return ServerResponse.successResponse("Conflict reported successfully. Admin will review it.", HttpStatus.OK);
     }
 
@@ -362,7 +451,18 @@ public class OrderService {
 
         order.setOrderStatus(OrderStatus.RESOLVED);
         order.setConflictResolvedAt(java.time.LocalDateTime.now());
-        orderRepo.save(order);
+        OrderEntity savedOrder = orderRepo.save(order);
+
+        // Notify Buyer, Farmer, and Delivery
+        OrderNotificationDto notificationDto = OrderNotificationDto.builder()
+                .orderId(savedOrder.getOrderId())
+                .productName(savedOrder.getStock().getStockName())
+                .buyerUsername(savedOrder.getBuyer().getUser().getUsername())
+                .farmerUsername(savedOrder.getStock().getFarmer().getUser().getUsername())
+                .deliveryUsername(savedOrder.getDelivery() != null ? savedOrder.getDelivery().getUser().getUsername() : null)
+                .build();
+        orderResolvedNotificationHandler.handle(notificationDto);
+
         return ServerResponse.successResponse("Conflict marked as RESOLVED.", HttpStatus.OK);
     }
 
@@ -408,12 +508,7 @@ public class OrderService {
             return ServerResponse.failureResponse("Unauthorized", HttpStatus.UNAUTHORIZED);
         }
 
-        Optional<com.krishiYatra.krishiYatra.farmer.FarmerEntity> farmerOpt = 
-            em.createQuery("SELECT f FROM FarmerEntity f WHERE f.user.userId = :userId", com.krishiYatra.krishiYatra.farmer.FarmerEntity.class)
-              .setParameter("userId", currentUser.getUserId())
-              .getResultList()
-              .stream()
-              .findFirst();
+        Optional<com.krishiYatra.krishiYatra.farmer.FarmerEntity> farmerOpt = farmerRepo.findByUser(currentUser);
 
         if (farmerOpt.isEmpty()) {
             return ServerResponse.failureResponse("Farmer profile not found", HttpStatus.NOT_FOUND);

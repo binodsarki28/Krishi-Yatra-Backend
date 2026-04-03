@@ -18,7 +18,7 @@ public class StockRequestDto {
     private String productName;
 
     private String description;
-    private String stockImages;
+    private java.util.List<String> stockImages;
 
     @NotNull(message = "Quantity is required")
     @Positive(message = "Quantity must be positive")

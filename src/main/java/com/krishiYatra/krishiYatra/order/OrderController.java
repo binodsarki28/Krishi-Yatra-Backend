@@ -61,7 +61,7 @@ public class OrderController {
 
     @Operation(summary = "Get order details by ID")
     @GetMapping("/detail/{orderId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<ServerResponse> getOrderDetails(@PathVariable String orderId) {
         ServerResponse response = orderService.getOrderById(orderId);
         return new ResponseEntity<>(response, response.getHttpStatus());
@@ -112,7 +112,7 @@ public class OrderController {
     @PostMapping("/report-conflict/{orderId}")
     @PreAuthorize("hasAuthority('BUYER')")
     public ResponseEntity<ServerResponse> reportConflict(@PathVariable String orderId, @RequestBody Map<String, String> body) {
-        String message = body.getOrDefault("message", "No message provided");
+        String message = body.get("conflictMessage");
         ServerResponse response = orderService.reportConflict(orderId, message);
         return new ResponseEntity<>(response, response.getHttpStatus());
     }

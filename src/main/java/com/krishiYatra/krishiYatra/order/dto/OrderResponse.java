@@ -31,5 +31,6 @@ public class OrderResponse {
     private String deliveryPhone;
 
     private String conflictMessage;
+    private LocalDateTime conflictRaisedAt;
     private LocalDateTime createdAt;
 }

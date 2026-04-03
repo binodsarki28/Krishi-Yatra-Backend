@@ -40,6 +40,9 @@ public class NotificationEntity extends Auditable {
     @Builder.Default
     @Column(name = "IS_DELETED")
     private boolean deleted = false;
+    
+    @Column(name = "ACTION_URL")
+    private String actionUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_GUID", nullable = false)

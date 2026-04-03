@@ -21,13 +21,15 @@ public class OrderMapperImpl implements OrderMapper {
         entity.setStock(stock);
         entity.setOrderQuantity(request.getOrderQuantity());
         entity.setPerUnitPrice(stock.getPricePerUnit());
-        entity.setTotalPrice(stock.getPricePerUnit() * request.getOrderQuantity());
+        double subTotal = stock.getPricePerUnit() * request.getOrderQuantity();
+        double deliveryFee = request.getDeliveryFee() != null ? request.getDeliveryFee() : 0.0;
+        entity.setTotalPrice(subTotal + deliveryFee);
         entity.setPickupAddress(request.getPickupAddress());
         entity.setDropAddress(request.getDropAddress());
 //        entity.setVehicleType(request.getVehicleType());
         entity.setCheckpoints(request.getCheckpoints());
         entity.setNotes(request.getNotes());
-        entity.setDeliveryFee(request.getDeliveryFee());
+        entity.setDeliveryFee(deliveryFee);
         return entity;
     }
 
@@ -56,6 +58,7 @@ public class OrderMapperImpl implements OrderMapper {
         response.setNotes(entity.getNotes());
         response.setCreatedAt(entity.getCreatedAt());
         response.setConflictMessage(entity.getConflictMessage());
+        response.setConflictRaisedAt(entity.getConflictRaisedAt());
 
         if (entity.getFarmer() != null && entity.getFarmer().getUser() != null) {
             response.setFarmerName(entity.getFarmer().getUser().getFullName());

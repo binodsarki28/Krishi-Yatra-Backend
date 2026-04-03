@@ -95,7 +95,7 @@ public class NotificationService {
         }
     }
 
-    public ServerResponse sendToUser(String username, String title, String body, NotificationType type, NotificationCategory category) {
+    public ServerResponse sendToUser(String username, String title, String body, NotificationType type, NotificationCategory category, String actionUrl) {
         UserEntity user = userRepo.findByUsername(username).orElse(null);
         if (user == null) {
             return ServerResponse.failureResponse(NotificationConst.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
@@ -108,6 +108,7 @@ public class NotificationService {
                 .body(body)
                 .category(category)
                 .read(false)
+                .actionUrl(actionUrl)
                 .build();
         notificationRepo.save(notification);
 
@@ -133,12 +134,16 @@ public class NotificationService {
         return ServerResponse.successResponse(NotificationConst.NOTIFICATION_SENT, HttpStatus.OK);
     }
 
+    public ServerResponse sendToUser(String username, String title, String body, NotificationType type, NotificationCategory category) {
+        return sendToUser(username, title, body, type, category, null);
+    }
+
     public ServerResponse sendToUser(String username, String title, String body, NotificationType type) {
-        return sendToUser(username, title, body, type, NotificationCategory.GENERAL);
+        return sendToUser(username, title, body, type, NotificationCategory.GENERAL, null);
     }
 
     public ServerResponse sendToUser(String username, String title, String body) {
-        return sendToUser(username, title, body, NotificationType.PUSH, NotificationCategory.GENERAL);
+        return sendToUser(username, title, body, NotificationType.PUSH, NotificationCategory.GENERAL, null);
     }
 
     public ServerResponse getUserNotifications(String username, int page, int size) {
@@ -160,6 +165,7 @@ public class NotificationService {
                         .body(n.getBody())
                         .category(n.getCategory())
                         .read(n.isRead())
+                        .actionUrl(n.getActionUrl())
                         .createdAt(n.getCreatedAt())
                         .build())
                 .collect(Collectors.toList());
@@ -172,10 +178,14 @@ public class NotificationService {
         );
     }
 
-    public void sendToUsers(List<String> usernames, String title, String body, NotificationType type, NotificationCategory category) {
+    public void sendToUsers(List<String> usernames, String title, String body, NotificationType type, NotificationCategory category, String actionUrl) {
         for (String uname : usernames) {
-            sendToUser(uname, title, body, type, category);
+            sendToUser(uname, title, body, type, category, actionUrl);
         }
+    }
+
+    public void sendToUsers(List<String> usernames, String title, String body, NotificationType type, NotificationCategory category) {
+        sendToUsers(usernames, title, body, type, category, null);
     }
 
     public List<String> findUsernamesByRole(String roleNameStr) {

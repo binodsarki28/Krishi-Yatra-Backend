@@ -13,5 +13,6 @@ public class NotificationResponse {
     private String body;
     private NotificationCategory category;
     private boolean read;
+    private String actionUrl;
     private LocalDateTime createdAt;
 }
