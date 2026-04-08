@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -45,16 +46,24 @@ public class DemandService {
     @Transactional
     public ServerResponse createDemand(DemandCreateRequest request) {
         UserEntity currentUser = UserUtil.getCurrentUser();
-        if (currentUser == null) return ServerResponse.failureResponse("Unauthorized", HttpStatus.UNAUTHORIZED);
+        if (currentUser == null) {
+            return ServerResponse.failureResponse("Unauthorized", HttpStatus.UNAUTHORIZED);
+        }
 
         BuyerEntity buyer = buyerRepo.findByUser(currentUser).orElse(null);
-        if (buyer == null) return ServerResponse.failureResponse(DemandConst.ONLY_BUYERS, HttpStatus.FORBIDDEN);
+        if (buyer == null) {
+            return ServerResponse.failureResponse(DemandConst.ONLY_BUYERS, HttpStatus.FORBIDDEN);
+        }
 
         CategoryEntity category = categoryRepo.findById(request.getCategoryId()).orElse(null);
-        if (category == null) return ServerResponse.failureResponse("Category not found", HttpStatus.NOT_FOUND);
+        if (category == null) {
+            return ServerResponse.failureResponse("Category not found", HttpStatus.NOT_FOUND);
+        }
 
         SubCategoryEntity subCategory = subCategoryRepo.findById(request.getSubCategoryId()).orElse(null);
-        if (subCategory == null) return ServerResponse.failureResponse("Sub-category not found", HttpStatus.NOT_FOUND);
+        if (subCategory == null) {
+            return ServerResponse.failureResponse("Sub-category not found", HttpStatus.NOT_FOUND);
+        }
 
         DemandEntity entity = demandMapper.toEntity(request, category, subCategory, buyer);
         entity.setStatus(DemandStatus.OPEN);
@@ -89,7 +98,9 @@ public class DemandService {
     public ServerResponse getFarmerFulfilledDemands(int page, int size) {
         UserEntity currentUser = UserUtil.getCurrentUser();
         FarmerEntity farmer = farmerRepo.findByUser(currentUser).orElse(null);
-        if (farmer == null) return ServerResponse.failureResponse(DemandConst.ONLY_FARMERS, HttpStatus.FORBIDDEN);
+        if (farmer == null) {
+            return ServerResponse.failureResponse(DemandConst.ONLY_FARMERS, HttpStatus.FORBIDDEN);
+        }
         
         Map<String, String> params = Map.of("farmerGuid", farmer.getFarmerId(), "active", "true");
         Pageable pageable = PageRequest.of(page, size);
@@ -102,9 +113,11 @@ public class DemandService {
     public ServerResponse cancelDemand(String demandId) {
         UserEntity currentUser = UserUtil.getCurrentUser();
         DemandEntity demand = demandRepo.findById(demandId).orElse(null);
-        if (demand == null) return ServerResponse.failureResponse(DemandConst.DEMAND_NOT_FOUND, HttpStatus.NOT_FOUND);
+        if (demand == null) {
+            return ServerResponse.failureResponse(DemandConst.DEMAND_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
 
-        if (!demand.getBuyer().getUser().getUserId().equals(currentUser.getUserId())) {
+        if (!demand.getBuyer().getUser().getUserId().equals(Objects.requireNonNull(currentUser).getUserId())) {
             return ServerResponse.failureResponse(DemandConst.NOT_AUTHORIZED, HttpStatus.FORBIDDEN);
         }
 
@@ -122,10 +135,14 @@ public class DemandService {
     public ServerResponse acceptDemand(String demandId) {
         UserEntity currentUser = UserUtil.getCurrentUser();
         FarmerEntity farmer = farmerRepo.findByUser(currentUser).orElse(null);
-        if (farmer == null) return ServerResponse.failureResponse(DemandConst.ONLY_FARMERS, HttpStatus.FORBIDDEN);
+        if (farmer == null) {
+            return ServerResponse.failureResponse(DemandConst.ONLY_FARMERS, HttpStatus.FORBIDDEN);
+        }
 
         DemandEntity demand = demandRepo.findById(demandId).orElse(null);
-        if (demand == null) return ServerResponse.failureResponse(DemandConst.DEMAND_NOT_FOUND, HttpStatus.NOT_FOUND);
+        if (demand == null) {
+            return ServerResponse.failureResponse(DemandConst.DEMAND_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
 
         if (demand.getStatus() != DemandStatus.OPEN) {
             return ServerResponse.failureResponse(DemandConst.INVALID_STATUS, HttpStatus.BAD_REQUEST);

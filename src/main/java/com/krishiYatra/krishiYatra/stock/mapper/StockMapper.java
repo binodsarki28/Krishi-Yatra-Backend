@@ -1,9 +1,9 @@
 package com.krishiYatra.krishiYatra.stock.mapper;
 
 import com.krishiYatra.krishiYatra.stock.StockEntity;
-import com.krishiYatra.krishiYatra.stock.dto.StockListResponse;
-import com.krishiYatra.krishiYatra.stock.dto.StockRequestDto;
-import com.krishiYatra.krishiYatra.stock.dto.StockResponseDto;
+import com.krishiYatra.krishiYatra.stock.category.CategoryEntity;
+import com.krishiYatra.krishiYatra.stock.dto.*;
+import com.krishiYatra.krishiYatra.stock.subCategory.SubCategoryEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -43,7 +43,7 @@ public class StockMapper {
         dto.setProductName(entity.getProductName());
         dto.setStockSlug(entity.getStockSlug());
         dto.setDescription(entity.getDescription());
-        dto.setStockImages(entity.getStockImageUrls()); // Use helper method
+        dto.setStockImages(entity.getStockImageUrls());
         dto.setQuantity(entity.getQuantity());
         dto.setPricePerUnit(entity.getPricePerUnit());
         dto.setMinQuantity(entity.getMinQuantity());
@@ -93,12 +93,12 @@ public class StockMapper {
         return dto;
     }
 
-    public com.krishiYatra.krishiYatra.stock.dto.CategoryResponseDto toCategoryDto(com.krishiYatra.krishiYatra.stock.category.CategoryEntity entity) {
-        return new com.krishiYatra.krishiYatra.stock.dto.CategoryResponseDto(entity.getCategoryId(), entity.getCategoryName());
+    public CategoryResponseDto toCategoryDto(CategoryEntity entity) {
+        return new CategoryResponseDto(entity.getCategoryId(), entity.getCategoryName());
     }
 
-    public com.krishiYatra.krishiYatra.stock.dto.SubCategoryResponseDto toSubCategoryDto(com.krishiYatra.krishiYatra.stock.subCategory.SubCategoryEntity entity) {
-        return new com.krishiYatra.krishiYatra.stock.dto.SubCategoryResponseDto(
+    public SubCategoryResponseDto toSubCategoryDto(SubCategoryEntity entity) {
+        return new SubCategoryResponseDto(
                 entity.getSubCategoryId(),
                 entity.getSubCategoryName(),
                 entity.getCategory() != null ? entity.getCategory().getCategoryId() : null,

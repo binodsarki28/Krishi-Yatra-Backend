@@ -35,15 +35,12 @@ public class EmailService {
 
     private void sendEmail(String toEmail, String subject, String body) {
         try {
-            System.out.println("EmailService: Starting to send email to [" + toEmail + "]");
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(fromEmail);
             message.setTo(toEmail);
             message.setSubject(subject);
             message.setText(body);
-
             mailSender.send(message);
-            System.out.println("EmailService: Email successfully sent to [" + toEmail + "]");
         } catch (Exception e) {
             System.err.println("EmailService: ERROR sending email to [" + toEmail + "]. Error: " + e.getMessage());
             e.printStackTrace();

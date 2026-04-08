@@ -13,6 +13,4 @@ public interface FirebaseRepo extends JpaRepository<FirebaseEntity, Long> {
     Optional<FirebaseEntity> findByFcmToken(String fcmToken);
 
     List<FirebaseEntity> findAllByUser(UserEntity user);
-
-    void deleteAllByUser(UserEntity user);
 }

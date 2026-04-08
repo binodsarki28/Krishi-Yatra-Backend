@@ -6,8 +6,6 @@ import com.krishiYatra.krishiYatra.farmer.dto.FarmerDetailResponse;
 import com.krishiYatra.krishiYatra.farmer.dto.RegisterFarmerRequest;
 import com.krishiYatra.krishiYatra.farmer.dto.VerifyFarmerRequest;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -62,7 +60,9 @@ public class FarmerController {
 
     @PostMapping("/block-unblock/{username}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<ServerResponse> blockUnblockFarmer(@PathVariable String username, @RequestParam boolean block, @RequestParam(required = false) String reason) {
+    public ResponseEntity<ServerResponse> blockUnblockFarmer(@PathVariable String username,
+                                                             @RequestParam boolean block,
+                                                             @RequestParam(required = false) String reason) {
         return new ResponseEntity<>(farmerService.blockUnblockFarmer(username, block, reason), HttpStatus.OK);
     }
 

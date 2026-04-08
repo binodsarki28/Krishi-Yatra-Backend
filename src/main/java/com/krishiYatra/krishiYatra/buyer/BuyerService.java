@@ -1,24 +1,28 @@
 package com.krishiYatra.krishiYatra.buyer;
 
+import com.krishiYatra.krishiYatra.buyer.dao.IBuyerDao;
 import com.krishiYatra.krishiYatra.buyer.dto.BuyerListResponse;
 import com.krishiYatra.krishiYatra.buyer.dto.BuyerDetailResponse;
 import com.krishiYatra.krishiYatra.buyer.dto.RegisterBuyerRequest;
 import com.krishiYatra.krishiYatra.buyer.dto.VerifyBuyerRequest;
 import com.krishiYatra.krishiYatra.buyer.mapper.BuyerMapper;
 import com.krishiYatra.krishiYatra.common.enums.RoleType;
+import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
+import com.krishiYatra.krishiYatra.notification.handler.VerificationNotificationHandler;
 import com.krishiYatra.krishiYatra.user.RoleRepo;
 import com.krishiYatra.krishiYatra.user.UserEntity;
 import com.krishiYatra.krishiYatra.user.UserRepo;
 import com.krishiYatra.krishiYatra.utils.UserUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -30,11 +34,11 @@ public class BuyerService {
     private final RoleRepo roleRepo;
     private final BuyerMapper buyerMapper;
 
-    private final com.krishiYatra.krishiYatra.buyer.dao.IBuyerDao buyerDao;
-    private final com.krishiYatra.krishiYatra.notification.handler.VerificationNotificationHandler verificationNotificationHandler;
+    private final IBuyerDao buyerDao;
+    private final VerificationNotificationHandler verificationNotificationHandler;
 
     @Transactional(readOnly = true)
-    public List<BuyerListResponse> getBuyers(java.util.Map<String, String> params, org.springframework.data.domain.Pageable pageable) {
+    public List<BuyerListResponse> getBuyers(Map<String, String> params, Pageable pageable) {
         return buyerDao.getAllBuyers(params, pageable);
     }
 
@@ -72,7 +76,7 @@ public class BuyerService {
                 .orElseThrow(() -> new RuntimeException(BuyerConst.REGISTRATION_NOT_FOUND));
 
         if (request.getApproved()) {
-            buyer.setStatus(com.krishiYatra.krishiYatra.common.enums.VerificationStatus.VERIFIED);
+            buyer.setStatus(VerificationStatus.VERIFIED);
             buyerRepo.save(buyer);
 
             // Notify buyer
@@ -109,10 +113,10 @@ public class BuyerService {
                 .orElseThrow(() -> new RuntimeException(BuyerConst.REGISTRATION_NOT_FOUND));
         
         if (block) {
-            buyer.setStatus(com.krishiYatra.krishiYatra.common.enums.VerificationStatus.BLOCKED);
+            buyer.setStatus(VerificationStatus.BLOCKED);
             buyer.setStatusMessage(reason);
         } else {
-            buyer.setStatus(com.krishiYatra.krishiYatra.common.enums.VerificationStatus.VERIFIED);
+            buyer.setStatus(VerificationStatus.VERIFIED);
             buyer.setStatusMessage(null);
         }
         

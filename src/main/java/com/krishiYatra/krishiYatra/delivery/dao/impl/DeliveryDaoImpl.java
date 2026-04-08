@@ -1,6 +1,7 @@
 package com.krishiYatra.krishiYatra.delivery.dao.impl;
 
 import com.krishiYatra.krishiYatra.common.enums.VehicleType;
+import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
 import com.krishiYatra.krishiYatra.delivery.DeliveryEntity;
 import com.krishiYatra.krishiYatra.delivery.dao.IDeliveryDao;
 import com.krishiYatra.krishiYatra.delivery.dto.DeliveryListResponse;
@@ -23,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -83,7 +83,7 @@ public class DeliveryDaoImpl implements IDeliveryDao {
         }
         if (params.containsKey("status")) {
             try {
-                com.krishiYatra.krishiYatra.common.enums.VerificationStatus stat = com.krishiYatra.krishiYatra.common.enums.VerificationStatus.valueOf(params.get("status").toUpperCase());
+                VerificationStatus stat = VerificationStatus.valueOf(params.get("status").toUpperCase());
                 predicates.add(cb.equal(root.get("status"), stat));
             } catch (IllegalArgumentException e) {
                 // Ignore invalid status

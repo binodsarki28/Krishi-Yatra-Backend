@@ -18,7 +18,7 @@ public class OrderAcceptedNotificationHandler {
         String orderId = dto.getOrderId();
         String productName = dto.getProductName();
 
-        // 1. Notify the Buyer
+        // Notify the Buyer
         if (dto.getBuyerUsername() != null) {
             String buyerTitle = NotificationConst.ORDER_ACCEPTED_BUYER_TITLE;
             String buyerBody = String.format(NotificationConst.ORDER_ACCEPTED_BUYER_BODY, productName, orderId);
@@ -27,7 +27,7 @@ public class OrderAcceptedNotificationHandler {
                 NotificationType.PUSH, NotificationCategory.ORDER_ACCEPTED, url);
         }
         
-        // 2. Notify the Farmer
+        //Notify the Farmer
         if (dto.getFarmerUsername() != null) {
             String farmerTitle = NotificationConst.ORDER_ACCEPTED_FARMER_TITLE;
             String farmerBody = String.format(NotificationConst.ORDER_ACCEPTED_FARMER_BODY, productName, orderId);

@@ -4,11 +4,14 @@ import com.krishiYatra.krishiYatra.address.AddressService;
 import com.krishiYatra.krishiYatra.address.dto.AddressResponse;
 import com.krishiYatra.krishiYatra.buyer.BuyerEntity;
 import com.krishiYatra.krishiYatra.buyer.BuyerRepo;
+import com.krishiYatra.krishiYatra.common.enums.NotificationCategory;
+import com.krishiYatra.krishiYatra.common.enums.NotificationType;
 import com.krishiYatra.krishiYatra.common.enums.OrderStatus;
 import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
 import com.krishiYatra.krishiYatra.delivery.DeliveryEntity;
 import com.krishiYatra.krishiYatra.delivery.DeliveryRepo;
+import com.krishiYatra.krishiYatra.farmer.FarmerEntity;
 import com.krishiYatra.krishiYatra.order.dto.OrderCreateRequest;
 import com.krishiYatra.krishiYatra.order.dto.OrderResponse;
 import com.krishiYatra.krishiYatra.notification.NotificationConst;
@@ -24,6 +27,7 @@ import com.krishiYatra.krishiYatra.order.mapper.OrderMapper;
 import com.krishiYatra.krishiYatra.order.dao.IOrderDao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,15 +104,14 @@ public class OrderService {
         stock.setQuantity(stock.getQuantity() - request.getOrderQuantity());
         stockRepo.save(stock);
 
-        // Check if stock is low
         if (stock.getQuantity() < stock.getMinQuantity()) {
             String farmerName = stock.getFarmer().getUser().getUsername();
             String title = NotificationConst.STOCK_LOW_TITLE;
             String body = String.format(NotificationConst.STOCK_LOW_BODY, stock.getProductName(), stock.getQuantity());
             
             notificationService.sendToUser(farmerName, title, body, 
-                com.krishiYatra.krishiYatra.common.enums.NotificationType.PUSH, 
-                com.krishiYatra.krishiYatra.common.enums.NotificationCategory.STOCK_LOW,
+                NotificationType.PUSH,
+                NotificationCategory.STOCK_LOW,
                 String.format(NotificationConst.EDIT_STOCK_URL, stock.getStockSlug()));
         }
 
@@ -169,7 +172,7 @@ public class OrderService {
     @Transactional
     public ServerResponse markAsPickedUp(String orderId) {
         OrderEntity order = orderRepo.findById(orderId).orElse(null);
-        if (order == null) return ServerResponse.failureResponse("Order not found", HttpStatus.NOT_FOUND);
+        if (order == null) return ServerResponse.failureResponse(OrderConst.ORDER_NOT_FOUND, HttpStatus.NOT_FOUND);
         
         if (order.getOrderStatus() != OrderStatus.ACCEPTED) {
             return ServerResponse.failureResponse("Order must be ACCEPTED before picking up.", HttpStatus.BAD_REQUEST);
@@ -191,10 +194,14 @@ public class OrderService {
 
     public ServerResponse getPendingOrders() {
         UserEntity currentUser = UserUtil.getCurrentUser();
-        if (currentUser == null) return ServerResponse.failureResponse("Unauthorized", HttpStatus.UNAUTHORIZED);
+        if (currentUser == null) {
+            return ServerResponse.failureResponse("Unauthorized", HttpStatus.UNAUTHORIZED);
+        }
         
         DeliveryEntity delivery = deliveryRepo.findByUser(currentUser).orElse(null);
-        if (delivery == null) return ServerResponse.failureResponse("Delivery profile not found", HttpStatus.NOT_FOUND);
+        if (delivery == null) {
+            return ServerResponse.failureResponse("Delivery profile not found", HttpStatus.NOT_FOUND);
+        }
 
         List<OrderEntity> pendingOrders = orderRepo.findByDeliveryIsNullAndOrderStatus(
             OrderStatus.PENDING
@@ -263,13 +270,13 @@ public class OrderService {
             resp.setDeliveryPhone(order.getDelivery().getUser().getPhoneNumber());
         }
         
-        return ServerResponse.successObjectResponse("Order details fetched", HttpStatus.OK, resp, 1);
+        return ServerResponse.successObjectResponse(OrderConst.ORDER_DETAIL, HttpStatus.OK, resp, 1);
     }
 
     @Transactional
     public ServerResponse updateOrderCheckpoints(String orderId, String checkpoints) {
         OrderEntity order = orderRepo.findById(orderId).orElse(null);
-        if (order == null) return ServerResponse.failureResponse("Order not found", HttpStatus.NOT_FOUND);
+        if (order == null) return ServerResponse.failureResponse(OrderConst.ORDER_NOT_FOUND, HttpStatus.NOT_FOUND);
         
         order.setCheckpoints(checkpoints);
         OrderEntity savedOrder = orderRepo.save(order);
@@ -291,7 +298,9 @@ public class OrderService {
     }
 
     private String extractLatestCheckpoint(String checkpoints) {
-        if (checkpoints == null || !checkpoints.contains("(Reached)")) return null;
+        if (checkpoints == null || !checkpoints.contains("(Reached)")) {
+            return null;
+        }
         String[] parts = checkpoints.split("\\|");
         for (int i = parts.length - 1; i >= 0; i--) {
             if (parts[i].contains("(Reached)")) {
@@ -304,13 +313,15 @@ public class OrderService {
     @Transactional
     public ServerResponse markOrderAsDelivered(String orderId) {
         OrderEntity order = orderRepo.findById(orderId).orElse(null);
-        if (order == null) return ServerResponse.failureResponse("Order not found", HttpStatus.NOT_FOUND);
-        
+        if (order == null) {
+            return ServerResponse.failureResponse(OrderConst.ORDER_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
+
         order.setOrderStatus(OrderStatus.DELIVERED);
         order.setDeliveredAt(java.time.LocalDateTime.now());
         OrderEntity savedOrder = orderRepo.save(order);
 
-        // Notify Farmer only (Buyer is usually the one receiving it physically)
+        // Notify Farmer
         OrderNotificationDto notificationDto = OrderNotificationDto.builder()
                 .orderId(savedOrder.getOrderId())
                 .productName(savedOrder.getStock().getProductName())
@@ -318,7 +329,7 @@ public class OrderService {
                 .build();
         orderDeliveredNotificationHandler.handle(notificationDto);
 
-        return ServerResponse.successResponse("Order delivered successfully", HttpStatus.OK);
+        return ServerResponse.successResponse(OrderConst.ORDER_DELIVERED, HttpStatus.OK);
     }
 
     public ServerResponse getFarmerAddressByStockSlug(String stockSlug) {
@@ -340,10 +351,14 @@ public class OrderService {
 
     public ServerResponse getMyAcceptedOrders() {
         UserEntity currentUser = UserUtil.getCurrentUser();
-        if (currentUser == null) return ServerResponse.failureResponse("Unauthorized", HttpStatus.UNAUTHORIZED);
+        if (currentUser == null) {
+            return ServerResponse.failureResponse("Unauthorized", HttpStatus.UNAUTHORIZED);
+        }
 
         DeliveryEntity delivery = deliveryRepo.findByUser(currentUser).orElse(null);
-        if (delivery == null) return ServerResponse.failureResponse("Delivery profile not found", HttpStatus.NOT_FOUND);
+        if (delivery == null) {
+            return ServerResponse.failureResponse("Delivery profile not found", HttpStatus.NOT_FOUND);
+        }
 
         List<OrderEntity> acceptedOrders = orderRepo.findByDeliveryAndOrderStatusIn(
             delivery, 
@@ -379,9 +394,11 @@ public class OrderService {
     public ServerResponse cancelOrder(String orderId) {
         OrderEntity order = orderRepo.findById(orderId)
                 .orElse(null);
-        if (order == null) return ServerResponse.failureResponse("Order not found", HttpStatus.NOT_FOUND);
+        if (order == null) {
+            return ServerResponse.failureResponse(OrderConst.ORDER_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
 
-        if (order.getOrderStatus() == OrderStatus.DELIVERED || order.getOrderStatus() == OrderStatus.CANCELLED) {
+        if (order.getOrderStatus() == OrderStatus.DELIVERED || order.getOrderStatus() == OrderStatus.CANCELLED || order.getOrderStatus() == OrderStatus.RESOLVED) {
             return ServerResponse.failureResponse("Cannot cancel an order that is already delivered or cancelled.", HttpStatus.BAD_REQUEST);
         }
 
@@ -395,7 +412,7 @@ public class OrderService {
         order.setOrderStatus(OrderStatus.CANCELLED);
         OrderEntity savedOrder = orderRepo.save(order);
 
-        // Notify all 3 parties (Buyer, Farmer, and Delivery if assigned)
+        // Notify all 3 parties (Buyer, Farmer, and Delivery)
         OrderNotificationDto notificationDto = OrderNotificationDto.builder()
                 .orderId(savedOrder.getOrderId())
                 .productName(savedOrder.getStock().getStockName())
@@ -416,7 +433,7 @@ public class OrderService {
 
         OrderEntity order = orderRepo.findById(orderId)
                 .orElse(null);
-        if (order == null) return ServerResponse.failureResponse("Order not found", HttpStatus.NOT_FOUND);
+        if (order == null) return ServerResponse.failureResponse(OrderConst.ORDER_NOT_FOUND, HttpStatus.NOT_FOUND);
 
         if (order.getOrderStatus() != OrderStatus.DELIVERED) {
             return ServerResponse.failureResponse("Conflict can only be reported for delivered orders.", HttpStatus.BAD_REQUEST);
@@ -443,7 +460,7 @@ public class OrderService {
     public ServerResponse resolveConflict(String orderId) {
         OrderEntity order = orderRepo.findById(orderId)
                 .orElse(null);
-        if (order == null) return ServerResponse.failureResponse("Order not found", HttpStatus.NOT_FOUND);
+        if (order == null) return ServerResponse.failureResponse(OrderConst.ORDER_NOT_FOUND, HttpStatus.NOT_FOUND);
 
         if (order.getOrderStatus() != OrderStatus.CONFLICT) {
             return ServerResponse.failureResponse("Only orders with CONFLICT status can be resolved.", HttpStatus.BAD_REQUEST);
@@ -502,13 +519,13 @@ public class OrderService {
         return ServerResponse.successObjectResponse("Your bought orders fetched successfully.", HttpStatus.OK, orders, orders.size());
     }
 
-    public ServerResponse getOrdersByFarmer(Map<String, String> requestParams, org.springframework.data.domain.Pageable pageable) {
+    public ServerResponse getOrdersByFarmer(Map<String, String> requestParams, Pageable pageable) {
         UserEntity currentUser = UserUtil.getCurrentUser();
         if (currentUser == null) {
             return ServerResponse.failureResponse("Unauthorized", HttpStatus.UNAUTHORIZED);
         }
 
-        Optional<com.krishiYatra.krishiYatra.farmer.FarmerEntity> farmerOpt = farmerRepo.findByUser(currentUser);
+        Optional<FarmerEntity> farmerOpt = farmerRepo.findByUser(currentUser);
 
         if (farmerOpt.isEmpty()) {
             return ServerResponse.failureResponse("Farmer profile not found", HttpStatus.NOT_FOUND);
@@ -520,7 +537,7 @@ public class OrderService {
         return ServerResponse.successObjectResponse("Your sold orders fetched successfully.", HttpStatus.OK, orders, orders.size());
     }
 
-    public ServerResponse getOrdersByDelivery(Map<String, String> requestParams, org.springframework.data.domain.Pageable pageable) {
+    public ServerResponse getOrdersByDelivery(Map<String, String> requestParams, Pageable pageable) {
         UserEntity currentUser = UserUtil.getCurrentUser();
         if (currentUser == null) {
             return ServerResponse.failureResponse("Unauthorized", HttpStatus.UNAUTHORIZED);

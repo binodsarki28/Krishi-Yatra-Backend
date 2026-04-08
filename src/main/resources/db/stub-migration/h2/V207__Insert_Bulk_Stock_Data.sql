@@ -86,4 +86,6 @@ INSERT INTO STOCKS (STOCK_GUID, STOCK_NAME, PRODUCT_NAME, STOCK_SLUG, DESCRIPTIO
 ('stk_51', 'Fresh Rosemary', 'Herbs', 'rosemary-1', 'Culinary rosemary sprigs.', 10.0, 180.0, TRUE, 'f_id_01', 8, 28, 'System', CURRENT_TIMESTAMP),
 ('stk_52', 'Buffalo Butter', 'Dairy', 'buffalo-butter-1', 'Pure churned buffalo butter.', 40.0, 950.0, TRUE, 'f_id_06', 7, 26, 'System', CURRENT_TIMESTAMP),
 ('stk_53', 'Catfish', 'Fish', 'catfish-1', 'Fresh catfish for grilling.', 25.0, 400.0, TRUE, 'f_id_05', 6, 22, 'System', CURRENT_TIMESTAMP),
-('stk_54', 'Dill Leaves', 'Herbs', 'dill-leaves-1', 'Fresh dill leaves for garnish.', 15.0, 60.0, TRUE, 'f_id_01', 8, 27, 'System', CURRENT_TIMESTAMP);
+('stk_54', 'Dill Leaves', 'Herbs', 'dill-leaves-1', 'Fresh dill leaves for garnish.', 15.0, 60.0, TRUE, 'f_id_01', 8, 27, 'System', CURRENT_TIMESTAMP),
+('stk_55', 'Fresh Red Tomatoes', 'Tomato', 'red-tomatoes-1', 'Hand-picked organic tomatoes.', 500.0, 80.0, TRUE, 'f0000000-0000-0000-0000-000000000001', 2, 2, 'System', CURRENT_TIMESTAMP),
+('stk_56', 'Himalayan Apples', 'Apple', 'himalayan-apples-1', 'Crispy and sweet mountain apples.', 200.0, 250.0, TRUE, 'f0000000-0000-0000-0000-000000000001', 3, 7, 'System', CURRENT_TIMESTAMP);

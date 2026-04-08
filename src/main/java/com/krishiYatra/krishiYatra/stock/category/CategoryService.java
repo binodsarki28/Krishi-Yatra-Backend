@@ -3,6 +3,7 @@ package com.krishiYatra.krishiYatra.stock.category;
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
 import com.krishiYatra.krishiYatra.stock.category.dto.CategoryRequest;
 import com.krishiYatra.krishiYatra.stock.category.dto.CategoryResponse;
+import com.krishiYatra.krishiYatra.stock.subCategory.SubCategoryEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ public class CategoryService {
     public ServerResponse createCategory(CategoryRequest request) {
         String formattedName = capitalizeFirstLetter(request.getName());
         
-        // Case-insensitive exact match check (You could write a custom query in repo, or simply stream)
+        // Case-insensitive exact match check
         boolean exists = categoryRepo.findAll().stream()
                 .anyMatch(c -> c.getCategoryName().equalsIgnoreCase(formattedName));
                 
@@ -62,7 +63,7 @@ public class CategoryService {
         category.setActive(!category.isActive());
         
         if (category.getSubCategories() != null) {
-            for (com.krishiYatra.krishiYatra.stock.subCategory.SubCategoryEntity sub : category.getSubCategories()) {
+            for (SubCategoryEntity sub : category.getSubCategories()) {
                 sub.setActive(category.isActive());
             }
         }

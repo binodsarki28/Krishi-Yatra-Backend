@@ -1,6 +1,7 @@
 package com.krishiYatra.krishiYatra.common.exception;
 
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
+import com.krishiYatra.krishiYatra.user.UserConst;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -33,13 +34,13 @@ public class GlobalExceptionHandler {
             BadCredentialsException.class,
             InternalAuthenticationServiceException.class})
     public ResponseEntity<ServerResponse> handleAuthenticationException() {
-        ServerResponse response = ServerResponse.failureResponse(com.krishiYatra.krishiYatra.user.constant.UserConst.INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
+        ServerResponse response = ServerResponse.failureResponse(UserConst.INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
     
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ServerResponse> handleGeneralException(Exception ex) {
-        System.err.println("ANTIGRAVITY ERROR CAUGHT in GlobalHandler: " + ex.getClass().getName());
+        System.err.println("An Unexpected Error Occur: " + ex.getClass().getName());
         ex.printStackTrace();
         String errMsg = ex.getMessage();
         if (errMsg == null || errMsg.isEmpty()) {
@@ -49,3 +50,4 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
+

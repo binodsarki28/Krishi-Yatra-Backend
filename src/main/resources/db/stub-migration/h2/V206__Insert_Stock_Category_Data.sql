@@ -39,7 +39,7 @@ INSERT INTO SUB_CATEGORY (SUB_CATEGORY_ID, SUB_CATEGORY_NAME, CATEGORY_ID, CREAT
 -- Stub: Insert Dummy Stocks for the Normal User (f0000000-0000-0000-0000-000000000001)
 -- Linked to BOTH Category and Sub-category
 INSERT INTO STOCKS (STOCK_GUID, STOCK_NAME, PRODUCT_NAME, STOCK_SLUG, DESCRIPTION, QUANTITY, PRICE_PER_UNIT, ACTIVE, FARMER_GUID, CATEGORY_ID, SUB_CATEGORY_ID, CREATED_USER) VALUES
-('stock_001', 'Fresh Red Tomatoes', 'Tomato', 'fresh-red-tomatoes-v1', 'Organic farm fresh red tomatoes from Chitwan.', 100.0, 80.0, TRUE, 'f1111111-1111-1111-1111-111111111111', 2, 2, 'System'),
-('stock_002', 'Mustang Potatoes', 'Potato', 'mustang-potatoes-v1', 'Original tasty potatoes from Mustang region.', 500.0, 60.0, TRUE, 'f1111111-1111-1111-1111-111111111111', 2, 3, 'System'),
-('stock_003', 'Sweet Organic Apples', 'Apple', 'sweet-organic-apples-v1', 'Crunchy and sweet organic apples.', 200.0, 150.0, TRUE, 'f1111111-1111-1111-1111-111111111111', 3, 7, 'System'),
-('stock_004', 'Local Basmati Rice', 'Rice', 'local-basmati-rice-v1', 'Aromatic local basmati rice.', 1000.0, 120.0, TRUE, 'f1111111-1111-1111-1111-111111111111', 4, 12, 'System');
+('stock_001', 'Fresh Red Tomatoes', 'Tomato', 'fresh-red-tomatoes-v1', 'Organic farm fresh red tomatoes from Chitwan.', 100.0, 80.0, TRUE, 'f0000000-0000-0000-0000-000000000001', 2, 2, 'System'),
+('stock_002', 'Mustang Potatoes', 'Potato', 'mustang-potatoes-v1', 'Original tasty potatoes from Mustang region.', 500.0, 60.0, TRUE, 'f0000000-0000-0000-0000-000000000001', 2, 3, 'System'),
+('stock_003', 'Sweet Organic Apples', 'Apple', 'sweet-organic-apples-v1', 'Crunchy and sweet organic apples.', 200.0, 150.0, TRUE, 'f0000000-0000-0000-0000-000000000001', 3, 7, 'System'),
+('stock_004', 'Local Basmati Rice', 'Rice', 'local-basmati-rice-v1', 'Aromatic local basmati rice.', 1000.0, 120.0, TRUE, 'f0000000-0000-0000-0000-000000000001', 4, 12, 'System');

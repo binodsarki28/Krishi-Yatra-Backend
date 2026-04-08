@@ -26,7 +26,6 @@ public class OrderMapperImpl implements OrderMapper {
         entity.setTotalPrice(subTotal + deliveryFee);
         entity.setPickupAddress(request.getPickupAddress());
         entity.setDropAddress(request.getDropAddress());
-//        entity.setVehicleType(request.getVehicleType());
         entity.setCheckpoints(request.getCheckpoints());
         entity.setNotes(request.getNotes());
         entity.setDeliveryFee(deliveryFee);
@@ -53,7 +52,6 @@ public class OrderMapperImpl implements OrderMapper {
         response.setPickupAddress(entity.getPickupAddress());
         response.setDropAddress(entity.getDropAddress());
         response.setDeliveryFee(entity.getDeliveryFee());
-//        response.setVehicleType(entity.getVehicleType());
         response.setCheckpoints(entity.getCheckpoints());
         response.setNotes(entity.getNotes());
         response.setCreatedAt(entity.getCreatedAt());

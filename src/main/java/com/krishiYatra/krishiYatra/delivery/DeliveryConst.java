@@ -12,7 +12,4 @@ public class DeliveryConst {
     
     public static final String DASHBOARD_WELCOME = "Welcome to the Delivery Partner Dashboard";
 
-    private DeliveryConst() {
-        // Private constructor to prevent instantiation
-    }
 }

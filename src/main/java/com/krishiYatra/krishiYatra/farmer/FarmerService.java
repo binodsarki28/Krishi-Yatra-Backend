@@ -14,6 +14,7 @@ import com.krishiYatra.krishiYatra.user.UserEntity;
 import com.krishiYatra.krishiYatra.user.UserRepo;
 import com.krishiYatra.krishiYatra.utils.UserUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,7 +48,7 @@ public class FarmerService {
     }
 
     @Transactional(readOnly = true)
-    public List<FarmerListResponse> getFarmers(java.util.Map<String, String> params, org.springframework.data.domain.Pageable pageable) {
+    public List<FarmerListResponse> getFarmers(java.util.Map<String, String> params, Pageable pageable) {
         return farmerDao.getAllFarmers(params, pageable);
     }
 
@@ -63,7 +64,7 @@ public class FarmerService {
                 .orElseThrow(() -> new RuntimeException(FarmerConst.USER_NOT_FOUND));
 
         if (farmerRepo.findByUser(managedUser).isPresent()) {
-            // Fix for existing users: If they registered before the role-assignment fix was added,
+            // Fix for existing users: If they registered before the role-assignment
             // give them the role now if they try to register again.
             if (!managedUser.getRoles().stream().anyMatch(r -> r.getRoleName() == RoleType.FARMER)) {
                 roleRepo.findByRoleName(RoleType.FARMER).ifPresent(role -> {

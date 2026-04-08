@@ -2,6 +2,7 @@ package com.krishiYatra.krishiYatra.notification;
 
 import com.krishiYatra.krishiYatra.common.enums.NotificationCategory;
 import com.krishiYatra.krishiYatra.common.enums.NotificationType;
+import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
 import com.krishiYatra.krishiYatra.notification.dto.NotificationResponse;
 import com.krishiYatra.krishiYatra.user.UserEntity;
@@ -14,7 +15,6 @@ import com.krishiYatra.krishiYatra.utils.UserUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -101,7 +101,7 @@ public class NotificationService {
             return ServerResponse.failureResponse(NotificationConst.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
         }
 
-        // 1. Save to Database for In-App Notifications
+        // Save to Database for In-App Notifications
         NotificationEntity notification = NotificationEntity.builder()
                 .user(user)
                 .title(title)
@@ -112,7 +112,7 @@ public class NotificationService {
                 .build();
         notificationRepo.save(notification);
 
-        // 2. Handle Email Notification
+        // Handle Email Notification
         if (type == NotificationType.EMAIL || type == NotificationType.BOTH) {
             try {
                 emailService.sendNotificationEmail(user.getEmail(), title, body);
@@ -184,17 +184,8 @@ public class NotificationService {
         }
     }
 
-    public void sendToUsers(List<String> usernames, String title, String body, NotificationType type, NotificationCategory category) {
-        sendToUsers(usernames, title, body, type, category, null);
-    }
-
-    public List<String> findUsernamesByRole(String roleNameStr) {
-        com.krishiYatra.krishiYatra.common.enums.RoleType roleType = com.krishiYatra.krishiYatra.common.enums.RoleType.valueOf(roleNameStr);
-        return userRepo.findUsernamesByRole(roleType);
-    }
-
     public List<String> findVerifiedDeliveryUsernames() {
-        return deliveryRepo.findUsernamesByStatus(com.krishiYatra.krishiYatra.common.enums.VerificationStatus.VERIFIED);
+        return deliveryRepo.findUsernamesByStatus(VerificationStatus.VERIFIED);
     }
 
     @Transactional
@@ -222,16 +213,18 @@ public class NotificationService {
     public ServerResponse deleteNotification(Long id) {
         NotificationEntity notification = notificationRepo.findById(id).orElse(null);
         if (notification == null) {
-            return ServerResponse.failureResponse("Notification not found", HttpStatus.NOT_FOUND);
+            return ServerResponse.failureResponse(NotificationConst.NOTIFICATION_NOT_FOUND, HttpStatus.NOT_FOUND);
         }
         notification.setDeleted(true);
         notificationRepo.save(notification);
-        return ServerResponse.successResponse("Notification deleted permanently", HttpStatus.OK);
+        return ServerResponse.successResponse(NotificationConst.NOTIFICATION_DELETED, HttpStatus.OK);
     }
 
     public long getUnreadCount(String username) {
         UserEntity user = UserUtil.getCurrentUser();
-        if (user == null) return 0;
+        if (user == null) {
+            return 0;
+        }
         return notificationRepo.countByUserAndReadFalseAndDeletedFalse(user);
     }
 }

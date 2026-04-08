@@ -9,6 +9,7 @@ public class NotificationConst {
     public static final String NOTIFICATION_FAILED = "Unable to process notification delivery.";
     public static final String NOTIFICATIONS_FETCHED = "Notifications fetched successfully.";
     public static final String NOTIFICATION_MARKED_READ = "Notification marked as read.";
+    public static final String NOTIFICATION_DELETED = "Notification deleted successfully.";
 
     // Frontend Route Constants
     public static final String TRACK_URL_BUYER = "/buyer/orders/track/%s";
@@ -88,4 +89,5 @@ public class NotificationConst {
     public static final String VERIFICATION_REJECTED_TITLE = "Application Rejected";
     public static final String VERIFICATION_REJECTED_BODY = "Your application for %s role was declined. Reason: %s. Register again.";
 
+    public static final String NOTIFICATION_NOT_FOUND = "Notification not found";
 }

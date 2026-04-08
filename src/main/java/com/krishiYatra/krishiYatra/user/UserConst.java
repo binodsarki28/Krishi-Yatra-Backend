@@ -1,4 +1,4 @@
-package com.krishiYatra.krishiYatra.user.constant;
+package com.krishiYatra.krishiYatra.user;
 
 public class UserConst {
 
@@ -14,4 +14,5 @@ public class UserConst {
     public static final String OTP_VERIFIED = "Email verified successfully. You can now complete registration.";
     public static final String OTP_INVALID = "Invalid or expired OTP code.";
     public static final String EMAIL_NOT_VERIFIED = "Please verify your email first.";
+    public static final String PHONE_EXIST = "Phone number already in use";
 }
