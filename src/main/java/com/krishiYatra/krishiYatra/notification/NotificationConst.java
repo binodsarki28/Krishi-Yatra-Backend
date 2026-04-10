@@ -79,9 +79,9 @@ public class NotificationConst {
     public static final String DEMAND_CREATED_TITLE = "New Market Demand!";
     public static final String DEMAND_CREATED_BODY = "A new demand for %s (%.2f) has been posted. Claim it now!";
     public static final String DEMAND_ACCEPTED_BUYER_TITLE = "Demand Accepted!";
-    public static final String DEMAND_ACCEPTED_BUYER_BODY = "Farmer '%s' has accepted your demand for %s. View your demand dashboard.";
+    public static final String DEMAND_ACCEPTED_BUYER_BODY = "Farmer '%s' has accepted your demand for %s. Search stock to find it.";
     public static final String DEMAND_ACCEPTED_FARMER_TITLE = "Acceptance Confirmed";
-    public static final String DEMAND_ACCEPTED_FARMER_BODY = "You've successfully accepted the demand for %s. View your stock list to fulfill.";
+    public static final String DEMAND_ACCEPTED_FARMER_BODY = "You've successfully accepted the demand for %s. Add in stock to fulfill it.";
 
     // Verification Notifications
     public static final String VERIFICATION_APPROVED_TITLE = "Application Approved!";

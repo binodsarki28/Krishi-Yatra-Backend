@@ -12,6 +12,7 @@ public class BuyerDashboardResponse {
     private long totalOrders;
     private long pendingOrders;
     private long completedOrders;
+    private long myDemands;
     private double totalSpent;
     
     // For Chart.js

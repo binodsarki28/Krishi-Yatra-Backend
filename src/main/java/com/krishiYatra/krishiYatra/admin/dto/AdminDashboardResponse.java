@@ -17,6 +17,7 @@ public class AdminDashboardResponse {
     private long pendingVerifications;
     private long activeStocks;
     private long totalOrders;
+    private long activeDemands;
     private double platformRevenue; // sum of total order amounts
     
     // For Chart.js

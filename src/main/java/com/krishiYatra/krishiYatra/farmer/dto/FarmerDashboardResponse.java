@@ -17,6 +17,7 @@ public class FarmerDashboardResponse {
     private long totalOrders;
     private long completedOrders;
     private long pendingOrders;
+    private long acceptedDemands;
     
     private double totalRevenue;
     

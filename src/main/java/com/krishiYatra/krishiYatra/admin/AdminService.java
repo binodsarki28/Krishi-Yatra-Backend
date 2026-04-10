@@ -10,6 +10,7 @@ import com.krishiYatra.krishiYatra.farmer.FarmerRepo;
 import com.krishiYatra.krishiYatra.order.OrderRepo;
 import com.krishiYatra.krishiYatra.stock.StockRepo;
 import com.krishiYatra.krishiYatra.user.UserRepo;
+import com.krishiYatra.krishiYatra.demand.DemandRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class AdminService {
     private final DeliveryRepo deliveryRepo;
     private final OrderRepo orderRepo;
     private final StockRepo stockRepo;
+    private final DemandRepo demandRepo;
 
     @Transactional(readOnly = true)
     public ServerResponse getAdminDashboard() {
@@ -43,6 +45,7 @@ public class AdminService {
                 
         long activeStocks = stockRepo.count();
         long totalOrders = orderRepo.count();
+        long activeDemands = demandRepo.countByActiveTrue();
         Double revenue = orderRepo.sumTotalPlatformRevenue();
         
         // Orders by Status distribution
@@ -69,6 +72,7 @@ public class AdminService {
                 .pendingVerifications(pendingVerifications)
                 .activeStocks(activeStocks)
                 .totalOrders(totalOrders)
+                .activeDemands(activeDemands)
                 .platformRevenue(revenue != null ? revenue : 0.0)
                 .ordersByStatus(ordersByStatus)
                 .userRegistrationTrend(userTrend)

@@ -15,6 +15,7 @@ import com.krishiYatra.krishiYatra.user.UserEntity;
 import com.krishiYatra.krishiYatra.user.UserRepo;
 import com.krishiYatra.krishiYatra.utils.UserUtil;
 import com.krishiYatra.krishiYatra.order.OrderRepo;
+import com.krishiYatra.krishiYatra.demand.DemandRepo;
 import com.krishiYatra.krishiYatra.common.enums.OrderStatus;
 import com.krishiYatra.krishiYatra.buyer.dto.*;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +42,7 @@ public class BuyerService {
     private final IBuyerDao buyerDao;
     private final VerificationNotificationHandler verificationNotificationHandler;
     private final OrderRepo orderRepo;
+    private final DemandRepo demandRepo;
 
     @Transactional(readOnly = true)
     public List<BuyerListResponse> getBuyers(Map<String, String> params, Pageable pageable) {
@@ -154,6 +156,7 @@ public class BuyerService {
         long totalOrders = orderRepo.countByBuyer(buyer);
         long pendingOrders = orderRepo.countByBuyerAndOrderStatus(buyer, OrderStatus.PENDING);
         long completedOrders = orderRepo.countByBuyerAndOrderStatus(buyer, OrderStatus.DELIVERED);
+        long myDemands = demandRepo.countByBuyer(buyer);
         Double spent = orderRepo.sumTotalPriceByBuyer(buyer);
 
         List<Object[]> trendData = orderRepo.buyerSpendingTrend(buyer.getBuyerId());
@@ -167,6 +170,7 @@ public class BuyerService {
                 .totalOrders(totalOrders)
                 .pendingOrders(pendingOrders)
                 .completedOrders(completedOrders)
+                .myDemands(myDemands)
                 .totalSpent(spent != null ? spent : 0.0)
                 .spendingTrend(spendingTrend)
                 .build();

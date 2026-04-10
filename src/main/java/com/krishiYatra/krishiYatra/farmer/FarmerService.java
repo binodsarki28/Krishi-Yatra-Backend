@@ -15,7 +15,9 @@ import com.krishiYatra.krishiYatra.user.UserRepo;
 import com.krishiYatra.krishiYatra.utils.UserUtil;
 import com.krishiYatra.krishiYatra.stock.StockRepo;
 import com.krishiYatra.krishiYatra.order.OrderRepo;
+import com.krishiYatra.krishiYatra.demand.DemandRepo;
 import com.krishiYatra.krishiYatra.common.enums.OrderStatus;
+import com.krishiYatra.krishiYatra.common.enums.DemandStatus;
 import com.krishiYatra.krishiYatra.farmer.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +43,7 @@ public class FarmerService {
     private final IFarmerDao farmerDao;
     private final StockRepo stockRepo;
     private final OrderRepo orderRepo;
+    private final DemandRepo demandRepo;
     private final VerificationNotificationHandler verificationNotificationHandler;
 
     @Transactional(readOnly = true)
@@ -163,6 +166,8 @@ public class FarmerService {
         long pendingOrders = orderRepo.countByFarmerAndOrderStatus(farmer, OrderStatus.PENDING);
         long completedOrders = orderRepo.countByFarmerAndOrderStatus(farmer, OrderStatus.DELIVERED);
         
+        long acceptedDemands = demandRepo.countByAcceptedBy(farmer);
+        
         Double revenue = orderRepo.sumTotalPriceByFarmer(farmer);
         
         // Category distribution for pie chart
@@ -188,6 +193,7 @@ public class FarmerService {
                 .totalOrders(totalOrders)
                 .pendingOrders(pendingOrders)
                 .completedOrders(completedOrders)
+                .acceptedDemands(acceptedDemands)
                 .totalRevenue(revenue != null ? revenue : 0.0)
                 .stocksByCategory(stocksByCategory)
                 .revenueByMonth(revenueTrend)
