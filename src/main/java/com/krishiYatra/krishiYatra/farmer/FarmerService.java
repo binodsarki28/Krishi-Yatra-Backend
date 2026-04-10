@@ -13,6 +13,11 @@ import com.krishiYatra.krishiYatra.user.RoleRepo;
 import com.krishiYatra.krishiYatra.user.UserEntity;
 import com.krishiYatra.krishiYatra.user.UserRepo;
 import com.krishiYatra.krishiYatra.utils.UserUtil;
+import com.krishiYatra.krishiYatra.stock.StockRepo;
+import com.krishiYatra.krishiYatra.order.OrderRepo;
+import com.krishiYatra.krishiYatra.common.enums.OrderStatus;
+import com.krishiYatra.krishiYatra.farmer.dto.*;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -20,10 +25,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class FarmerService {
 
     private final FarmerRepo farmerRepo;
@@ -31,21 +39,9 @@ public class FarmerService {
     private final RoleRepo roleRepo;
     private final FarmerMapper farmerMapper;
     private final IFarmerDao farmerDao;
+    private final StockRepo stockRepo;
+    private final OrderRepo orderRepo;
     private final VerificationNotificationHandler verificationNotificationHandler;
-
-    public FarmerService(FarmerRepo farmerRepo,
-                         UserRepo userRepo,
-                         RoleRepo roleRepo,
-                         FarmerMapper farmerMapper,
-                         IFarmerDao farmerDao,
-                         VerificationNotificationHandler verificationNotificationHandler) {
-        this.farmerRepo = farmerRepo;
-        this.userRepo = userRepo;
-        this.roleRepo = roleRepo;
-        this.farmerMapper = farmerMapper;
-        this.farmerDao = farmerDao;
-        this.verificationNotificationHandler = verificationNotificationHandler;
-    }
 
     @Transactional(readOnly = true)
     public List<FarmerListResponse> getFarmers(java.util.Map<String, String> params, Pageable pageable) {
@@ -150,5 +146,53 @@ public class FarmerService {
                 .orElseThrow(() -> new RuntimeException(FarmerConst.REGISTRATION_NOT_FOUND));
         
         return farmerMapper.toDetailResponse(farmer);
+    }
+
+    @Transactional(readOnly = true)
+    public ServerResponse getFarmerDashboard() {
+        UserEntity user = UserUtil.getCurrentUser();
+        FarmerEntity farmer = farmerRepo.findByUser_Username(user.getUsername())
+                .orElseThrow(() -> new RuntimeException(FarmerConst.REGISTRATION_NOT_FOUND));
+
+        // Stats
+        long totalStocks = stockRepo.countByFarmer(farmer);
+        long activeStocks = stockRepo.countByFarmerAndActive(farmer, true);
+        long outOfStock = stockRepo.countByFarmerAndQuantityLessThanEqual(farmer, 0.0);
+        
+        long totalOrders = orderRepo.countByFarmer(farmer);
+        long pendingOrders = orderRepo.countByFarmerAndOrderStatus(farmer, OrderStatus.PENDING);
+        long completedOrders = orderRepo.countByFarmerAndOrderStatus(farmer, OrderStatus.DELIVERED);
+        
+        Double revenue = orderRepo.sumTotalPriceByFarmer(farmer);
+        
+        // Category distribution for pie chart
+        List<Object[]> categoryData = stockRepo.countStocksByCategory(farmer);
+        Map<String, Long> stocksByCategory = categoryData.stream()
+                .collect(Collectors.toMap(
+                        obj -> (String) obj[0],
+                        obj -> obj[1] != null ? ((Number) obj[1]).longValue() : 0L
+                ));
+
+        // Revenue trend for line chart
+        List<Object[]> trendData = orderRepo.farmerRevenueTrend(farmer.getFarmerId());
+        Map<String, Double> revenueTrend = trendData.stream()
+                .collect(Collectors.toMap(
+                        obj -> (String) obj[0],
+                        obj -> obj[1] != null ? ((Number) obj[1]).doubleValue() : 0.0
+                ));
+
+        FarmerDashboardResponse dashboard = FarmerDashboardResponse.builder()
+                .totalStocks(totalStocks)
+                .activeStocks(activeStocks)
+                .outOfStock(outOfStock)
+                .totalOrders(totalOrders)
+                .pendingOrders(pendingOrders)
+                .completedOrders(completedOrders)
+                .totalRevenue(revenue != null ? revenue : 0.0)
+                .stocksByCategory(stocksByCategory)
+                .revenueByMonth(revenueTrend)
+                .build();
+
+        return ServerResponse.successObjectResponse("Farmer dashboard fetch success", HttpStatus.OK, dashboard);
     }
 }

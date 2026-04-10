@@ -3,6 +3,7 @@ package com.krishiYatra.krishiYatra.admin;
 import com.krishiYatra.krishiYatra.admin.dto.AdminStatsResponse;
 import com.krishiYatra.krishiYatra.buyer.BuyerRepo;
 import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
+import com.krishiYatra.krishiYatra.common.response.ServerResponse;
 import com.krishiYatra.krishiYatra.delivery.DeliveryRepo;
 import com.krishiYatra.krishiYatra.farmer.FarmerRepo;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,11 +22,20 @@ public class AdminController {
     private final FarmerRepo farmerRepo;
     private final BuyerRepo buyerRepo;
     private final DeliveryRepo deliveryRepo;
+    private final AdminService adminService;
 
-    public AdminController(FarmerRepo farmerRepo, BuyerRepo buyerRepo, DeliveryRepo deliveryRepo) {
+    public AdminController(FarmerRepo farmerRepo, BuyerRepo buyerRepo, DeliveryRepo deliveryRepo, AdminService adminService) {
         this.farmerRepo = farmerRepo;
         this.buyerRepo = buyerRepo;
         this.deliveryRepo = deliveryRepo;
+        this.adminService = adminService;
+    }
+
+    @Operation(summary = "Get full admin dashboard data")
+    @GetMapping("/dashboard")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ServerResponse getDashboard() {
+        return adminService.getAdminDashboard();
     }
 
     @Operation(summary = "Get counts of pending applications for the dashboard")

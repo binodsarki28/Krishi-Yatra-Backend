@@ -41,11 +41,11 @@ public class BuyerController {
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
 
-    @Operation(summary = "Example of a protected buyer endpoint")
-    @PostMapping("/dashboard")
+    @Operation(summary = "Get buyer dashboard data")
+    @GetMapping("/dashboard")
     @PreAuthorize("hasAuthority('BUYER')")
     public ServerResponse getBuyerDashboard() {
-        return ServerResponse.successResponse(BuyerConst.DASHBOARD_WELCOME, HttpStatus.OK);
+        return buyerService.getBuyerDashboard();
     }
 
     @Operation(summary = "Verify or reject a buyer registration (Admin only)")

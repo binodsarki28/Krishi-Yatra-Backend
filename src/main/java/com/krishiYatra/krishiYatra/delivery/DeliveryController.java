@@ -41,11 +41,11 @@ public class DeliveryController {
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
 
-    @Operation(summary = "Example of a protected delivery endpoint")
-    @PostMapping("/dashboard")
+    @Operation(summary = "Get delivery partner dashboard data")
+    @GetMapping("/dashboard")
     @PreAuthorize("hasAuthority('DELIVERY')")
     public ServerResponse getDeliveryDashboard() {
-        return ServerResponse.successResponse(DeliveryConst.DASHBOARD_WELCOME, HttpStatus.OK);
+        return deliveryService.getDeliveryDashboard();
     }
 
     @Operation(summary = "Verify or reject a delivery partner registration (Admin only)")

@@ -14,6 +14,9 @@ import com.krishiYatra.krishiYatra.user.RoleRepo;
 import com.krishiYatra.krishiYatra.user.UserEntity;
 import com.krishiYatra.krishiYatra.user.UserRepo;
 import com.krishiYatra.krishiYatra.utils.UserUtil;
+import com.krishiYatra.krishiYatra.order.OrderRepo;
+import com.krishiYatra.krishiYatra.common.enums.OrderStatus;
+import com.krishiYatra.krishiYatra.delivery.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -36,6 +40,7 @@ public class DeliveryService {
 
     private final IDeliveryDao deliveryDao;
     private final VerificationNotificationHandler verificationNotificationHandler;
+    private final OrderRepo orderRepo;
 
     @Transactional(readOnly = true)
     public List<DeliveryListResponse> getDeliveries(Map<String, String> params, Pageable pageable) {
@@ -136,5 +141,36 @@ public class DeliveryService {
                 .orElseThrow(() -> new RuntimeException(DeliveryConst.REGISTRATION_NOT_FOUND));
         
         return deliveryMapper.toDetailResponse(delivery);
+    }
+
+
+
+    @Transactional(readOnly = true)
+    public ServerResponse getDeliveryDashboard() {
+        UserEntity user = UserUtil.getCurrentUser();
+        DeliveryEntity delivery = deliveryRepo.findByUser_Username(user.getUsername())
+                .orElseThrow(() -> new RuntimeException("Delivery partner not found"));
+
+        long totalDeliveries = orderRepo.countByDelivery(delivery);
+        long pendingDeliveries = orderRepo.countByDeliveryAndOrderStatus(delivery, OrderStatus.SHIPPING);
+        long completedDeliveries = orderRepo.countByDeliveryAndOrderStatus(delivery, OrderStatus.DELIVERED);
+        Double earnings = orderRepo.sumDeliveryFeeByDelivery(delivery);
+
+        List<Object[]> trendData = orderRepo.deliveryEarningsTrend(delivery.getDeliveryId());
+        Map<String, Double> earningsTrend = trendData.stream()
+                .collect(Collectors.toMap(
+                        obj -> (String) obj[0],
+                        obj -> obj[1] != null ? ((Number) obj[1]).doubleValue() : 0.0
+                ));
+
+        DeliveryDashboardResponse dashboard = DeliveryDashboardResponse.builder()
+                .totalDeliveries(totalDeliveries)
+                .pendingDeliveries(pendingDeliveries)
+                .completedDeliveries(completedDeliveries)
+                .totalEarnings(earnings != null ? earnings : 0.0)
+                .earningsTrend(earningsTrend)
+                .build();
+
+        return ServerResponse.successObjectResponse("Delivery dashboard fetch success", HttpStatus.OK, dashboard);
     }
 }
