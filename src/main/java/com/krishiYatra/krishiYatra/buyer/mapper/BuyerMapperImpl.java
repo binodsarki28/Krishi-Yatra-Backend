@@ -4,6 +4,7 @@ import com.krishiYatra.krishiYatra.buyer.BuyerEntity;
 import com.krishiYatra.krishiYatra.buyer.dto.BuyerListResponse;
 import com.krishiYatra.krishiYatra.buyer.dto.BuyerDetailResponse;
 import com.krishiYatra.krishiYatra.buyer.dto.RegisterBuyerRequest;
+import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,7 +19,7 @@ public class BuyerMapperImpl implements BuyerMapper {
         buyer.setConsumerType(request.getConsumerType());
         buyer.setBusinessName(request.getBusinessName());
         buyer.setBusinessLocation(request.getBusinessLocation());
-        buyer.setStatus(com.krishiYatra.krishiYatra.common.enums.VerificationStatus.PENDING);
+        buyer.setStatus(VerificationStatus.PENDING);
         return buyer;
     }
 

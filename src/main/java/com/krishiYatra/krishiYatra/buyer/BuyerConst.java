@@ -12,7 +12,4 @@ public class BuyerConst {
     
     public static final String DASHBOARD_WELCOME = "Welcome to the Buyer Dashboard";
 
-    private BuyerConst() {
-        // Private constructor to prevent instantiation
-    }
 }

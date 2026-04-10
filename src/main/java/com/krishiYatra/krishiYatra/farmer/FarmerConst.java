@@ -12,7 +12,4 @@ public class FarmerConst {
     
     public static final String DASHBOARD_WELCOME = "Welcome to the Farmer Dashboard";
 
-    private FarmerConst() {
-        // Private constructor to prevent instantiation
-    }
 }

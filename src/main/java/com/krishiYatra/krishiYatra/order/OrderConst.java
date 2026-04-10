@@ -15,4 +15,6 @@ public class OrderConst {
     public static final String ORDER_NOT_AVAILABLE_FOR_DELIVERY = "Order is not available for delivery acceptance.";
     public static final String DELIVERY_ACCEPTED = "Delivery accepted. Order moved to shipping.";
     public static final String FETCH_ORDER = "Orders fetched successfully.";
+    public static final String ORDER_DETAIL = "Order details fetched";
+    public static final String ORDER_DELIVERED = "Order delivered successfully";
 }

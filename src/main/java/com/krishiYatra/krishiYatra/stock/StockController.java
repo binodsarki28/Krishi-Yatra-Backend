@@ -1,34 +1,38 @@
 package com.krishiYatra.krishiYatra.stock;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
 import com.krishiYatra.krishiYatra.stock.dto.StockRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @RestController
 @RequestMapping("/api/v1/stock")
 @RequiredArgsConstructor
-@lombok.extern.slf4j.Slf4j
+@Slf4j
 public class StockController {
 
     private final StockService stockService;
-    private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     @Operation(summary = "Create stock (Verified Farmer only)")
-
-    @PostMapping(value = "/create", consumes = { org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE })
+    @PostMapping(value = "/create", consumes = { MULTIPART_FORM_DATA_VALUE })
     @PreAuthorize("hasAuthority('FARMER')")
     public ResponseEntity<ServerResponse> createStock(
-            org.springframework.web.multipart.MultipartHttpServletRequest request) throws Exception {
-        log.info("DIAGNOSTIC - All Part Names: {}", request.getFileMap().keySet());
-        
+            MultipartHttpServletRequest request) throws Exception {
         // Manual parse stockData
         String stockDataJson;
         if (request.getFile("stockData") != null) {
@@ -38,30 +42,26 @@ public class StockController {
         }
         
         if (stockDataJson == null || stockDataJson.isEmpty()) {
-            return new ResponseEntity<>(ServerResponse.failureResponse("Stock data is missing in the request", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ServerResponse.failureResponse(StockConst.STOCK_DATA_MISSING, HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
-        
-        System.out.println("StockController handles create request. Raw JSON: " + stockDataJson);
+
         StockRequestDto requestDto = objectMapper.readValue(stockDataJson, StockRequestDto.class);
-        
-        java.util.List<org.springframework.web.multipart.MultipartFile> images = new java.util.ArrayList<>();
+
+        List<MultipartFile> images = new ArrayList<>();
         request.getMultiFileMap().forEach((key, list) -> {
             if (key.toLowerCase().contains("image")) {
                 images.addAll(list);
             }
         });
-        System.out.println("DEBUG (Manual Total): Received " + images.size() + " files total");
-        ServerResponse response = stockService.createStock(requestDto, images.toArray(new org.springframework.web.multipart.MultipartFile[0]));
+        ServerResponse response = stockService.createStock(requestDto, images.toArray(new MultipartFile[0]));
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
 
     @Operation(summary = "Update stock (Verified Farmer owner only, uses slug in body)")
-    @PutMapping(value = "/update", consumes = { org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE })
+    @PutMapping(value = "/update", consumes = { MULTIPART_FORM_DATA_VALUE })
     @PreAuthorize("hasAuthority('FARMER')")
     public ResponseEntity<ServerResponse> updateStock(
-            org.springframework.web.multipart.MultipartHttpServletRequest request) throws Exception {
-        log.info("DIAGNOSTIC - All Part Names: {}", request.getFileMap().keySet());
-        
+            MultipartHttpServletRequest request) throws Exception {
         // Manual parse stockData
         String stockDataJson;
         if (request.getFile("stockData") != null) {
@@ -71,19 +71,18 @@ public class StockController {
         }
         
         if (stockDataJson == null || stockDataJson.isEmpty()) {
-            return new ResponseEntity<>(ServerResponse.failureResponse("Stock data is missing in the request", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ServerResponse.failureResponse(StockConst.STOCK_DATA_MISSING, HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
         
         StockRequestDto requestDto = objectMapper.readValue(stockDataJson, StockRequestDto.class);
 
-        java.util.List<org.springframework.web.multipart.MultipartFile> images = new java.util.ArrayList<>();
+        List<MultipartFile> images = new java.util.ArrayList<>();
         request.getMultiFileMap().forEach((key, list) -> {
             if (key.toLowerCase().contains("image")) {
                 images.addAll(list);
             }
         });
-        System.out.println("DEBUG (Manual Total): Received " + images.size() + " files total");
-        ServerResponse response = stockService.updateStock(requestDto, images.toArray(new org.springframework.web.multipart.MultipartFile[0]));
+        ServerResponse response = stockService.updateStock(requestDto, images.toArray(new MultipartFile[0]));
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
 
@@ -128,7 +127,7 @@ public class StockController {
     @Operation(summary = "Create sub-category")
     @PostMapping("/subcategory/create")
     @PreAuthorize("hasAuthority('FARMER')")
-    public ResponseEntity<ServerResponse> createSubCategory(@RequestParam String categoryId, @RequestParam String name) {
+    public ResponseEntity<ServerResponse> createSubCategory(@RequestParam int categoryId, @RequestParam String name) {
         ServerResponse response = stockService.createSubCategory(categoryId, name);
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
@@ -142,15 +141,8 @@ public class StockController {
 
     @Operation(summary = "Get sub-categories by category")
     @GetMapping("/subcategories")
-    public ResponseEntity<ServerResponse> getSubCategories(@RequestParam(required = false) String categoryId) {
+    public ResponseEntity<ServerResponse> getSubCategories(@RequestParam(required = false) Integer categoryId) {
         ServerResponse response = stockService.getSubCategories(categoryId);
-        return new ResponseEntity<>(response, response.getHttpStatus());
-    }
-    @Operation(summary = "Adjust stock quantity (increment/decrement)")
-    @PutMapping("/adjust")
-    @PreAuthorize("hasAuthority('FARMER')")
-    public ResponseEntity<ServerResponse> adjustStockQuantity(@RequestParam String slug, @RequestParam Double amount) {
-        ServerResponse response = stockService.adjustStockQuantity(slug, amount);
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
 }

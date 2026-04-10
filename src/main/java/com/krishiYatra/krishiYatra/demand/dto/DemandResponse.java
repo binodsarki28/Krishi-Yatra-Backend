@@ -8,9 +8,9 @@ import java.time.LocalDateTime;
 public class DemandResponse {
     private String demandId;
     private String categoryName;
-    private String categoryGuid;
+    private int categoryId;
     private String subCategoryName;
-    private String subCategoryGuid;
+    private int subCategoryId;
     private Double quantity;
     private Double expectedPricePerUnit;
     private String description;

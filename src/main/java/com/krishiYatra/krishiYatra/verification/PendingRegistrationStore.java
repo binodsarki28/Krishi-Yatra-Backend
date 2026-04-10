@@ -7,9 +7,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Stores pending registration data temporarily
- */
+// Stores pending registration data temporarily
 @Service
 public class PendingRegistrationStore {
 
@@ -26,16 +24,14 @@ public class PendingRegistrationStore {
         }
     }
 
-    /**
-     * Store registration data
-     */
+
+    // Store registration data
     public void store(String email, UserCreateRequest userData) {
         pendingRegistrations.put(email, new RegistrationData(userData));
     }
 
-    /**
-     * Get registration data
-     */
+
+    //Get registration data
     public UserCreateRequest get(String email) {
         RegistrationData data = pendingRegistrations.get(email);
         if (data == null) {
@@ -51,9 +47,8 @@ public class PendingRegistrationStore {
         return data.userData;
     }
 
-    /**
-     * Remove registration data
-     */
+
+    // Remove registration data
     public void remove(String email) {
         pendingRegistrations.remove(email);
     }

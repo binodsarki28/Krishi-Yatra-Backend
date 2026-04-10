@@ -49,6 +49,7 @@ public class UserEntity extends Auditable implements UserDetails {
 
     @Column(name = "DESCRIPTION", length = 800)
     private String description;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",

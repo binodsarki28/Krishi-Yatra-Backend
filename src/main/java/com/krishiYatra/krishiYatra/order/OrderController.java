@@ -20,9 +20,7 @@ public class OrderController {
     @Operation(summary = "Get list of orders dynamically mapped to current user")
     @GetMapping("/list")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ServerResponse> getOrders(
-            @RequestParam Map<String, String> requestParams,
-            org.springframework.data.domain.Pageable pageable) {
+    public ResponseEntity<ServerResponse> getOrders(@RequestParam Map<String, String> requestParams, Pageable pageable) {
         ServerResponse response = orderService.getOrders(requestParams, pageable);
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
@@ -61,7 +59,7 @@ public class OrderController {
 
     @Operation(summary = "Get order details by ID")
     @GetMapping("/detail/{orderId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<ServerResponse> getOrderDetails(@PathVariable String orderId) {
         ServerResponse response = orderService.getOrderById(orderId);
         return new ResponseEntity<>(response, response.getHttpStatus());
@@ -112,7 +110,7 @@ public class OrderController {
     @PostMapping("/report-conflict/{orderId}")
     @PreAuthorize("hasAuthority('BUYER')")
     public ResponseEntity<ServerResponse> reportConflict(@PathVariable String orderId, @RequestBody Map<String, String> body) {
-        String message = body.getOrDefault("message", "No message provided");
+        String message = body.get("conflictMessage");
         ServerResponse response = orderService.reportConflict(orderId, message);
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
@@ -128,9 +126,7 @@ public class OrderController {
     @Operation(summary = "Get buyer orders with pagination and sorting")
     @GetMapping("/buyer/my-orders")
     @PreAuthorize("hasAuthority('BUYER')")
-    public ResponseEntity<ServerResponse> getOrdersByBuyer(
-            @RequestParam Map<String, String> requestParams,
-            org.springframework.data.domain.Pageable pageable) {
+    public ResponseEntity<ServerResponse> getOrdersByBuyer(@RequestParam Map<String, String> requestParams, Pageable pageable) {
         ServerResponse response = orderService.getOrdersByBuyer(requestParams, pageable);
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
@@ -138,8 +134,7 @@ public class OrderController {
     @Operation(summary = "Get farmer orders with pagination and sorting")
     @GetMapping("/farmer/my-orders")
     @PreAuthorize("hasAuthority('FARMER')")
-    public ResponseEntity<ServerResponse> getOrdersByFarmer(
-            @RequestParam Map<String, String> requestParams, Pageable pageable) {
+    public ResponseEntity<ServerResponse> getOrdersByFarmer(@RequestParam Map<String, String> requestParams, Pageable pageable) {
         ServerResponse response = orderService.getOrdersByFarmer(requestParams, pageable);
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
@@ -147,8 +142,7 @@ public class OrderController {
     @Operation(summary = "Get delivery orders with pagination and sorting")
     @GetMapping("/delivery/my-orders")
     @PreAuthorize("hasAuthority('DELIVERY')")
-    public ResponseEntity<ServerResponse> getOrdersByDelivery(
-            @RequestParam Map<String, String> requestParams, Pageable pageable) {
+    public ResponseEntity<ServerResponse> getOrdersByDelivery(@RequestParam Map<String, String> requestParams, Pageable pageable) {
         ServerResponse response = orderService.getOrdersByDelivery(requestParams, pageable);
         return new ResponseEntity<>(response, response.getHttpStatus());
     }

@@ -1,11 +1,14 @@
 package com.krishiYatra.krishiYatra.stock.category;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.krishiYatra.krishiYatra.db.Auditable;
 import com.krishiYatra.krishiYatra.stock.subCategory.SubCategoryEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.util.List;
 
 @Entity
 @Table(name = "CATEGORY")
@@ -15,14 +18,17 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class CategoryEntity extends Auditable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "CATEGORY_GUID")
-    private String categoryId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "CATEGORY_ID")
+    private int categoryId;
 
     @Column(name = "CATEGORY_NAME", unique = true)
     private String categoryName;
 
-    @com.fasterxml.jackson.annotation.JsonManagedReference
+    @JsonManagedReference
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    private java.util.List<SubCategoryEntity> subCategories;
+    private List<SubCategoryEntity> subCategories;
+
+    @Column(nullable = false)
+    private boolean active = true;
 }

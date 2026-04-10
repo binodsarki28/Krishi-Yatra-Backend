@@ -1,6 +1,7 @@
 package com.krishiYatra.krishiYatra.delivery.dto;
 
 import com.krishiYatra.krishiYatra.common.enums.VehicleType;
+import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
@@ -15,7 +16,7 @@ public class DeliveryDetailResponse {
     private String licenseNumber;
     private String vehiclePhoto;
     private String licensePhoto;
-    private com.krishiYatra.krishiYatra.common.enums.VerificationStatus status;
+    private VerificationStatus status;
     private String fullName;
     private String email;
     private String phoneNumber;

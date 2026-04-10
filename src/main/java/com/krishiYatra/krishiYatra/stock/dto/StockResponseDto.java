@@ -11,13 +11,13 @@ public class StockResponseDto {
     private String productName;
     private String stockSlug;
     private String description;
-    private List<String> stockImages; // Updated to List
+    private List<String> stockImages;
     private Double quantity;
     private Double pricePerUnit;
     private String categoryName;
-    private String categoryId;
+    private int categoryId;
     private String subCategoryName;
-    private String subCategoryId;
+    private int subCategoryId;
     private String farmerName;
     private Integer minQuantity;
     private boolean active;

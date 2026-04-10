@@ -8,17 +8,18 @@ import com.krishiYatra.krishiYatra.farmer.dto.FarmerDetailResponse;
 import com.krishiYatra.krishiYatra.farmer.dto.RegisterFarmerRequest;
 import com.krishiYatra.krishiYatra.farmer.dto.VerifyFarmerRequest;
 import com.krishiYatra.krishiYatra.farmer.mapper.FarmerMapper;
+import com.krishiYatra.krishiYatra.notification.handler.VerificationNotificationHandler;
 import com.krishiYatra.krishiYatra.user.RoleRepo;
 import com.krishiYatra.krishiYatra.user.UserEntity;
 import com.krishiYatra.krishiYatra.user.UserRepo;
 import com.krishiYatra.krishiYatra.utils.UserUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
 
 @Service
@@ -29,23 +30,25 @@ public class FarmerService {
     private final UserRepo userRepo;
     private final RoleRepo roleRepo;
     private final FarmerMapper farmerMapper;
-
     private final IFarmerDao farmerDao;
+    private final VerificationNotificationHandler verificationNotificationHandler;
 
     public FarmerService(FarmerRepo farmerRepo,
                          UserRepo userRepo,
                          RoleRepo roleRepo,
                          FarmerMapper farmerMapper,
-                         IFarmerDao farmerDao) {
+                         IFarmerDao farmerDao,
+                         VerificationNotificationHandler verificationNotificationHandler) {
         this.farmerRepo = farmerRepo;
         this.userRepo = userRepo;
         this.roleRepo = roleRepo;
         this.farmerMapper = farmerMapper;
         this.farmerDao = farmerDao;
+        this.verificationNotificationHandler = verificationNotificationHandler;
     }
 
     @Transactional(readOnly = true)
-    public List<FarmerListResponse> getFarmers(java.util.Map<String, String> params, org.springframework.data.domain.Pageable pageable) {
+    public List<FarmerListResponse> getFarmers(java.util.Map<String, String> params, Pageable pageable) {
         return farmerDao.getAllFarmers(params, pageable);
     }
 
@@ -61,7 +64,7 @@ public class FarmerService {
                 .orElseThrow(() -> new RuntimeException(FarmerConst.USER_NOT_FOUND));
 
         if (farmerRepo.findByUser(managedUser).isPresent()) {
-            // Fix for existing users: If they registered before the role-assignment fix was added,
+            // Fix for existing users: If they registered before the role-assignment
             // give them the role now if they try to register again.
             if (!managedUser.getRoles().stream().anyMatch(r -> r.getRoleName() == RoleType.FARMER)) {
                 roleRepo.findByRoleName(RoleType.FARMER).ifPresent(role -> {
@@ -94,10 +97,28 @@ public class FarmerService {
         if (request.getApproved()) {
             farmer.setStatus(VerificationStatus.VERIFIED);
             farmerRepo.save(farmer);
+            
+            // Notify user of approval and take to dashboard
+            try {
+                verificationNotificationHandler.notifyFarmerStatus(farmer.getUser(), true, null);
+            } catch (Exception e) {
+                log.error("Failed to send farmer verification notification: {}", e.getMessage());
+            }
+
             return ServerResponse.successResponse(FarmerConst.VERIFICATION_SUCCESS, HttpStatus.OK);
         } else {
+            // Store user for notification before deleting farmer entity
+            UserEntity user = farmer.getUser();
+            
             // If rejected, delete the farmer entity
             farmerRepo.delete(farmer);
+
+            // Notify user of rejection and take to registration page
+            try {
+                verificationNotificationHandler.notifyFarmerStatus(user, false, request.getReason());
+            } catch (Exception e) {
+                log.error("Failed to send farmer rejection notification: {}", e.getMessage());
+            }
 
             String message = FarmerConst.REJECTION_PREFIX + request.getReason();
             log.info(message);

@@ -16,13 +16,8 @@ public class EmailService {
     }
 
     public void sendOtpEmail(String toEmail, String otpCode) {
-        try {
-            System.out.println("EmailService: Starting to send email to [" + toEmail + "]");
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(toEmail);
-            message.setSubject("Krishi Yatra - Email Verification Code");
-            message.setText(String.format(
+        String subject = "Krishi Yatra - Email Verification Code";
+        String body = String.format(
                 "Welcome to Krishi Yatra!\n\n" +
                 "Your email verification code is: %s\n\n" +
                 "This code will expire in 5 minutes.\n\n" +
@@ -30,10 +25,22 @@ public class EmailService {
                 "Best regards,\n" +
                 "Krishi Yatra Team",
                 otpCode
-            ));
+        );
+        sendEmail(toEmail, subject, body);
+    }
 
+    public void sendNotificationEmail(String toEmail, String subject, String body) {
+        sendEmail(toEmail, "Krishi Yatra - " + subject, body);
+    }
+
+    private void sendEmail(String toEmail, String subject, String body) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(toEmail);
+            message.setSubject(subject);
+            message.setText(body);
             mailSender.send(message);
-            System.out.println("EmailService: Email successfully sent to [" + toEmail + "]");
         } catch (Exception e) {
             System.err.println("EmailService: ERROR sending email to [" + toEmail + "]. Error: " + e.getMessage());
             e.printStackTrace();

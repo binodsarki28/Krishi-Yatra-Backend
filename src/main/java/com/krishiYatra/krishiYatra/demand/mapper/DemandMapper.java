@@ -30,12 +30,12 @@ public class DemandMapper {
         
         if (entity.getCategory() != null) {
             response.setCategoryName(entity.getCategory().getCategoryName());
-            response.setCategoryGuid(entity.getCategory().getCategoryId());
+            response.setCategoryId(entity.getCategory().getCategoryId());
         }
         
         if (entity.getSubCategory() != null) {
             response.setSubCategoryName(entity.getSubCategory().getSubCategoryName());
-            response.setSubCategoryGuid(entity.getSubCategory().getSubCategoryId());
+            response.setSubCategoryId(entity.getSubCategory().getSubCategoryId());
         }
         
         response.setQuantity(entity.getQuantity());

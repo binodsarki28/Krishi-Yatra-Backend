@@ -1,10 +1,10 @@
 package com.krishiYatra.krishiYatra.user;
 
+import com.krishiYatra.krishiYatra.common.enums.RoleType;
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
 import com.krishiYatra.krishiYatra.config.security.jwt.JwtTokenProvider;
 import com.krishiYatra.krishiYatra.user.dto.JwtResponse;
 import com.krishiYatra.krishiYatra.user.dto.UserLoginRequest;
-import com.krishiYatra.krishiYatra.user.constant.UserConst;
 import com.krishiYatra.krishiYatra.user.dto.UserCreateRequest;
 import com.krishiYatra.krishiYatra.user.dto.PasswordUpdateRequest;
 import com.krishiYatra.krishiYatra.user.mapper.UserMapper;
@@ -27,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -86,6 +87,7 @@ public class UserService {
         String jwt = tokenProvider.generateToken(authentication);
 
         UserEntity userDetails = (UserEntity) authentication.getPrincipal();
+
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
@@ -135,6 +137,10 @@ public class UserService {
             return ServerResponse.failureResponse(UserConst.USERNAME_EXISTS, HttpStatus.BAD_REQUEST);
         }
 
+        if (userRepo.existsByPhoneNumber(request.getPhoneNumber())) {
+            return ServerResponse.failureResponse(UserConst.PHONE_EXIST, HttpStatus.BAD_REQUEST);
+        }
+
         try {
             // Store registration data
             pendingRegistrationStore.store(request.getEmail(), request);
@@ -149,7 +155,6 @@ public class UserService {
             return ServerResponse.failureResponse("Failed to send verification code: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
     //Request/Resend OTP for email verification
     public ServerResponse requestOtp(OtpRequestDto request) {
@@ -203,7 +208,7 @@ public class UserService {
         UserEntity user = userMapper.entityToUserCreateRequest(userData);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setActive(true);
-        roleRepo.findByRoleName(com.krishiYatra.krishiYatra.common.enums.RoleType.FARMER).ifPresent(role -> user.getRoles().add(role));
+        roleRepo.findByRoleName(RoleType.FARMER).ifPresent(role -> user.getRoles().add(role));
         userRepo.save(user);
 
         // Clean up
@@ -220,7 +225,7 @@ public class UserService {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        List<String> verifiedRoles = new java.util.ArrayList<>();
+        List<String> verifiedRoles = new ArrayList<>();
         Map<String, String> statusMessages = new HashMap<>();
 
         if (roles.contains("FARMER")) {

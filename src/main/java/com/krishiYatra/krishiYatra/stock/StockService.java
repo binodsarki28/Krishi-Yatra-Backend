@@ -1,6 +1,7 @@
 package com.krishiYatra.krishiYatra.stock;
 
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
+import com.krishiYatra.krishiYatra.config.CloudinaryService;
 import com.krishiYatra.krishiYatra.farmer.FarmerEntity;
 import com.krishiYatra.krishiYatra.farmer.FarmerRepo;
 import com.krishiYatra.krishiYatra.stock.category.CategoryEntity;
@@ -20,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,7 +36,7 @@ public class StockService {
     private final SubCategoryRepo subCategoryRepo;
     private final StockMapper stockMapper;
     private final IStockDao stockDao;
-    private final com.krishiYatra.krishiYatra.config.CloudinaryService cloudinaryService;
+    private final CloudinaryService cloudinaryService;
 
     private FarmerEntity getCurrentFarmer() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -59,6 +59,10 @@ public class StockService {
                 .orElseThrow(() -> new RuntimeException("Category not found"));
         SubCategoryEntity subCategory = subCategoryRepo.findById(dto.getSubCategoryId())
                 .orElseThrow(() -> new RuntimeException("Sub-category not found"));
+
+        if (dto.getMinQuantity() > dto.getQuantity()) {
+            return ServerResponse.failureResponse(StockConst.MIN_GREATER_THAN_QUANTITY, HttpStatus.BAD_REQUEST);
+        }
 
         StockEntity entity = stockMapper.toEntity(dto);
         entity.setFarmer(farmer);
@@ -113,6 +117,10 @@ public class StockService {
         SubCategoryEntity subCategory = subCategoryRepo.findById(dto.getSubCategoryId())
                 .orElseThrow(() -> new RuntimeException("Sub-category not found"));
 
+        if (dto.getMinQuantity() > dto.getQuantity()) {
+            return ServerResponse.failureResponse(StockConst.MIN_GREATER_THAN_QUANTITY, HttpStatus.BAD_REQUEST);
+        }
+
         stockMapper.updateEntity(entity, dto);
         entity.setCategory(category);
         entity.setSubCategory(subCategory);
@@ -132,15 +140,13 @@ public class StockService {
                 }
             }
             if (!imageUrls.isEmpty()) {
-                System.out.println("DEBUG (Service): Successfully uploaded " + imageUrls.size() + " photos to Cloudinary");
                 entity.getStockImages().clear();
                 for (int i = 0; i < imageUrls.size(); i++) {
                     entity.getStockImages().add(new StockImageEntity(imageUrls.get(i), entity, i));
                 }
             }
         }
-        
-        System.out.println("DEBUG (Final): Stock Entity now has " + entity.getStockImages().size() + " image rows");
+
         stockRepo.save(entity);
         return ServerResponse.successResponse(StockConst.UPDATE_STOCK, HttpStatus.OK);
     }
@@ -186,7 +192,7 @@ public class StockService {
         entity.setActive(!entity.isActive());
         stockRepo.save(entity);
 
-        return ServerResponse.successResponse("Stock status updated successfully.", HttpStatus.OK);
+        return ServerResponse.successResponse(StockConst.STOCK_STATUS_UPDATED, HttpStatus.OK);
     }
 
     public ServerResponse getStockList(Map<String, String> params) {
@@ -212,7 +218,7 @@ public class StockService {
     }
 
     @Transactional
-    public ServerResponse createSubCategory(String categoryId, String name) {
+    public ServerResponse createSubCategory(int categoryId, String name) {
         CategoryEntity category = categoryRepo.findById(categoryId)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
         SubCategoryEntity subCategory = new SubCategoryEntity();
@@ -224,34 +230,22 @@ public class StockService {
 
     public ServerResponse getCategories() {
         List<CategoryResponseDto> categories = categoryRepo.findAll().stream()
+                .filter(CategoryEntity::isActive)
                 .map(stockMapper::toCategoryDto)
                 .collect(Collectors.toList());
         return ServerResponse.successObjectResponse("Categories fetched successfully", HttpStatus.OK, categories);
     }
 
-    public ServerResponse getSubCategories(String categoryId) {
+    public ServerResponse getSubCategories(Integer categoryId) {
         List<SubCategoryEntity> subCategories;
-        if (categoryId != null && !categoryId.isEmpty()) {
-            subCategories = subCategoryRepo.findByCategory_CategoryId(categoryId);
+        if (categoryId != null) {
+            subCategories = subCategoryRepo.findByCategory_CategoryIdAndActiveTrue(categoryId);
         } else {
-
-            subCategories = subCategoryRepo.findAll();
+            subCategories = subCategoryRepo.findByActiveTrue();
         }
         List<SubCategoryResponseDto> response = subCategories.stream()
                 .map(stockMapper::toSubCategoryDto)
                 .collect(Collectors.toList());
-        return ServerResponse.successObjectResponse("Sub-categories fetched successfully", HttpStatus.OK, response);
-    }
-
-    @Transactional
-    public ServerResponse adjustStockQuantity(String slug, Double amount) {
-        StockEntity entity = stockRepo.findByStockSlug(slug)
-                .orElseThrow(() -> new RuntimeException(StockConst.STOCK_NOT_FOUND));
-        
-        entity.setQuantity(entity.getQuantity() + amount);
-        if (entity.getQuantity() < 0) entity.setQuantity(0.0);
-        
-        stockRepo.save(entity);
-        return ServerResponse.successResponse("Stock quantity adjusted", HttpStatus.OK);
+        return ServerResponse.successObjectResponse(StockConst.SUB_CATEGORY_FETCHED, HttpStatus.OK, response);
     }
 }
