@@ -209,7 +209,6 @@ public class UserService {
         UserEntity user = userMapper.entityToUserCreateRequest(userData);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setActive(true);
-        roleRepo.findByRoleName(RoleType.BUYER).ifPresent(role -> user.getRoles().add(role));
         userRepo.save(user);
 
         // Clean up

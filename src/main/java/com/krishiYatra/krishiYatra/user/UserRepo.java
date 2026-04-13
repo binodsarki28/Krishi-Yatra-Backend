@@ -20,6 +20,6 @@ public interface UserRepo extends JpaRepository<UserEntity, String> {
 
     boolean existsByPhoneNumber(String phoneNumber);
 
-    @Query(value = "SELECT FORMATDATETIME(u.CREATED_TIME, 'MMM') as month_label, COUNT(*) FROM USERS u GROUP BY month_label", nativeQuery = true)
+    @Query(value = "SELECT DATE_FORMAT(u.CREATED_TIME, '%b') as month_label, COUNT(*) FROM USERS u GROUP BY month_label", nativeQuery = true)
     List<Object[]> getRegistrationTrend();
 }

@@ -99,6 +99,12 @@ public class DeliveryService {
             // If rejected, delete the delivery entity so they can re-apply
             deliveryRepo.delete(delivery);
 
+            // Remove Delivery role from user so they can try again
+            UserEntity managedUser = userRepo.findByUsername(user.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            managedUser.getRoles().removeIf(role -> role.getRoleName() == RoleType.DELIVERY);
+            userRepo.save(managedUser);
+
             // Notify Rider
             try {
                 verificationNotificationHandler.notifyDeliveryStatus(user, false, request.getReason());

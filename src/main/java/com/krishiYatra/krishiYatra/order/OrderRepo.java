@@ -40,13 +40,13 @@ public interface OrderRepo extends JpaRepository<OrderEntity, String> {
     Double sumDeliveryFeeByDelivery(@org.springframework.data.repository.query.Param("delivery") DeliveryEntity delivery);
 
     // Chart Queries (Native for compatibility)
-    @Query(value = "SELECT FORMATDATETIME(o.CREATED_TIME, 'MMM') as month_label, SUM(o.TOTAL_PRICE) as total FROM ORDERS o WHERE o.FARMER_GUID = :farmerId AND o.ORDER_STATUS = 'DELIVERED' GROUP BY month_label", nativeQuery = true)
+    @Query(value = "SELECT DATE_FORMAT(o.CREATED_TIME, '%b') as month_label, SUM(o.TOTAL_PRICE) as total FROM ORDERS o WHERE o.FARMER_GUID = :farmerId AND o.ORDER_STATUS = 'DELIVERED' GROUP BY month_label", nativeQuery = true)
     List<Object[]> farmerRevenueTrend(@Param("farmerId") String farmerId);
 
-    @Query(value = "SELECT FORMATDATETIME(o.CREATED_TIME, 'MMM') as month_label, SUM(o.TOTAL_PRICE) as total FROM ORDERS o WHERE o.BUYER_GUID = :buyerId AND o.ORDER_STATUS = 'DELIVERED' GROUP BY month_label", nativeQuery = true)
+    @Query(value = "SELECT DATE_FORMAT(o.CREATED_TIME, '%b') as month_label, SUM(o.TOTAL_PRICE) as total FROM ORDERS o WHERE o.BUYER_GUID = :buyerId AND o.ORDER_STATUS = 'DELIVERED' GROUP BY month_label", nativeQuery = true)
     List<Object[]> buyerSpendingTrend(@Param("buyerId") String buyerId);
 
-    @Query(value = "SELECT FORMATDATETIME(o.CREATED_TIME, 'MMM') as month_label, SUM(o.DELIVERY_FEE) as total FROM ORDERS o WHERE o.DELIVERY_GUID = :deliveryId AND o.ORDER_STATUS = 'DELIVERED' GROUP BY month_label", nativeQuery = true)
+    @Query(value = "SELECT DATE_FORMAT(o.CREATED_TIME, '%b') as month_label, SUM(o.DELIVERY_FEE) as total FROM ORDERS o WHERE o.DELIVERY_GUID = :deliveryId AND o.ORDER_STATUS = 'DELIVERED' GROUP BY month_label", nativeQuery = true)
     List<Object[]> deliveryEarningsTrend(@Param("deliveryId") String deliveryId);
 
     @Query("SELECT SUM(o.totalPrice) FROM OrderEntity o WHERE o.orderStatus = 'DELIVERED'")

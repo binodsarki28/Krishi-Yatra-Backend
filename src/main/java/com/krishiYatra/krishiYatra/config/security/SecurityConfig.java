@@ -59,10 +59,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/notification/**").permitAll()
                         .requestMatchers("/api/v1/order/detail/**").permitAll()
                         .requestMatchers("/api/v1/contact/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())) // For H2 Console
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

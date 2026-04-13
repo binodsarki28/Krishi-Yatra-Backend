@@ -112,6 +112,12 @@ public class FarmerService {
             // If rejected, delete the farmer entity
             farmerRepo.delete(farmer);
 
+            // Remove Farmer role from user so they can try again
+            UserEntity managedUser = userRepo.findByUsername(user.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            managedUser.getRoles().removeIf(role -> role.getRoleName() == RoleType.FARMER);
+            userRepo.save(managedUser);
+
             // Notify user of rejection and take to registration page
             try {
                 verificationNotificationHandler.notifyFarmerStatus(user, false, request.getReason());

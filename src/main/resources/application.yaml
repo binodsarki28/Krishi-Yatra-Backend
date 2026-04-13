@@ -8,14 +8,10 @@ spring:
       max-request-size: 10MB
 
   datasource:
-    mysql:
-      url: jdbc:mysql://localhost:3306/krishi-yatra
-      username: root
-      password: "WJ28@krhps"
-    url: jdbc:h2:mem:krishi_yatra;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: jdbc:mysql://localhost:3306/Krishi-Yatra
+    username: root
+    password: "WJ28@krhps"
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
@@ -31,6 +27,7 @@ spring:
     baseline-on-migrate: true
     out-of-order: true
     validate-on-migrate: true
+    repair-on-migrate: true
 
   mail:
     host: smtp.gmail.com

@@ -101,6 +101,12 @@ public class BuyerService {
             // If rejected, delete the buyer entity so they can re-apply
             buyerRepo.delete(buyer);
 
+            // Remove Buyer role from user so they can try again
+            UserEntity managedUser = userRepo.findByUsername(user.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            managedUser.getRoles().removeIf(role -> role.getRoleName() == RoleType.BUYER);
+            userRepo.save(managedUser);
+
             // Notify buyer
             try {
                 verificationNotificationHandler.notifyBuyerStatus(user, false, request.getReason());
