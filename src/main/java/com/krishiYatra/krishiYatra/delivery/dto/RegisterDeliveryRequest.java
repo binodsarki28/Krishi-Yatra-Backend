@@ -4,6 +4,7 @@ import com.krishiYatra.krishiYatra.common.enums.VehicleType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,7 +26,8 @@ public class RegisterDeliveryRequest {
     private String numberPlate;
 
     @NotBlank(message = "License number is required")
-    @Schema(description = "Driving license number", example = "01-01-00000000")
+    @Pattern(regexp = "^\\d{2}-\\d{2}-\\d{10}$", message = "Invalid license format. Expected: 01-01-0012345678")
+    @Schema(description = "Driving license number", example = "01-01-0012345678")
     private String licenseNumber;
 
     @Schema(description = "URL/Path to vehicle photo")

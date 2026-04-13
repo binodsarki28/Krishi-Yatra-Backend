@@ -11,6 +11,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class DemandDaoImpl implements IDemandDao {
 
     @PersistenceContext
@@ -72,11 +74,21 @@ public class DemandDaoImpl implements IDemandDao {
         predicates.add(cb.equal(root.get("active"), active));
 
         if (params.containsKey("categoryId") && !params.get("categoryId").isEmpty()) {
-            predicates.add(cb.equal(root.get("category").get("categoryId"), params.get("categoryId")));
+            try {
+                int catId = Integer.parseInt(params.get("categoryId"));
+                predicates.add(cb.equal(root.get("category").get("categoryId"), catId));
+            } catch (NumberFormatException e) {
+                log.error("Invalid categoryId format: {}", params.get("categoryId"));
+            }
         }
 
         if (params.containsKey("subCategoryId") && !params.get("subCategoryId").isEmpty()) {
-            predicates.add(cb.equal(root.get("subCategory").get("subCategoryId"), params.get("subCategoryId")));
+            try {
+                int subCatId = Integer.parseInt(params.get("subCategoryId"));
+                predicates.add(cb.equal(root.get("subCategory").get("subCategoryId"), subCatId));
+            } catch (NumberFormatException e) {
+                log.error("Invalid subCategoryId format: {}", params.get("subCategoryId"));
+            }
         }
 
         if (params.containsKey("status") && !params.get("status").isEmpty()) {

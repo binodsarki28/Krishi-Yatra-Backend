@@ -14,6 +14,10 @@ import com.krishiYatra.krishiYatra.user.RoleRepo;
 import com.krishiYatra.krishiYatra.user.UserEntity;
 import com.krishiYatra.krishiYatra.user.UserRepo;
 import com.krishiYatra.krishiYatra.utils.UserUtil;
+import com.krishiYatra.krishiYatra.order.OrderRepo;
+import com.krishiYatra.krishiYatra.demand.DemandRepo;
+import com.krishiYatra.krishiYatra.common.enums.OrderStatus;
+import com.krishiYatra.krishiYatra.buyer.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -36,6 +41,8 @@ public class BuyerService {
 
     private final IBuyerDao buyerDao;
     private final VerificationNotificationHandler verificationNotificationHandler;
+    private final OrderRepo orderRepo;
+    private final DemandRepo demandRepo;
 
     @Transactional(readOnly = true)
     public List<BuyerListResponse> getBuyers(Map<String, String> params, Pageable pageable) {
@@ -94,6 +101,12 @@ public class BuyerService {
             // If rejected, delete the buyer entity so they can re-apply
             buyerRepo.delete(buyer);
 
+            // Remove Buyer role from user so they can try again
+            UserEntity managedUser = userRepo.findByUsername(user.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            managedUser.getRoles().removeIf(role -> role.getRoleName() == RoleType.BUYER);
+            userRepo.save(managedUser);
+
             // Notify buyer
             try {
                 verificationNotificationHandler.notifyBuyerStatus(user, false, request.getReason());
@@ -136,5 +149,38 @@ public class BuyerService {
                 .orElseThrow(() -> new RuntimeException(BuyerConst.REGISTRATION_NOT_FOUND));
         
         return buyerMapper.toDetailResponse(buyer);
+    }
+
+
+
+    @Transactional(readOnly = true)
+    public ServerResponse getBuyerDashboard() {
+        UserEntity user = UserUtil.getCurrentUser();
+        BuyerEntity buyer = buyerRepo.findByUser_Username(user.getUsername())
+                .orElseThrow(() -> new RuntimeException("Buyer not found"));
+
+        long totalOrders = orderRepo.countByBuyer(buyer);
+        long pendingOrders = orderRepo.countByBuyerAndOrderStatus(buyer, OrderStatus.PENDING);
+        long completedOrders = orderRepo.countByBuyerAndOrderStatus(buyer, OrderStatus.DELIVERED);
+        long myDemands = demandRepo.countByBuyer(buyer);
+        Double spent = orderRepo.sumTotalPriceByBuyer(buyer);
+
+        List<Object[]> trendData = orderRepo.buyerSpendingTrend(buyer.getBuyerId());
+        Map<String, Double> spendingTrend = trendData.stream()
+                .collect(Collectors.toMap(
+                        obj -> (String) obj[0],
+                        obj -> obj[1] != null ? ((Number) obj[1]).doubleValue() : 0.0
+                ));
+
+        BuyerDashboardResponse dashboard = BuyerDashboardResponse.builder()
+                .totalOrders(totalOrders)
+                .pendingOrders(pendingOrders)
+                .completedOrders(completedOrders)
+                .myDemands(myDemands)
+                .totalSpent(spent != null ? spent : 0.0)
+                .spendingTrend(spendingTrend)
+                .build();
+
+        return ServerResponse.successObjectResponse("Buyer dashboard fetch success", HttpStatus.OK, dashboard);
     }
 }

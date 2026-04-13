@@ -52,16 +52,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
-                        .requestMatchers("/api/v1/user/register/**", "/api/v1/user/login/**", "/api/v1/user/verify-otp", "/api/v1/user/resend-otp").permitAll()
+                        .requestMatchers("/api/v1/user/register/**", "/api/v1/user/login/**", "/api/v1/user/verify-otp", "/api/v1/user/resend-otp", "/api/v1/user/forgot-password", "/api/v1/user/reset-password").permitAll()
                         .requestMatchers("/api/v1/stock/list", "/api/v1/stock/details/**", "/api/v1/stock/categories", "/api/v1/stock/subcategories").permitAll()
                         .requestMatchers("/api/v1/categories", "/api/v1/sub-categories").permitAll()
                         .requestMatchers("/api/v1/demand/list").permitAll()
                         .requestMatchers("/api/v1/notification/**").permitAll()
                         .requestMatchers("/api/v1/order/detail/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/api/v1/contact/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())) // For H2 Console
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

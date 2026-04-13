@@ -6,6 +6,7 @@ import com.krishiYatra.krishiYatra.user.dto.OtpVerifyDto;
 import com.krishiYatra.krishiYatra.user.dto.UserCreateRequest;
 import com.krishiYatra.krishiYatra.user.dto.UserLoginRequest;
 import com.krishiYatra.krishiYatra.user.dto.PasswordUpdateRequest;
+import com.krishiYatra.krishiYatra.user.dto.ResetPasswordRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -75,6 +76,18 @@ public class UserController {
     @PutMapping("/password")
     public ResponseEntity<ServerResponse> updatePassword(@Validated @RequestBody PasswordUpdateRequest request) {
         ServerResponse response = userService.updatePassword(request);
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ServerResponse> forgotPassword(@Validated @RequestBody OtpRequestDto request) {
+        ServerResponse response = userService.forgotPassword(request);
+        return new ResponseEntity<>(response, response.getHttpStatus());
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ServerResponse> resetPassword(@Validated @RequestBody ResetPasswordRequest request) {
+        ServerResponse response = userService.resetPassword(request);
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
 }

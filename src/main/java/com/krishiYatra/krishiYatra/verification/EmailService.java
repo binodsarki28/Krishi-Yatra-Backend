@@ -1,7 +1,8 @@
 package com.krishiYatra.krishiYatra.verification;
 
-import org.springframework.mail.SimpleMailMessage;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -35,11 +36,14 @@ public class EmailService {
 
     private void sendEmail(String toEmail, String subject, String body) {
         try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(toEmail);
-            message.setSubject(subject);
-            message.setText(body);
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
+            
+            helper.setFrom(fromEmail, "Krishi Yatra");
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setText(body);
+            
             mailSender.send(message);
         } catch (Exception e) {
             System.err.println("EmailService: ERROR sending email to [" + toEmail + "]. Error: " + e.getMessage());

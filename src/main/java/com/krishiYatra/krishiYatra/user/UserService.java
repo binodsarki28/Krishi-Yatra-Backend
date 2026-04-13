@@ -7,6 +7,7 @@ import com.krishiYatra.krishiYatra.user.dto.JwtResponse;
 import com.krishiYatra.krishiYatra.user.dto.UserLoginRequest;
 import com.krishiYatra.krishiYatra.user.dto.UserCreateRequest;
 import com.krishiYatra.krishiYatra.user.dto.PasswordUpdateRequest;
+import com.krishiYatra.krishiYatra.user.dto.ResetPasswordRequest;
 import com.krishiYatra.krishiYatra.user.mapper.UserMapper;
 import com.krishiYatra.krishiYatra.user.dto.OtpRequestDto;
 import com.krishiYatra.krishiYatra.user.dto.OtpVerifyDto;
@@ -208,7 +209,6 @@ public class UserService {
         UserEntity user = userMapper.entityToUserCreateRequest(userData);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setActive(true);
-        roleRepo.findByRoleName(RoleType.FARMER).ifPresent(role -> user.getRoles().add(role));
         userRepo.save(user);
 
         // Clean up
@@ -351,5 +351,38 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepo.save(user);
         return ServerResponse.successResponse("Password updated successfully", HttpStatus.OK);
+    }
+    public ServerResponse forgotPassword(OtpRequestDto request) {
+        String genericMessage = "If an account exists with this email, a reset code has been sent to your inbox.";
+        
+        // Internally check if user exists
+        if (!userRepo.existsByEmail(request.getEmail())) {
+            // Return success anyway to prevent email enumeration (detecting if an email is registered)
+            return ServerResponse.successResponse(genericMessage, HttpStatus.OK);
+        }
+
+        try {
+            String otpCode = otpService.generateOtp(request.getEmail());
+            System.out.println("Forgot Password OTP for " + request.getEmail() + ": " + otpCode);
+            emailService.sendOtpEmail(request.getEmail(), otpCode);
+            return ServerResponse.successResponse(genericMessage, HttpStatus.OK);
+        } catch (Exception e) {
+            // Only log the actual error, still return generic or failure if technical
+            return ServerResponse.failureResponse("Failed to process request. Please try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ServerResponse resetPassword(ResetPasswordRequest request) {
+        boolean isValid = otpService.verifyOtp(request.getEmail(), request.getOtpCode());
+        if (!isValid) {
+            return ServerResponse.failureResponse(UserConst.OTP_INVALID, HttpStatus.BAD_REQUEST);
+        }
+
+        UserEntity user = userRepo.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepo.save(user);
+        return ServerResponse.successResponse("Password has been reset successfully. You can now login with your new password.", HttpStatus.OK);
     }
 }

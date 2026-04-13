@@ -37,11 +37,11 @@ public class FarmerController {
         return new ResponseEntity<>(response, response.getHttpStatus());
     }
 
-    @Operation(summary = "Example of a protected farmer endpoint")
-    @PostMapping("/dashboard")
+    @Operation(summary = "Get farmer dashboard data")
+    @GetMapping("/dashboard")
     @PreAuthorize("hasAuthority('FARMER')")
     public ServerResponse getFarmerDashboard() {
-        return ServerResponse.successResponse(FarmerConst.DASHBOARD_WELCOME, HttpStatus.OK);
+        return farmerService.getFarmerDashboard();
     }
 
     @Operation(summary = "Verify or reject a farmer registration (Admin only)")
