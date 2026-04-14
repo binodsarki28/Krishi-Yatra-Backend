@@ -19,6 +19,7 @@ public class StockResponseDto {
     private String subCategoryName;
     private int subCategoryId;
     private String farmerName;
+    private String farmerUsername;
     private Integer minQuantity;
     private boolean active;
 }

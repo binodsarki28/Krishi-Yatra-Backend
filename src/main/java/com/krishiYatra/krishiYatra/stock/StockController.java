@@ -95,7 +95,7 @@ public class StockController {
 
     @Operation(summary = "Soft Delete or Undelete stock (Active/Inactive toggle)")
     @PutMapping("/delete-or-undelete/{slug}")
-    @PreAuthorize("hasAuthority('FARMER')")
+    @PreAuthorize("hasAnyAuthority('FARMER', 'ADMIN')")
     public ResponseEntity<ServerResponse> deleteOrUndeleteStock(@PathVariable String slug) {
         ServerResponse response = stockService.toggleStockStatus(slug);
         return new ResponseEntity<>(response, response.getHttpStatus());
@@ -118,7 +118,7 @@ public class StockController {
 
     @Operation(summary = "Create category")
     @PostMapping("/category/create")
-    @PreAuthorize("hasAuthority('FARMER')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ServerResponse> createCategory(@RequestParam String name) {
         ServerResponse response = stockService.createCategory(name);
         return new ResponseEntity<>(response, response.getHttpStatus());
@@ -126,7 +126,7 @@ public class StockController {
 
     @Operation(summary = "Create sub-category")
     @PostMapping("/subcategory/create")
-    @PreAuthorize("hasAuthority('FARMER')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ServerResponse> createSubCategory(@RequestParam int categoryId, @RequestParam String name) {
         ServerResponse response = stockService.createSubCategory(categoryId, name);
         return new ResponseEntity<>(response, response.getHttpStatus());

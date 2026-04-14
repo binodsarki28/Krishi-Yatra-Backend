@@ -59,6 +59,7 @@ public class StockMapper {
         
         if (entity.getFarmer() != null) {
             dto.setFarmerName(entity.getFarmer().getUser().getFullName());
+            dto.setFarmerUsername(entity.getFarmer().getUser().getUsername());
         }
         
         dto.setActive(entity.isActive());

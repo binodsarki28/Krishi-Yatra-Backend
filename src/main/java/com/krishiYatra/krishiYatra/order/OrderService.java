@@ -66,6 +66,16 @@ public class OrderService {
             return ServerResponse.failureResponse(OrderConst.BUYER_NOT_FOUND, HttpStatus.UNAUTHORIZED);
         }
 
+        Optional<StockEntity> stockOptional = stockRepo.findByStockSlug(request.getStockSlug());
+        if (stockOptional.isEmpty()) {
+            return ServerResponse.failureResponse(OrderConst.STOCK_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
+        StockEntity stock = stockOptional.get();
+
+        if (stock.getFarmer().getUser().getUserId().equals(currentUser.getUserId())) {
+            return ServerResponse.failureResponse("You cannot order your own stock.", HttpStatus.BAD_REQUEST);
+        }
+
         Optional<BuyerEntity> buyerOptional = buyerRepo.findByUser(currentUser);
         if (buyerOptional.isEmpty()) {
             return ServerResponse.failureResponse(OrderConst.BUYER_NOT_FOUND, HttpStatus.NOT_FOUND);
@@ -75,12 +85,6 @@ public class OrderService {
         if (buyer.getStatus() != VerificationStatus.VERIFIED) {
             return ServerResponse.failureResponse(OrderConst.BUYER_NOT_VERIFIED, HttpStatus.FORBIDDEN);
         }
-
-        Optional<StockEntity> stockOptional = stockRepo.findByStockSlug(request.getStockSlug());
-        if (stockOptional.isEmpty()) {
-            return ServerResponse.failureResponse(OrderConst.STOCK_NOT_FOUND, HttpStatus.NOT_FOUND);
-        }
-        StockEntity stock = stockOptional.get();
 
         if (!stock.isActive()) {
             return ServerResponse.failureResponse(OrderConst.STOCK_NOT_ACTIVE, HttpStatus.BAD_REQUEST);
