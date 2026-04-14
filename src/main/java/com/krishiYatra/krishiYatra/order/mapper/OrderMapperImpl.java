@@ -6,6 +6,9 @@ import com.krishiYatra.krishiYatra.order.dto.OrderCreateRequest;
 import com.krishiYatra.krishiYatra.stock.StockEntity;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 @Service
 public class OrderMapperImpl implements OrderMapper {
 
@@ -20,15 +23,30 @@ public class OrderMapperImpl implements OrderMapper {
         entity.setFarmer(stock.getFarmer());
         entity.setStock(stock);
         entity.setOrderQuantity(request.getOrderQuantity());
-        entity.setPerUnitPrice(stock.getPricePerUnit());
-        double subTotal = stock.getPricePerUnit() * request.getOrderQuantity();
-        double deliveryFee = request.getDeliveryFee() != null ? request.getDeliveryFee() : 0.0;
-        entity.setTotalPrice(subTotal + deliveryFee);
+
+        BigDecimal pricePerUnit = BigDecimal.valueOf(stock.getPricePerUnit());
+        BigDecimal quantity = BigDecimal.valueOf(request.getOrderQuantity());
+
+        BigDecimal subTotal = pricePerUnit.multiply(quantity);
+
+        BigDecimal deliveryFee = request.getDeliveryFee() != null
+                ? BigDecimal.valueOf(request.getDeliveryFee())
+                : BigDecimal.ZERO;
+
+        BigDecimal total = subTotal.add(deliveryFee);
+
+        deliveryFee = deliveryFee.setScale(2, RoundingMode.HALF_UP);
+        total = total.setScale(2, RoundingMode.HALF_UP);
+
+        entity.setPerUnitPrice(pricePerUnit.doubleValue());
+        entity.setDeliveryFee(deliveryFee.doubleValue());
+        entity.setTotalPrice(total.doubleValue());
+
         entity.setPickupAddress(request.getPickupAddress());
         entity.setDropAddress(request.getDropAddress());
         entity.setCheckpoints(request.getCheckpoints());
         entity.setNotes(request.getNotes());
-        entity.setDeliveryFee(deliveryFee);
+
         return entity;
     }
 
