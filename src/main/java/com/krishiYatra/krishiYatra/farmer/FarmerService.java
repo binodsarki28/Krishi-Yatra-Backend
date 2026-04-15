@@ -170,7 +170,7 @@ public class FarmerService {
         
         long totalOrders = orderRepo.countByFarmer(farmer);
         long pendingOrders = orderRepo.countByFarmerAndOrderStatus(farmer, OrderStatus.PENDING);
-        long completedOrders = orderRepo.countByFarmerAndOrderStatus(farmer, OrderStatus.DELIVERED);
+        long completedOrders = orderRepo.countByFarmerAndOrderStatusIn(farmer, List.of(OrderStatus.DELIVERED, OrderStatus.RESOLVED));
         
         long acceptedDemands = demandRepo.countByAcceptedBy(farmer);
         

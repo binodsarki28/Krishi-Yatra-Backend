@@ -161,7 +161,7 @@ public class BuyerService {
 
         long totalOrders = orderRepo.countByBuyer(buyer);
         long pendingOrders = orderRepo.countByBuyerAndOrderStatus(buyer, OrderStatus.PENDING);
-        long completedOrders = orderRepo.countByBuyerAndOrderStatus(buyer, OrderStatus.DELIVERED);
+        long completedOrders = orderRepo.countByBuyerAndOrderStatusIn(buyer, List.of(OrderStatus.DELIVERED, OrderStatus.RESOLVED));
         long myDemands = demandRepo.countByBuyer(buyer);
         Double spent = orderRepo.sumTotalPriceByBuyer(buyer);
 

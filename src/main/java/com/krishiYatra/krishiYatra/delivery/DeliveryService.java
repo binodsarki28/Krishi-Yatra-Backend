@@ -159,7 +159,7 @@ public class DeliveryService {
 
         long totalDeliveries = orderRepo.countByDelivery(delivery);
         long pendingDeliveries = orderRepo.countByDeliveryAndOrderStatus(delivery, OrderStatus.SHIPPING);
-        long completedDeliveries = orderRepo.countByDeliveryAndOrderStatus(delivery, OrderStatus.DELIVERED);
+        long completedDeliveries = orderRepo.countByDeliveryAndOrderStatusIn(delivery, List.of(OrderStatus.DELIVERED, OrderStatus.RESOLVED));
         Double earnings = orderRepo.sumDeliveryFeeByDelivery(delivery);
 
         List<Object[]> trendData = orderRepo.deliveryEarningsTrend(delivery.getDeliveryId());
