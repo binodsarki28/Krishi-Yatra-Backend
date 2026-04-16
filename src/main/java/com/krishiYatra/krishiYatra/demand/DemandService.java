@@ -47,7 +47,7 @@ public class DemandService {
     public ServerResponse createDemand(DemandCreateRequest request) {
         UserEntity currentUser = UserUtil.getCurrentUser();
         if (currentUser == null) {
-            return ServerResponse.failureResponse("Unauthorized", HttpStatus.UNAUTHORIZED);
+            return ServerResponse.failureResponse(DemandConst.UNAUTHORIZED, HttpStatus.UNAUTHORIZED);
         }
 
         BuyerEntity buyer = buyerRepo.findByUser(currentUser).orElse(null);
@@ -57,12 +57,12 @@ public class DemandService {
 
         CategoryEntity category = categoryRepo.findById(request.getCategoryId()).orElse(null);
         if (category == null) {
-            return ServerResponse.failureResponse("Category not found", HttpStatus.NOT_FOUND);
+            return ServerResponse.failureResponse(DemandConst.CATEGORY_NOT_FOUND, HttpStatus.NOT_FOUND);
         }
 
         SubCategoryEntity subCategory = subCategoryRepo.findById(request.getSubCategoryId()).orElse(null);
         if (subCategory == null) {
-            return ServerResponse.failureResponse("Sub-category not found", HttpStatus.NOT_FOUND);
+            return ServerResponse.failureResponse(DemandConst.SUB_CATEGORY_NOT_FOUND, HttpStatus.NOT_FOUND);
         }
 
         DemandEntity entity = demandMapper.toEntity(request, category, subCategory, buyer);

@@ -10,9 +10,7 @@ import com.krishiYatra.krishiYatra.delivery.dto.RegisterDeliveryRequest;
 import com.krishiYatra.krishiYatra.delivery.dto.VerifyDeliveryRequest;
 import com.krishiYatra.krishiYatra.delivery.mapper.DeliveryMapper;
 import com.krishiYatra.krishiYatra.notification.handler.VerificationNotificationHandler;
-import com.krishiYatra.krishiYatra.user.RoleRepo;
-import com.krishiYatra.krishiYatra.user.UserEntity;
-import com.krishiYatra.krishiYatra.user.UserRepo;
+import com.krishiYatra.krishiYatra.user.*;
 import com.krishiYatra.krishiYatra.utils.UserUtil;
 import com.krishiYatra.krishiYatra.order.OrderRepo;
 import com.krishiYatra.krishiYatra.common.enums.OrderStatus;
@@ -66,7 +64,7 @@ public class DeliveryService {
         delivery.setUser(managedUser);
         deliveryRepo.save(delivery);
 
-        // Add Delivery role to user
+        // Add a Delivery role to user
         roleRepo.findByRoleName(RoleType.DELIVERY).ifPresent(role -> {
             managedUser.getRoles().add(role);
             userRepo.save(managedUser);
@@ -101,7 +99,7 @@ public class DeliveryService {
 
             // Remove Delivery role from user so they can try again
             UserEntity managedUser = userRepo.findByUsername(user.getUsername())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+                    .orElseThrow(() -> new RuntimeException(UserConst.USER_NOT_FOUND));
             managedUser.getRoles().removeIf(role -> role.getRoleName() == RoleType.DELIVERY);
             userRepo.save(managedUser);
 
@@ -177,6 +175,6 @@ public class DeliveryService {
                 .earningsTrend(earningsTrend)
                 .build();
 
-        return ServerResponse.successObjectResponse("Delivery dashboard fetch success", HttpStatus.OK, dashboard);
+        return ServerResponse.successObjectResponse(DeliveryConst.DASHBOARD_WELCOME, HttpStatus.OK, dashboard);
     }
 }

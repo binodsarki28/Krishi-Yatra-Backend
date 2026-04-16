@@ -3,6 +3,7 @@ package com.krishiYatra.krishiYatra.address;
 import com.krishiYatra.krishiYatra.address.dto.AddressRequest;
 import com.krishiYatra.krishiYatra.address.dto.AddressResponse;
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
+import com.krishiYatra.krishiYatra.user.UserConst;
 import com.krishiYatra.krishiYatra.user.UserEntity;
 import com.krishiYatra.krishiYatra.utils.UserUtil;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class AddressService {
     public ServerResponse saveOrUpdateAddress(AddressRequest request) {
         UserEntity currentUser = UserUtil.getCurrentUser();
         if (currentUser == null) {
-            return ServerResponse.failureResponse("User not found.", HttpStatus.UNAUTHORIZED);
+            return ServerResponse.failureResponse(UserConst.USER_NOT_FOUND, HttpStatus.UNAUTHORIZED);
         }
 
         Optional<AddressEntity> existingOpt = addressRepo.findByUser(currentUser);

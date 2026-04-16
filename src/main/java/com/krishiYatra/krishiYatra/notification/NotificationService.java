@@ -192,7 +192,7 @@ public class NotificationService {
     public ServerResponse markAsRead(Long id) {
         NotificationEntity notification = notificationRepo.findById(id).orElse(null);
         if (notification == null) {
-            return ServerResponse.failureResponse("Notification not found", HttpStatus.NOT_FOUND);
+            return ServerResponse.failureResponse(NotificationConst.NOTIFICATION_NOT_FOUND, HttpStatus.NOT_FOUND);
         }
         notification.setRead(true);
         notificationRepo.save(notification);
@@ -206,7 +206,7 @@ public class NotificationService {
             return ServerResponse.failureResponse(NotificationConst.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
         }
         notificationRepo.markAllAsRead(user);
-        return ServerResponse.successResponse("All notifications marked as read", HttpStatus.OK);
+        return ServerResponse.successResponse(NotificationConst.ALL_MARKED_READ, HttpStatus.OK);
     }
 
     @Transactional

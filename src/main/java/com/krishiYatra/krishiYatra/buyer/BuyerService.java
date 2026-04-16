@@ -11,6 +11,7 @@ import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
 import com.krishiYatra.krishiYatra.notification.handler.VerificationNotificationHandler;
 import com.krishiYatra.krishiYatra.user.RoleRepo;
+import com.krishiYatra.krishiYatra.user.UserConst;
 import com.krishiYatra.krishiYatra.user.UserEntity;
 import com.krishiYatra.krishiYatra.user.UserRepo;
 import com.krishiYatra.krishiYatra.utils.UserUtil;
@@ -101,9 +102,9 @@ public class BuyerService {
             // If rejected, delete the buyer entity so they can re-apply
             buyerRepo.delete(buyer);
 
-            // Remove Buyer role from user so they can try again
+            // Remove from a buyer role so they can try again
             UserEntity managedUser = userRepo.findByUsername(user.getUsername())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+                    .orElseThrow(() -> new RuntimeException(UserConst.USER_NOT_FOUND));
             managedUser.getRoles().removeIf(role -> role.getRoleName() == RoleType.BUYER);
             userRepo.save(managedUser);
 
@@ -181,6 +182,6 @@ public class BuyerService {
                 .spendingTrend(spendingTrend)
                 .build();
 
-        return ServerResponse.successObjectResponse("Buyer dashboard fetch success", HttpStatus.OK, dashboard);
+        return ServerResponse.successObjectResponse(BuyerConst.DASHBOARD_WELCOME, HttpStatus.OK, dashboard);
     }
 }
