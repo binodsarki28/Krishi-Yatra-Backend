@@ -8,9 +8,9 @@ spring:
       max-request-size: 10MB
 
   datasource:
-    url: jdbc:mysql://localhost:3306/Krishi-Yatra
-    username: root
-    password: "WJ28@krhps"
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/Krishi-Yatra}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:WJ28@krhps}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
