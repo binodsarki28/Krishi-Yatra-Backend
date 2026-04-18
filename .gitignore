@@ -40,4 +40,4 @@ out/
 src/main/resources/firebase/*.json
 
 ### Config Files ###
-src/main/resources/application.yaml
+# src/main/resources/application.yaml
