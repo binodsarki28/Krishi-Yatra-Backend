@@ -2,7 +2,6 @@ package com.krishiYatra.krishiYatra.admin;
 
 import com.krishiYatra.krishiYatra.admin.dto.AdminDashboardResponse;
 import com.krishiYatra.krishiYatra.buyer.BuyerRepo;
-import com.krishiYatra.krishiYatra.common.enums.OrderStatus;
 import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
 import com.krishiYatra.krishiYatra.delivery.DeliveryRepo;

@@ -30,10 +30,6 @@ public class BuyerController {
     private final BuyerService buyerService;
 
     @Operation(summary = "Register an existing user as a buyer")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Buyer registered successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid input or user already a buyer")
-    })
     @PostMapping("/register")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ServerResponse> registerForBuyer(@Valid @RequestBody RegisterBuyerRequest request) {

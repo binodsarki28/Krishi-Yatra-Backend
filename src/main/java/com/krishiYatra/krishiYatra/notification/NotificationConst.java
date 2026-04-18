@@ -10,6 +10,9 @@ public class NotificationConst {
     public static final String NOTIFICATIONS_FETCHED = "Notifications fetched successfully.";
     public static final String NOTIFICATION_MARKED_READ = "Notification marked as read.";
     public static final String NOTIFICATION_DELETED = "Notification deleted successfully.";
+    public static final String NOTIFICATION_NOT_FOUND = "Notification not found";
+
+    public static final String ALL_MARKED_READ = "All notifications marked as read";
 
     // Frontend Route Constants
     public static final String TRACK_URL_BUYER = "/buyer/orders/track/%s";
@@ -46,7 +49,7 @@ public class NotificationConst {
     public static final String ORDER_ACCEPTED_FARMER_TITLE = "Order Claimed!";
     public static final String ORDER_ACCEPTED_FARMER_BODY = "A rider has claimed the order for %s (ID: %s). Please ensure the stock is ready for pickup.";
 
-    // Order picked up notification
+    // Order picked-up notification
     public static final String ORDER_PICKED_UP_BUYER_TITLE = "Order on the Way!";
     public static final String ORDER_PICKED_UP_BUYER_BODY = "Your order for %s (ID: %s) has been picked up and is now on the way!";
 
@@ -88,6 +91,4 @@ public class NotificationConst {
     public static final String VERIFICATION_APPROVED_BODY = "Congratulations! Your request for %s role has been verified. You can now access your dashboard.";
     public static final String VERIFICATION_REJECTED_TITLE = "Application Rejected";
     public static final String VERIFICATION_REJECTED_BODY = "Your application for %s role was declined. Reason: %s. Register again.";
-
-    public static final String NOTIFICATION_NOT_FOUND = "Notification not found";
 }

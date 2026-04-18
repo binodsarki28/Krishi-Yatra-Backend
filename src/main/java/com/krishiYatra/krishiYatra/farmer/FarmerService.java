@@ -10,6 +10,7 @@ import com.krishiYatra.krishiYatra.farmer.dto.VerifyFarmerRequest;
 import com.krishiYatra.krishiYatra.farmer.mapper.FarmerMapper;
 import com.krishiYatra.krishiYatra.notification.handler.VerificationNotificationHandler;
 import com.krishiYatra.krishiYatra.user.RoleRepo;
+import com.krishiYatra.krishiYatra.user.UserConst;
 import com.krishiYatra.krishiYatra.user.UserEntity;
 import com.krishiYatra.krishiYatra.user.UserRepo;
 import com.krishiYatra.krishiYatra.utils.UserUtil;
@@ -17,7 +18,6 @@ import com.krishiYatra.krishiYatra.stock.StockRepo;
 import com.krishiYatra.krishiYatra.order.OrderRepo;
 import com.krishiYatra.krishiYatra.demand.DemandRepo;
 import com.krishiYatra.krishiYatra.common.enums.OrderStatus;
-import com.krishiYatra.krishiYatra.common.enums.DemandStatus;
 import com.krishiYatra.krishiYatra.farmer.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -79,7 +79,7 @@ public class FarmerService {
         farmer.setUser(managedUser);
         farmerRepo.save(farmer);
 
-        // Add Farmer role to user set (Crucial for frontend dashboard visibility)
+        // Add a Farmer role to a user set (Crucial for frontend dashboard visibility)
         roleRepo.findByRoleName(RoleType.FARMER).ifPresent(role -> {
             managedUser.getRoles().add(role);
             userRepo.save(managedUser);
@@ -114,11 +114,11 @@ public class FarmerService {
 
             // Remove Farmer role from user so they can try again
             UserEntity managedUser = userRepo.findByUsername(user.getUsername())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+                    .orElseThrow(() -> new RuntimeException(UserConst.USER_NOT_FOUND));
             managedUser.getRoles().removeIf(role -> role.getRoleName() == RoleType.FARMER);
             userRepo.save(managedUser);
 
-            // Notify user of rejection and take to registration page
+            // Notify user of rejection and take to the registration page
             try {
                 verificationNotificationHandler.notifyFarmerStatus(user, false, request.getReason());
             } catch (Exception e) {
@@ -170,7 +170,7 @@ public class FarmerService {
         
         long totalOrders = orderRepo.countByFarmer(farmer);
         long pendingOrders = orderRepo.countByFarmerAndOrderStatus(farmer, OrderStatus.PENDING);
-        long completedOrders = orderRepo.countByFarmerAndOrderStatus(farmer, OrderStatus.DELIVERED);
+        long completedOrders = orderRepo.countByFarmerAndOrderStatusIn(farmer, List.of(OrderStatus.DELIVERED, OrderStatus.RESOLVED));
         
         long acceptedDemands = demandRepo.countByAcceptedBy(farmer);
         
@@ -205,6 +205,6 @@ public class FarmerService {
                 .revenueByMonth(revenueTrend)
                 .build();
 
-        return ServerResponse.successObjectResponse("Farmer dashboard fetch success", HttpStatus.OK, dashboard);
+        return ServerResponse.successObjectResponse(FarmerConst.DASHBOARD_WELCOME, HttpStatus.OK, dashboard);
     }
 }

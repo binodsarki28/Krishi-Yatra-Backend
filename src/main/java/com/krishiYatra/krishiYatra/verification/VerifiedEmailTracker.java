@@ -6,9 +6,8 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Tracks verified emails temporarily (15 minutes)
- */
+
+ // Tracks verified emails temporarily (15 minutes)
 @Service
 public class VerifiedEmailTracker {
 
@@ -21,7 +20,7 @@ public class VerifiedEmailTracker {
         verifiedEmails.put(email, LocalDateTime.now());
     }
 
-    // Check if email is verified and still valid
+    // Check if the email is verified and still valid
     public boolean isVerified(String email) {
         LocalDateTime verifiedAt = verifiedEmails.get(email);
         if (verifiedAt == null) {
@@ -38,7 +37,7 @@ public class VerifiedEmailTracker {
     }
 
 
-    // Remove email from verified list (after successful registration)
+    // Remove email from a verified list (after successful registration)
     public void removeVerification(String email) {
         verifiedEmails.remove(email);
     }

@@ -11,4 +11,8 @@ public class DemandConst {
     public static final String NOT_AUTHORIZED = "Not authorized to modify this demand";
     public static final String INVALID_STATUS = "Cannot perform this action on current demand status";
     public static final String DEMAND_MY_FETCHED = "Your demands fetched successfully";
+
+    public static final String UNAUTHORIZED = "Unauthorized";
+    public static final String CATEGORY_NOT_FOUND = "Category not found";
+    public static final String SUB_CATEGORY_NOT_FOUND = "Sub-category not found";
 }

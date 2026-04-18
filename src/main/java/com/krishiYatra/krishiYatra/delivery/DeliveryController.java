@@ -30,10 +30,6 @@ public class DeliveryController {
     private final DeliveryService deliveryService;
 
     @Operation(summary = "Register an existing user as a delivery partner")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Delivery partner registered successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid input or user already a partner")
-    })
     @PostMapping("/register")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ServerResponse> registerForDelivery(@Valid @RequestBody RegisterDeliveryRequest request) {

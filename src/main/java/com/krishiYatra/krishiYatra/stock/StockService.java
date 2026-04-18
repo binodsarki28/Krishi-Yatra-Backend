@@ -41,7 +41,7 @@ public class StockService {
     private FarmerEntity getCurrentFarmer() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return farmerRepo.findByUser_Username(username)
-                .orElseThrow(() -> new RuntimeException("Farmer record not found for user: " + username));
+                .orElseThrow(() -> new RuntimeException(StockConst.FARMER_NOT_FOUND));
     }
 
     @Transactional
@@ -52,13 +52,13 @@ public class StockService {
         }
 
         if (farmer.getUser().getAddress() == null) {
-            return ServerResponse.failureResponse("Please set your address in Profile before listing a product.", HttpStatus.FORBIDDEN);
+            return ServerResponse.failureResponse(StockConst.ADDRESS_REQUIRED, HttpStatus.FORBIDDEN);
         }
 
         CategoryEntity category = categoryRepo.findById(dto.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new RuntimeException(StockConst.CATEGORY_NOT_FOUND));
         SubCategoryEntity subCategory = subCategoryRepo.findById(dto.getSubCategoryId())
-                .orElseThrow(() -> new RuntimeException("Sub-category not found"));
+                .orElseThrow(() -> new RuntimeException(StockConst.SUB_CATEGORY_NOT_FOUND));
 
         if (dto.getMinQuantity() > dto.getQuantity()) {
             return ServerResponse.failureResponse(StockConst.MIN_GREATER_THAN_QUANTITY, HttpStatus.BAD_REQUEST);
@@ -97,7 +97,7 @@ public class StockService {
     @Transactional
     public ServerResponse updateStock(StockRequestDto dto, MultipartFile[] images) {
         if (dto.getStockSlug() == null || dto.getStockSlug().isEmpty()) {
-            return ServerResponse.failureResponse("Stock slug is required for update.", HttpStatus.BAD_REQUEST);
+            return ServerResponse.failureResponse(StockConst.SLUG_REQUIRED, HttpStatus.BAD_REQUEST);
         }
 
         FarmerEntity farmer = getCurrentFarmer();
@@ -109,13 +109,13 @@ public class StockService {
                 .orElseThrow(() -> new RuntimeException(StockConst.STOCK_NOT_FOUND));
 
         if (!entity.getFarmer().getFarmerId().equals(farmer.getFarmerId())) {
-            return ServerResponse.failureResponse("You are not authorized to update this stock.", HttpStatus.UNAUTHORIZED);
+            return ServerResponse.failureResponse(StockConst.UNAUTHORIZED_UPDATE, HttpStatus.UNAUTHORIZED);
         }
 
         CategoryEntity category = categoryRepo.findById(dto.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new RuntimeException(StockConst.CATEGORY_NOT_FOUND));
         SubCategoryEntity subCategory = subCategoryRepo.findById(dto.getSubCategoryId())
-                .orElseThrow(() -> new RuntimeException("Sub-category not found"));
+                .orElseThrow(() -> new RuntimeException(StockConst.SUB_CATEGORY_NOT_FOUND));
 
         if (dto.getMinQuantity() > dto.getQuantity()) {
             return ServerResponse.failureResponse(StockConst.MIN_GREATER_THAN_QUANTITY, HttpStatus.BAD_REQUEST);
@@ -161,7 +161,7 @@ public class StockService {
         StockEntity entity = entityOptional.get();
 
         if (!entity.getFarmer().getFarmerId().equals(farmer.getFarmerId())) {
-            return ServerResponse.failureResponse("You are not authorized to delete this stock.", HttpStatus.UNAUTHORIZED);
+            return ServerResponse.failureResponse(StockConst.UNAUTHORIZED_DELETE, HttpStatus.UNAUTHORIZED);
         }
 
         entity.setActive(false);
@@ -214,18 +214,18 @@ public class StockService {
         CategoryEntity category = new CategoryEntity();
         category.setCategoryName(name);
         categoryRepo.save(category);
-        return ServerResponse.successResponse("Category created successfully", HttpStatus.CREATED);
+        return ServerResponse.successResponse(StockConst.CATEGORY_CREATED, HttpStatus.CREATED);
     }
 
     @Transactional
     public ServerResponse createSubCategory(int categoryId, String name) {
         CategoryEntity category = categoryRepo.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new RuntimeException(StockConst.CATEGORY_NOT_FOUND));
         SubCategoryEntity subCategory = new SubCategoryEntity();
         subCategory.setSubCategoryName(name);
         subCategory.setCategory(category);
         subCategoryRepo.save(subCategory);
-        return ServerResponse.successResponse("Sub-category created successfully", HttpStatus.CREATED);
+        return ServerResponse.successResponse(StockConst.SUB_CATEGORY_CREATED, HttpStatus.CREATED);
     }
 
     public ServerResponse getCategories() {
@@ -233,7 +233,7 @@ public class StockService {
                 .filter(CategoryEntity::isActive)
                 .map(stockMapper::toCategoryDto)
                 .collect(Collectors.toList());
-        return ServerResponse.successObjectResponse("Categories fetched successfully", HttpStatus.OK, categories);
+        return ServerResponse.successObjectResponse(StockConst.CATEGORIES_FETCHED, HttpStatus.OK, categories);
     }
 
     public ServerResponse getSubCategories(Integer categoryId) {

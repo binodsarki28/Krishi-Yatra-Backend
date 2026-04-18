@@ -1,6 +1,5 @@
 package com.krishiYatra.krishiYatra.user;
 
-import com.krishiYatra.krishiYatra.common.enums.RoleType;
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
 import com.krishiYatra.krishiYatra.config.security.jwt.JwtTokenProvider;
 import com.krishiYatra.krishiYatra.user.dto.JwtResponse;
@@ -151,7 +150,7 @@ public class UserService {
             System.out.println("Generated OTP for " + request.getEmail() + ": " + otpCode);
             emailService.sendOtpEmail(request.getEmail(), otpCode);
 
-            return ServerResponse.successResponse("Verification code sent to your email.", HttpStatus.OK);
+            return ServerResponse.successResponse(UserConst.VERIFICATION_SENT, HttpStatus.OK);
         } catch (Exception e) {
             return ServerResponse.failureResponse("Failed to send verification code: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -163,7 +162,7 @@ public class UserService {
         // Check if there's pending registration data
         UserCreateRequest pendingData = pendingRegistrationStore.get(request.getEmail());
         if (pendingData == null) {
-            return ServerResponse.failureResponse("No pending registration found. Please register first.", HttpStatus.BAD_REQUEST);
+            return ServerResponse.failureResponse(UserConst.REGISTRATION_NOT_FOUND, HttpStatus.BAD_REQUEST);
         }
 
         // Check if email already exists in database
@@ -178,7 +177,7 @@ public class UserService {
             // Send email
             emailService.sendOtpEmail(request.getEmail(), otpCode);
             
-            return ServerResponse.successResponse("OTP sent to your email successfully.", HttpStatus.OK);
+            return ServerResponse.successResponse(UserConst.OTP_SENT, HttpStatus.OK);
         } catch (Exception e) {
             return ServerResponse.failureResponse("Failed to send OTP: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -195,7 +194,7 @@ public class UserService {
         // Get pending registration data
         UserCreateRequest userData = pendingRegistrationStore.get(request.getEmail());
         if (userData == null) {
-            return ServerResponse.failureResponse("Registration data not found. Please register again.", HttpStatus.BAD_REQUEST);
+            return ServerResponse.failureResponse(UserConst.DATA_NOT_FOUND, HttpStatus.BAD_REQUEST);
         }
 
         // Create user account
@@ -219,7 +218,7 @@ public class UserService {
 
     public ServerResponse getCurrentUserRoles(String username) {
         UserEntity userDetails = userRepo.findByUsername(username)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new RuntimeException(UserConst.USER_NOT_FOUND));
             
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -257,15 +256,15 @@ public class UserService {
         }
 
         JwtResponse jwtResponse = new JwtResponse(null, userDetails.getUsername(), userDetails.getFullName(), userDetails.getEmail(), roles, verifiedRoles, statusMessages, userDetails.getPhoneNumber(), userDetails.getProfileUrl(), userDetails.getDescription());
-        return ServerResponse.successObjectResponse("User details fetched successfully", HttpStatus.OK, jwtResponse);
+        return ServerResponse.successObjectResponse(UserConst.USER_FETCHED, HttpStatus.OK, jwtResponse);
     }
 
     public ServerResponse updateProfile(String username, String firstName, String lastName, String phoneNumber, String description, String newUsername, MultipartFile profileImage) {
-        UserEntity user = userRepo.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        UserEntity user = userRepo.findByUsername(username).orElseThrow(() -> new RuntimeException(UserConst.USER_NOT_FOUND));
         
         if (newUsername != null && !newUsername.isEmpty() && !newUsername.equals(user.getUsername())) {
              if (userRepo.existsByUsername(newUsername)) {
-                 return ServerResponse.failureResponse("Username already taken", HttpStatus.BAD_REQUEST);
+                 return ServerResponse.failureResponse(UserConst.USERNAME_TAKEN, HttpStatus.BAD_REQUEST);
              }
              user.setUsername(newUsername);
         }
@@ -336,24 +335,24 @@ public class UserService {
         }
 
         JwtResponse jwtResponse = new JwtResponse(null, user.getUsername(), user.getFullName(), user.getEmail(), roles, verifiedRoles, statusMessages, user.getPhoneNumber(), user.getProfileUrl(), user.getDescription());
-        return ServerResponse.successObjectResponse("Profile updated successfully", HttpStatus.OK, jwtResponse);
+        return ServerResponse.successObjectResponse(UserConst.PROFILE_UPDATED, HttpStatus.OK, jwtResponse);
     }
 
     public ServerResponse updatePassword(PasswordUpdateRequest request) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity user = userRepo.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException(UserConst.USER_NOT_FOUND));
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-            return ServerResponse.failureResponse("Incorrect current password.", HttpStatus.BAD_REQUEST);
+            return ServerResponse.failureResponse(UserConst.INCORRECT_PASSWORD, HttpStatus.BAD_REQUEST);
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepo.save(user);
-        return ServerResponse.successResponse("Password updated successfully", HttpStatus.OK);
+        return ServerResponse.successResponse(UserConst.PASSWORD_UPDATED, HttpStatus.OK);
     }
     public ServerResponse forgotPassword(OtpRequestDto request) {
-        String genericMessage = "If an account exists with this email, a reset code has been sent to your inbox.";
+        String genericMessage = UserConst.PASSWORD_RESET_SENT;
         
         // Internally check if user exists
         if (!userRepo.existsByEmail(request.getEmail())) {
@@ -368,7 +367,7 @@ public class UserService {
             return ServerResponse.successResponse(genericMessage, HttpStatus.OK);
         } catch (Exception e) {
             // Only log the actual error, still return generic or failure if technical
-            return ServerResponse.failureResponse("Failed to process request. Please try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
+            return ServerResponse.failureResponse(UserConst.INTERNAL_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -379,10 +378,10 @@ public class UserService {
         }
 
         UserEntity user = userRepo.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException(UserConst.USER_NOT_FOUND));
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepo.save(user);
-        return ServerResponse.successResponse("Password has been reset successfully. You can now login with your new password.", HttpStatus.OK);
+        return ServerResponse.successResponse(UserConst.PASSWORD_RESET_SUCCESS, HttpStatus.OK);
     }
 }
