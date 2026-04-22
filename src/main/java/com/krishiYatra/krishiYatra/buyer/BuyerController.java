@@ -6,8 +6,6 @@ import com.krishiYatra.krishiYatra.buyer.dto.RegisterBuyerRequest;
 import com.krishiYatra.krishiYatra.buyer.dto.VerifyBuyerRequest;
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

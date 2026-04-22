@@ -112,7 +112,7 @@ public class FarmerService {
             // If rejected, delete the farmer entity
             farmerRepo.delete(farmer);
 
-            // Remove Farmer role from user so they can try again
+            // Remove a Farmer role from user so they can try again
             UserEntity managedUser = userRepo.findByUsername(user.getUsername())
                     .orElseThrow(() -> new RuntimeException(UserConst.USER_NOT_FOUND));
             managedUser.getRoles().removeIf(role -> role.getRoleName() == RoleType.FARMER);

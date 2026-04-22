@@ -6,11 +6,6 @@ import com.krishiYatra.krishiYatra.user.dto.*;
 import com.krishiYatra.krishiYatra.user.mapper.UserMapper;
 import com.krishiYatra.krishiYatra.verification.InMemoryOtpService;
 import com.krishiYatra.krishiYatra.verification.PendingRegistrationStore;
-import com.krishiYatra.krishiYatra.farmer.FarmerRepo;
-import com.krishiYatra.krishiYatra.buyer.BuyerRepo;
-import com.krishiYatra.krishiYatra.delivery.DeliveryRepo;
-import com.krishiYatra.krishiYatra.config.CloudinaryService;
-import com.krishiYatra.krishiYatra.verification.EmailService;
 import com.krishiYatra.krishiYatra.config.security.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -42,12 +37,6 @@ public class UserServiceTest {
     @Mock private UserMapper userMapper;
     @Mock private AuthenticationManager authenticationManager;
     @Mock private JwtTokenProvider tokenProvider;
-    @Mock private FarmerRepo farmerRepo;
-    @Mock private BuyerRepo buyerRepo;
-    @Mock private DeliveryRepo deliveryRepo;
-    @Mock private RoleRepo roleRepo;
-    @Mock private CloudinaryService cloudinaryService;
-    @Mock private EmailService emailService;
 
     @InjectMocks
     private UserService userService;

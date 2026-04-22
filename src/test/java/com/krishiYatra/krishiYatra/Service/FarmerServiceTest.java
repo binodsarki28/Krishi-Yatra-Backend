@@ -3,9 +3,7 @@ package com.krishiYatra.krishiYatra.Service;
 import com.krishiYatra.krishiYatra.common.enums.RoleType;
 import com.krishiYatra.krishiYatra.common.enums.VerificationStatus;
 import com.krishiYatra.krishiYatra.common.response.ServerResponse;
-import com.krishiYatra.krishiYatra.demand.DemandRepo;
 import com.krishiYatra.krishiYatra.farmer.*;
-import com.krishiYatra.krishiYatra.farmer.dao.IFarmerDao;
 import com.krishiYatra.krishiYatra.farmer.dto.RegisterFarmerRequest;
 import com.krishiYatra.krishiYatra.farmer.dto.VerifyFarmerRequest;
 import com.krishiYatra.krishiYatra.farmer.mapper.FarmerMapper;
@@ -41,10 +39,8 @@ public class FarmerServiceTest {
     @Mock private UserRepo userRepo;
     @Mock private RoleRepo roleRepo;
     @Mock private FarmerMapper farmerMapper;
-    @Mock private IFarmerDao farmerDao;
     @Mock private StockRepo stockRepo;
     @Mock private OrderRepo orderRepo;
-    @Mock private DemandRepo demandRepo;
     @Mock private VerificationNotificationHandler verificationNotificationHandler;
 
     @InjectMocks
